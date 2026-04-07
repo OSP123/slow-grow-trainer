@@ -5,6 +5,9 @@ export default function Login() {
   const [view, setView] = useState<'login' | 'forgot' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [realName, setRealName] = useState('');
+  const [cmdName, setCmdName] = useState('');
+  const [discord, setDiscord] = useState('');
   const [message, setMessage] = useState('');
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -26,7 +29,17 @@ export default function Login() {
   const handleSignupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage('');
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        data: {
+          real_name: realName,
+          commander_name: cmdName,
+          discord_name: discord
+        }
+      }
+    });
     if (error) {
       setMessage('Failed to register: ' + error.message);
     } else {
@@ -93,6 +106,42 @@ export default function Login() {
               placeholder="Password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
+              style={{ width: '100%', boxSizing: 'border-box' }}
+            />
+          </div>
+          <div>
+            <label htmlFor="realName">Real Name</label>
+            <input 
+              id="realName" 
+              type="text" 
+              placeholder="Real Name" 
+              value={realName}
+              onChange={(e) => setRealName(e.target.value)}
+              required
+              style={{ width: '100%', boxSizing: 'border-box' }}
+            />
+          </div>
+          <div>
+            <label htmlFor="cmdName">Commander Name</label>
+            <input 
+              id="cmdName" 
+              type="text" 
+              placeholder="Commander Name" 
+              value={cmdName}
+              onChange={(e) => setCmdName(e.target.value)}
+              required
+              style={{ width: '100%', boxSizing: 'border-box' }}
+            />
+          </div>
+          <div>
+            <label htmlFor="discord">Discord Handle</label>
+            <input 
+              id="discord" 
+              type="text" 
+              placeholder="Discord Handle" 
+              value={discord}
+              onChange={(e) => setDiscord(e.target.value)}
               required
               style={{ width: '100%', boxSizing: 'border-box' }}
             />

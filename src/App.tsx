@@ -8,6 +8,7 @@ import UpdatePassword from './features/auth/UpdatePassword';
 import Dashboard from './features/dashboard/Dashboard';
 import Logistics from './features/logistics/Logistics';
 import Assessments from './features/assessments/Assessments';
+import AdminDashboard from './features/admin/AdminDashboard';
 import './App.css';
 
 const FACTIONS = [
@@ -150,6 +151,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/logistics" element={<Logistics />} />
           <Route path="/assessments" element={<Assessments />} />
+          <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </main>
     </div>

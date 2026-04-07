@@ -78,18 +78,31 @@ describe('Login Component', () => {
     // Fill out registration form
     const emailInput = screen.getByPlaceholderText(/Email/i);
     const passwordInput = screen.getByPlaceholderText(/Password/i);
+    const realNameInput = screen.getByPlaceholderText(/Real Name/i);
+    const cmdNameInput = screen.getByPlaceholderText(/Commander Name/i);
+    const discordInput = screen.getByPlaceholderText(/Discord Handle/i);
     
     fireEvent.change(emailInput, { target: { value: 'newplayer@admin.com' } });
     fireEvent.change(passwordInput, { target: { value: 'securepassword123' } });
+    fireEvent.change(realNameInput, { target: { value: 'Leman Russ' } });
+    fireEvent.change(cmdNameInput, { target: { value: 'WolfKing' } });
+    fireEvent.change(discordInput, { target: { value: 'leman_russ#1234' } });
 
     // Submit
     const registerBtn = screen.getByRole('button', { name: /Register/i });
     fireEvent.click(registerBtn);
 
-    // Assert the mocked supabase function was called
+    // Assert the mocked supabase function was called with meta-data
     expect(supabase.auth.signUp).toHaveBeenCalledWith({
       email: 'newplayer@admin.com',
       password: 'securepassword123',
+      options: {
+        data: {
+          real_name: 'Leman Russ',
+          commander_name: 'WolfKing',
+          discord_name: 'leman_russ#1234'
+        }
+      }
     });
   });
 });
