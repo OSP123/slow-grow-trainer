@@ -9,6 +9,7 @@ vi.mock('../../supabaseClient', () => ({
     auth: {
       signInWithPassword: vi.fn(),
       resetPasswordForEmail: vi.fn().mockResolvedValue({ error: null }),
+      signUp: vi.fn().mockResolvedValue({ data: { user: {} }, error: null }),
     },
   },
 }));
@@ -62,5 +63,33 @@ describe('Login Component', () => {
 
     // Assert supabase reset call
     expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledWith('recover@admin.com');
+  });
+
+  it('handles user registration (sign up) locally', async () => {
+    render(<Login />);
+
+    // Toggle to Sign Up view
+    const signUpToggle = screen.getByText(/Create an Account/i);
+    fireEvent.click(signUpToggle);
+
+    // Verify title change
+    expect(screen.getByRole('heading', { name: /New Commander Registration/i })).toBeInTheDocument();
+
+    // Fill out registration form
+    const emailInput = screen.getByPlaceholderText(/Email/i);
+    const passwordInput = screen.getByPlaceholderText(/Password/i);
+    
+    fireEvent.change(emailInput, { target: { value: 'newplayer@admin.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'securepassword123' } });
+
+    // Submit
+    const registerBtn = screen.getByRole('button', { name: /Register/i });
+    fireEvent.click(registerBtn);
+
+    // Assert the mocked supabase function was called
+    expect(supabase.auth.signUp).toHaveBeenCalledWith({
+      email: 'newplayer@admin.com',
+      password: 'securepassword123',
+    });
   });
 });
