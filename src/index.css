@@ -1,0 +1,102 @@
+@import './styles/themes.css';
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cinzel+Decorative:wght@700&family=Orbitron:wght@500;700&family=Outfit:wght@400;600&family=Inter:wght@400;500;600&family=Teko:wght@500;600&family=Black+Ops+One&display=swap');
+
+:root {
+  /* Default typography if not overridden by theme */
+  --font-head: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--theme-bg);
+  color: var(--theme-fg);
+  font-family: var(--font-body);
+  transition: background-color 0.4s ease, color 0.4s ease;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-head);
+  font-weight: 700;
+  margin-top: 0;
+  color: var(--theme-accent);
+}
+
+a {
+  color: var(--theme-accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+a:hover {
+  color: var(--theme-accent-hover);
+}
+
+/* Global utility classes */
+.card {
+  background-color: var(--theme-bg-secondary);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--panel-radius);
+  padding: 1.5rem;
+  box-shadow: var(--theme-shadow);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: var(--theme-border-accent);
+}
+
+.btn {
+  background-color: var(--theme-bg-secondary);
+  color: var(--theme-accent);
+  border: 1px solid var(--theme-border-accent);
+  border-radius: var(--panel-radius);
+  padding: 0.5rem 1.25rem;
+  font-family: var(--font-head);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn:hover {
+  background-color: var(--theme-accent);
+  color: var(--theme-bg);
+}
+
+.btn.primary {
+  background-color: var(--theme-accent);
+  color: var(--theme-bg);
+}
+
+.btn.primary:hover {
+  background-color: var(--theme-accent-hover);
+}
+
+input, select, textarea {
+  background-color: var(--theme-bg);
+  color: var(--theme-fg);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--panel-radius);
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--theme-accent);
+  box-shadow: 0 0 0 2px rgba(var(--theme-accent), 0.2);
+}
+
+label {
+  display: block;
+  font-family: var(--font-head);
+  color: var(--theme-fg-muted);
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+}

@@ -1,0 +1,330 @@
+/* Base / Imperium (Default) */
+:root {
+  --theme-bg: #0a0e17; /* Gothic deep blue/black */
+  --theme-bg-secondary: #131b2e;
+  --theme-fg: #e2e8f0;
+  --theme-fg-muted: #94a3b8;
+  --theme-accent: #d4af37; /* Relic Gold */
+  --theme-accent-hover: #b7952f;
+  --theme-border: #1e293b;
+  --theme-border-accent: #d4af37;
+  --theme-shadow: 0 4px 20px rgba(212, 175, 55, 0.1);
+  --font-head: 'Cinzel', 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --panel-radius: 4px;
+}
+
+/* Chaos */
+[data-theme="chaos"] {
+  --theme-bg: #110000;
+  --theme-bg-secondary: #220505;
+  --theme-fg: #fca5a5;
+  --theme-fg-muted: #991b1b;
+  --theme-accent: #dc2626; /* Blood red */
+  --theme-accent-hover: #b91c1c;
+  --theme-border: #450a0a;
+  --theme-border-accent: #b91c1c;
+  --theme-shadow: 0 4px 20px rgba(220, 38, 38, 0.15);
+  --font-head: 'Creepster', 'Outfit', sans-serif;
+  --panel-radius: 0px;
+}
+
+/* Orks */
+[data-theme="orks"] {
+  --theme-bg: #1c1c18;
+  --theme-bg-secondary: #2b2b24;
+  --theme-fg: #d2d2c6;
+  --theme-fg-muted: #7b7b6c;
+  --theme-accent: #eab308; /* Hazard yellow */
+  --theme-accent-hover: #ca8a04;
+  --theme-border: #3f3f33;
+  --theme-border-accent: #dc2626; /* Red wunz go fasta */
+  --theme-shadow: 0 4px 20px rgba(234, 179, 8, 0.1);
+  --font-head: 'Black Ops One', 'Outfit', sans-serif;
+  --panel-radius: 0px;
+}
+
+/* Necrons */
+[data-theme="necrons"] {
+  --theme-bg: #000000;
+  --theme-bg-secondary: #051405;
+  --theme-fg: #a7f3d0;
+  --theme-fg-muted: #059669;
+  --theme-accent: #22c55e; /* Glowing neon green */
+  --theme-accent-hover: #16a34a;
+  --theme-border: #064e3b;
+  --theme-border-accent: #22c55e;
+  --theme-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+  --font-head: 'Orbitron', 'Outfit', sans-serif;
+  --panel-radius: 0px;
+}
+
+/* Aeldari */
+[data-theme="aeldari"] {
+  --theme-bg: #f8fafc; /* Wraithbone white */
+  --theme-bg-secondary: #ffffff;
+  --theme-fg: #0f172a;
+  --theme-fg-muted: #64748b;
+  --theme-accent: #0ea5e9; /* Spirit stone blue */
+  --theme-accent-hover: #0284c7;
+  --theme-border: #e2e8f0;
+  --theme-border-accent: #0ea5e9;
+  --theme-shadow: 0 8px 30px rgba(14, 165, 233, 0.15);
+  --font-head: 'Cinzel Decorative', 'Outfit', sans-serif;
+  --panel-radius: 20px;
+}
+
+/* Drukhari */
+[data-theme="drukhari"] {
+  --theme-bg: #090014;
+  --theme-bg-secondary: #160026;
+  --theme-fg: #e9d5ff;
+  --theme-fg-muted: #7e22ce;
+  --theme-accent: #a855f7; /* Poison purple */
+  --theme-accent-hover: #9333ea;
+  --theme-border: #3b0764;
+  --theme-border-accent: #22c55e; /* Toxic green secondary */
+  --theme-shadow: 0 4px 20px rgba(168, 85, 247, 0.2);
+  --font-head: 'Cinzel Decorative', 'Outfit', sans-serif;
+  --panel-radius: 0px;
+}
+
+/* T'au Empire */
+[data-theme="tau"] {
+  --theme-bg: #f1f5f9; /* Clean XV8 armor */
+  --theme-bg-secondary: #ffffff;
+  --theme-fg: #1e293b;
+  --theme-fg-muted: #64748b;
+  --theme-accent: #f59e0b; /* Sept Ochre */
+  --theme-accent-hover: #d97706;
+  --theme-border: #cbd5e1;
+  --theme-border-accent: #38bdf8; /* Optic blue */
+  --theme-shadow: 0 4px 15px rgba(245, 158, 11, 0.15);
+  --font-head: 'Teko', 'Outfit', sans-serif;
+  --panel-radius: 2px;
+}
+
+/* Tyranids */
+[data-theme="tyranids"] {
+  --theme-bg: #1a0f1a;
+  --theme-bg-secondary: #2d162d;
+  --theme-fg: #fbcfe8;
+  --theme-fg-muted: #db2777;
+  --theme-accent: #ec4899; /* Chitin pink/purple */
+  --theme-accent-hover: #be185d;
+  --theme-border: #831843;
+  --theme-border-accent: #fcd34d; /* Yellow eye slit */
+  --theme-shadow: 0 4px 20px rgba(236, 72, 153, 0.15);
+  --font-head: 'Creepster', 'Outfit', sans-serif;
+  --panel-radius: 12px;
+}
+
+/* Genestealer Cults */
+[data-theme="genestealer_cults"] {
+  --theme-bg: #1c1824;
+  --theme-bg-secondary: #2d243a;
+  --theme-fg: #f1f5f9;
+  --theme-fg-muted: #a78bfa;
+  --theme-accent: #f97316; /* Miner Orange */
+  --theme-accent-hover: #ea580c;
+  --theme-border: #4c1d95; /* Cult Purple */
+  --theme-border-accent: #f97316;
+  --theme-shadow: 0 4px 20px rgba(249, 115, 22, 0.15);
+  --font-head: 'Teko', 'Outfit', sans-serif;
+  --panel-radius: 4px;
+}
+
+/* Leagues of Votann */
+[data-theme="leagues_of_votann"] {
+  --theme-bg: #0f172a;
+  --theme-bg-secondary: #1e293b;
+  --theme-fg: #f8fafc;
+  --theme-fg-muted: #cbd5e1;
+  --theme-accent: #fb923c; /* Plasma orange */
+  --theme-accent-hover: #f97316;
+  --theme-border: #334155;
+  --theme-border-accent: #38bdf8;
+  --theme-shadow: 0 8px 30px rgba(251, 146, 60, 0.15);
+  --font-head: 'Black Ops One', 'Outfit', sans-serif;
+  --panel-radius: 8px;
+}
+
+/* Space Marines */
+[data-theme="space_marines"] {
+  --theme-bg: #0f172a;
+  --theme-bg-secondary: #1e3a8a; /* Ultramarine Blue */
+  --theme-fg: #f8fafc;
+  --theme-fg-muted: #93c5fd;
+  --theme-accent: #facc15; /* Imperial Yellow/Gold Trim */
+  --theme-accent-hover: #eab308;
+  --theme-border: #1e40af;
+  --theme-border-accent: #facc15;
+  --theme-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+  --font-head: 'Cinzel', 'Outfit', sans-serif;
+  --panel-radius: 6px;
+}
+
+/* Astra Militarum */
+[data-theme="astra_militarum"] {
+  --theme-bg: #1c1917;
+  --theme-bg-secondary: #292524;
+  --theme-fg: #e7e5e4;
+  --theme-fg-muted: #a8a29e;
+  --theme-accent: #65a30d; /* Olive Drab */
+  --theme-accent-hover: #4d7c0f;
+  --theme-border: #44403c;
+  --theme-border-accent: #65a30d;
+  --theme-shadow: 0 4px 10px rgba(101, 163, 13, 0.15);
+  --font-head: 'Black Ops One', 'Outfit', sans-serif;
+  --panel-radius: 0px;
+}
+
+/* Adeptus Mechanicus */
+[data-theme="adeptus_mechanicus"] {
+  --theme-bg: #1a0505;
+  --theme-bg-secondary: #2c0b0b;
+  --theme-fg: #fca5a5;
+  --theme-fg-muted: #ca8a04; /* Brass/Bronze */
+  --theme-accent: #dc2626; /* Martian Red */
+  --theme-accent-hover: #b91c1c;
+  --theme-border: #713f12; /* Brass border */
+  --theme-border-accent: #dc2626;
+  --theme-shadow: 0 4px 15px rgba(220, 38, 38, 0.2);
+  --font-head: 'Orbitron', 'Outfit', sans-serif;
+  --panel-radius: 0px;
+}
+
+/* Adepta Sororitas */
+[data-theme="adepta_sororitas"] {
+  --theme-bg: #0f0a0a;
+  --theme-bg-secondary: #1a1010;
+  --theme-fg: #f3f4f6;
+  --theme-fg-muted: #9ca3af;
+  --theme-accent: #b91c1c; /* Blood/Cloak Red */
+  --theme-accent-hover: #991b1b;
+  --theme-border: #d4af37; /* Relic Gold */
+  --theme-border-accent: #f87171;
+  --theme-shadow: 0 4px 20px rgba(185, 28, 28, 0.2);
+  --font-head: 'Cinzel Decorative', 'Outfit', sans-serif;
+  --panel-radius: 4px;
+}
+
+/* Adeptus Custodes */
+[data-theme="adeptus_custodes"] {
+  --theme-bg: #1c1305;
+  --theme-bg-secondary: #291c0a;
+  --theme-fg: #fef3c7;
+  --theme-fg-muted: #fcd34d;
+  --theme-accent: #fbbf24; /* Auramite Gold */
+  --theme-accent-hover: #f59e0b;
+  --theme-border: #b45309;
+  --theme-border-accent: #ef4444; /* Crimson Plume */
+  --theme-shadow: 0 8px 30px rgba(251, 191, 36, 0.2);
+  --font-head: 'Cinzel', 'Outfit', sans-serif;
+  --panel-radius: 8px;
+}
+
+/* Imperial Knights */
+[data-theme="imperial_knights"] {
+  --theme-bg: #1e293b;
+  --theme-bg-secondary: #334155;
+  --theme-fg: #f8fafc;
+  --theme-fg-muted: #cbd5e1;
+  --theme-accent: #3b82f6; /* Heraldic Blue */
+  --theme-accent-hover: #2563eb;
+  --theme-border: #94a3b8; /* Steel/Silver */
+  --theme-border-accent: #fbbf24; /* Gold trim */
+  --theme-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+  --font-head: 'Cinzel', 'Outfit', sans-serif;
+  --panel-radius: 0px;
+}
+
+/* Chaos Space Marines */
+[data-theme="chaos_space_marines"] {
+  --theme-bg: #050505;
+  --theme-bg-secondary: #171717;
+  --theme-fg: #d4d4d4;
+  --theme-fg-muted: #a3a3a3;
+  --theme-accent: #facc15; /* Corrupted Gold/Brass Trim */
+  --theme-accent-hover: #eab308;
+  --theme-border: #404040;
+  --theme-border-accent: #dc2626; /* Chaos star glow */
+  --theme-shadow: 0 4px 20px rgba(250, 204, 21, 0.1);
+  --font-head: 'Creepster', 'Outfit', sans-serif;
+  --panel-radius: 0px;
+}
+
+/* Death Guard */
+[data-theme="death_guard"] {
+  --theme-bg: #141f14;
+  --theme-bg-secondary: #1e2b1e;
+  --theme-fg: #d9f99d;
+  --theme-fg-muted: #a3e635; /* Toxic/Nurgle Green */
+  --theme-accent: #d97706; /* Rust Orange */
+  --theme-accent-hover: #b45309;
+  --theme-border: #3f6212;
+  --theme-border-accent: #d97706;
+  --theme-shadow: 0 4px 20px rgba(163, 230, 53, 0.1);
+  --font-head: 'Creepster', 'Outfit', sans-serif;
+  --panel-radius: 12px;
+}
+
+/* Thousand Sons */
+[data-theme="thousand_sons"] {
+  --theme-bg: #0f172a;
+  --theme-bg-secondary: #1e3a8a;
+  --theme-fg: #e0f2fe;
+  --theme-fg-muted: #7dd3fc;
+  --theme-accent: #fcd34d; /* Yellow/Gold Trim */
+  --theme-accent-hover: #fbbf24;
+  --theme-border: #0284c7; /* Tzeentch Magic Blue */
+  --theme-border-accent: #38bdf8;
+  --theme-shadow: 0 4px 20px rgba(56, 189, 248, 0.2);
+  --font-head: 'Cinzel Decorative', 'Outfit', sans-serif;
+  --panel-radius: 4px;
+}
+
+/* World Eaters */
+[data-theme="world_eaters"] {
+  --theme-bg: #220505;
+  --theme-bg-secondary: #3f0a0a;
+  --theme-fg: #fef08a; /* Brass/Bone text */
+  --theme-fg-muted: #facc15;
+  --theme-accent: #dc2626; /* Blood Red */
+  --theme-accent-hover: #b91c1c;
+  --theme-border: #713f12; /* Brass */
+  --theme-border-accent: #ef4444;
+  --theme-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+  --font-head: 'Black Ops One', 'Outfit', sans-serif;
+  --panel-radius: 0px;
+}
+
+/* Chaos Daemons */
+[data-theme="chaos_daemons"] {
+  --theme-bg: #14051a;
+  --theme-bg-secondary: #2b0b38;
+  --theme-fg: #f3e8ff;
+  --theme-fg-muted: #d8b4fe;
+  --theme-accent: #c084fc; /* Warp Purple */
+  --theme-accent-hover: #a855f7;
+  --theme-border: #581c87;
+  --theme-border-accent: #f43f5e; /* Pink Horror/Bloodletter glow */
+  --theme-shadow: 0 4px 30px rgba(192, 132, 252, 0.2);
+  --font-head: 'Creepster', 'Outfit', sans-serif;
+  --panel-radius: 12px;
+}
+
+/* Chaos Knights */
+[data-theme="chaos_knights"] {
+  --theme-bg: #171717;
+  --theme-bg-secondary: #262626;
+  --theme-fg: #f5f5f5;
+  --theme-fg-muted: #a3a3a3;
+  --theme-accent: #991b1b; /* Dark oxidized red */
+  --theme-accent-hover: #7f1d1d;
+  --theme-border: #525252; /* Corrupted Steel */
+  --theme-border-accent: #d97706; /* Rust glow */
+  --theme-shadow: 0 4px 20px rgba(153, 27, 27, 0.2);
+  --font-head: 'Cinzel Decorative', 'Outfit', sans-serif;
+  --panel-radius: 0px;
+}
