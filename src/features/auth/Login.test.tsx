@@ -8,6 +8,7 @@ vi.mock('../../supabaseClient', () => ({
   supabase: {
     auth: {
       signInWithPassword: vi.fn(),
+      resetPasswordForEmail: vi.fn().mockResolvedValue({ error: null }),
     },
   },
 }));
@@ -39,5 +40,27 @@ describe('Login Component', () => {
       email: 'test@admin.com',
       password: 'password123',
     });
+  });
+
+  it('handles forgot password flow smoothly', async () => {
+    render(<Login />);
+
+    // Toggle forgot password view
+    const forgotBtn = screen.getByText(/Forgot Password\?/i);
+    fireEvent.click(forgotBtn);
+
+    // Verify view has swapped (Password field is gone)
+    expect(screen.queryByPlaceholderText(/Password/i)).not.toBeInTheDocument();
+    
+    // Fill out recovery email
+    const emailInput = screen.getByPlaceholderText(/Email/i);
+    fireEvent.change(emailInput, { target: { value: 'recover@admin.com' } });
+
+    // Submit recovery
+    const sendBtn = screen.getByRole('button', { name: /Send Recovery Link/i });
+    fireEvent.click(sendBtn);
+
+    // Assert supabase reset call
+    expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledWith('recover@admin.com');
   });
 });

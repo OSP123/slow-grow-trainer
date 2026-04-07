@@ -4,6 +4,7 @@ import { Route, Routes, Navigate, useNavigate, useLocation } from 'react-router-
 import { Shield, Map, Activity, UserCircle, LogOut } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import Login from './features/auth/Login';
+import UpdatePassword from './features/auth/UpdatePassword';
 import Dashboard from './features/dashboard/Dashboard';
 import Logistics from './features/logistics/Logistics';
 import Assessments from './features/assessments/Assessments';
@@ -37,6 +38,7 @@ const FACTIONS = [
 function App() {
   const [session, setSession] = useState<any>(null);
   const [activeTheme, setActiveTheme] = useState('imperium');
+  const [isRecovering, setIsRecovering] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -51,6 +53,9 @@ function App() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (_event === 'PASSWORD_RECOVERY') {
+        setIsRecovering(true);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -59,6 +64,10 @@ function App() {
   useEffect(() => {
     document.body.setAttribute('data-theme', activeTheme);
   }, [activeTheme]);
+
+  if (isRecovering) {
+    return <UpdatePassword setIsRecovering={setIsRecovering} />;
+  }
 
   if (!session) {
     return <Login />;
