@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
-import { generateMatchups, MatchPair } from './Matchmaker';
+import { generateMatchups, type MatchPair } from './Matchmaker';
 
 export default function AdminDashboard() {
   const [email, setEmail] = useState<string | null>(null);
