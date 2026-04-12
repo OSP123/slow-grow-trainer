@@ -29,7 +29,7 @@ export default function AdminDashboard() {
 
   const fetchVotes = async () => {
     setFetchingVotes(true);
-    const { data, error } = await supabase.from('campaign_votes').select('*');
+    const { data, error } = await supabase.from('campaign_votes').select('*, profiles(commander_name)');
     if (!error && data) {
       setVotes(data);
     }
@@ -84,7 +84,7 @@ export default function AdminDashboard() {
             {/* Extended tally map reduction easily constructed here */}
             <ul style={{ marginTop: '1rem', color: 'var(--theme-fg-muted)' }}>
               {votes.map(v => (
-                <li key={v.id}>Category [{v.category}] nominated: [{v.nominee_id}]</li>
+                <li key={v.id}>Category [{v.category}] nominated: [{v.profiles?.commander_name || v.nominee_id}]</li>
               ))}
             </ul>
           </div>

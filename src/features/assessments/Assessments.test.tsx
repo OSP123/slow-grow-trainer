@@ -28,8 +28,14 @@ describe('Officer Assessment (Voting Module)', () => {
   });
 
   it('submits a valid vote to the campaign_votes table', async () => {
+    const mockSelect = vi.fn().mockResolvedValue({ data: [{ id: 'test-opponent-uuid', commander_name: 'Leman Russ' }], error: null });
     const mockInsert = vi.fn().mockResolvedValue({ error: null });
-    (supabase.from as any).mockReturnValue({ insert: mockInsert });
+    
+    (supabase.from as any).mockImplementation((table: string) => {
+      if (table === 'profiles') return { select: mockSelect };
+      if (table === 'campaign_votes') return { insert: mockInsert };
+      return {};
+    });
 
     render(<Assessments />);
 
@@ -37,9 +43,14 @@ describe('Officer Assessment (Voting Module)', () => {
     const categorySelect = screen.getByLabelText(/Award Category/i);
     fireEvent.change(categorySelect, { target: { value: 'best_sportsmanship' } });
 
-    // Enter a Nominee UUID string (respecting no mock data, user types literal string ID for now)
-    const nomineeInput = screen.getByLabelText(/Nominee/i);
-    fireEvent.change(nomineeInput, { target: { value: 'test-opponent-uuid' } });
+    // Wait for async profiles to load into select
+    await waitFor(() => {
+      expect(screen.getByText(/Leman Russ/i)).toBeInTheDocument();
+    });
+
+    // Select Nominee from dropdown instead of manual input
+    const nomineeSelect = screen.getByLabelText(/Nominee/i);
+    fireEvent.change(nomineeSelect, { target: { value: 'test-opponent-uuid' } });
 
     // Submit
     const submitBtn = screen.getByRole('button', { name: /Submit Official Vote/i });

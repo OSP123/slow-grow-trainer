@@ -46,7 +46,9 @@ describe('AdminDashboard (RBAC)', () => {
       data: { user: { email: 'omarpatel123@gmail.com' } }
     });
 
-    const mockSelect = vi.fn().mockResolvedValue({ data: [], error: null });
+    const mockSelect = vi.fn().mockResolvedValue({ data: [
+      { id: 'vote1', category: 'best_painted', profiles: { commander_name: 'Leman Russ' } }
+    ], error: null });
     (supabase.from as any).mockReturnValue({ select: mockSelect });
 
     render(<AdminDashboard />);
@@ -60,7 +62,9 @@ describe('AdminDashboard (RBAC)', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Campaign Voting Tallies/i)).toBeInTheDocument();
+      expect(screen.getByText(/Leman Russ/i)).toBeInTheDocument();
       expect(supabase.from).toHaveBeenCalledWith('campaign_votes');
+      expect(mockSelect).toHaveBeenCalledWith('*, profiles(commander_name)');
     });
   });
 });

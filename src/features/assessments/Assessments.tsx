@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 
 export default function Assessments() {
@@ -6,6 +6,13 @@ export default function Assessments() {
   const [nomineeId, setNomineeId] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
+  const [profiles, setProfiles] = useState<any[]>([]);
+
+  useEffect(() => {
+    supabase.from('profiles').select('id, commander_name').then(({ data }) => {
+      if (data) setProfiles(data);
+    });
+  }, []);
 
   const handleVoteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,16 +74,19 @@ export default function Assessments() {
         </div>
 
         <div>
-          <label htmlFor="nominee" style={{ display: 'block', marginBottom: '0.5rem' }}>Nominee (Commander ID)</label>
-          <input 
-            id="nominee" 
-            type="text" 
-            value={nomineeId} 
-            onChange={(e) => setNomineeId(e.target.value)} 
-            placeholder="Enter opponent's secure UUID..."
+          <label htmlFor="nominee" style={{ display: 'block', marginBottom: '0.5rem' }}>Nominee (Commander)</label>
+          <select
+            id="nominee"
+            value={nomineeId}
+            onChange={(e) => setNomineeId(e.target.value)}
             required
-            style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }}
-          />
+            style={{ width: '100%', padding: '0.75rem', backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-fg)', border: '1px solid var(--theme-border)' }}
+          >
+            <option value="" disabled>Select a Commander...</option>
+            {profiles.map(p => (
+              <option key={p.id} value={p.id}>{p.commander_name || 'Unknown Commander'}</option>
+            ))}
+          </select>
         </div>
 
         <button type="submit" className="btn primary" disabled={submitting || !nomineeId}>
