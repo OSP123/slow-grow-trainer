@@ -8,6 +8,9 @@ export default function Login() {
   const [realName, setRealName] = useState('');
   const [cmdName, setCmdName] = useState('');
   const [discord, setDiscord] = useState('');
+  const [location, setLocation] = useState('');
+  const [experience, setExperience] = useState('beginner');
+  const [faction, setFaction] = useState('');
   const [message, setMessage] = useState('');
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -36,7 +39,10 @@ export default function Login() {
         data: {
           real_name: realName,
           commander_name: cmdName,
-          discord_name: discord
+          discord_name: discord,
+          location: location,
+          experience_level: experience,
+          army_faction: faction
         }
       }
     });
@@ -142,6 +148,43 @@ export default function Login() {
               placeholder="Discord Handle" 
               value={discord}
               onChange={(e) => setDiscord(e.target.value)}
+              required
+              style={{ width: '100%', boxSizing: 'border-box' }}
+            />
+          </div>
+          <div>
+            <label htmlFor="location">Geographical Zone (City/Zip)</label>
+            <input 
+              id="location" 
+              type="text" 
+              placeholder="Your Location" 
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              required
+              style={{ width: '100%', boxSizing: 'border-box' }}
+            />
+          </div>
+          <div>
+            <label htmlFor="experience">Commander Experience</label>
+            <select 
+              id="experience" 
+              value={experience}
+              onChange={(e) => setExperience(e.target.value)}
+              style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }}
+            >
+              <option value="beginner">Recruit (Beginner)</option>
+              <option value="intermediate">Veteran (Intermediate)</option>
+              <option value="experienced">Warmaster (Experienced)</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="faction">Army Faction Name</label>
+            <input 
+              id="faction" 
+              type="text" 
+              placeholder="e.g. Ultramarines, Tyranids..." 
+              value={faction}
+              onChange={(e) => setFaction(e.target.value)}
               required
               style={{ width: '100%', boxSizing: 'border-box' }}
             />

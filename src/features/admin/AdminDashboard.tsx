@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
+import { generateMatchups, MatchPair } from './Matchmaker';
 
 export default function AdminDashboard() {
   const [email, setEmail] = useState<string | null>(null);
@@ -9,6 +10,9 @@ export default function AdminDashboard() {
   
   const [votes, setVotes] = useState<any[]>([]);
   const [fetchingVotes, setFetchingVotes] = useState(false);
+  
+  const [generatedMatches, setGeneratedMatches] = useState<MatchPair[]>([]);
+  const [committingMatches, setCommittingMatches] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -34,6 +38,34 @@ export default function AdminDashboard() {
       setVotes(data);
     }
     setFetchingVotes(false);
+  };
+
+  const handleGenerateMatches = async () => {
+    const { data } = await supabase.from('profiles').select('id, location, experience_level, army_faction, commander_name').is('role', 'user');
+    if (data) {
+      const pairings = generateMatchups(data);
+      setGeneratedMatches(pairings);
+    }
+  };
+
+  const commitMatches = async () => {
+    if (generatedMatches.length === 0) return;
+    setCommittingMatches(true);
+    
+    const payload = generatedMatches.map(m => ({
+      p1_id: m.p1.id,
+      p2_id: m.p2.id,
+      status: 'scheduled'
+    }));
+
+    const { error } = await supabase.from('matchups').insert(payload);
+    if (!error) {
+      alert('Matchups actively committed to the Ledger!');
+      setGeneratedMatches([]);
+    } else {
+      alert('Error committing Matchups.');
+    }
+    setCommittingMatches(false);
   };
 
   if (loading) return <div style={{ textAlign: 'center', marginTop: '4rem' }}>Scanning biometric signatures...</div>;
@@ -87,6 +119,36 @@ export default function AdminDashboard() {
                 <li key={v.id}>Category [{v.category}] nominated: [{v.profiles?.commander_name || v.nominee_id}]</li>
               ))}
             </ul>
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <h2>Matchmaking Engine Override</h2>
+        <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1rem' }}>
+          Automatically pairs commanders globally across their Locations, Experience Tiers, and Army differences.
+        </p>
+        
+        <button onClick={handleGenerateMatches} className="btn secondary" style={{ marginBottom: '1rem' }}>
+          Simulate Pairings via Algorithm
+        </button>
+
+        {generatedMatches.length > 0 && (
+          <div style={{ marginTop: '1rem', padding: '1rem', border: '1px solid var(--theme-border)' }}>
+            <h3>Proposed Round Ledgers</h3>
+            <ul style={{ listStyle: 'none', padding: 0, margin: '1rem 0' }}>
+              {generatedMatches.map((m, idx) => (
+                <li key={idx} style={{ marginBottom: '0.5rem' }}>
+                  <strong>{m.p1.commander_name || 'Unknown'}</strong> ({m.p1.location || 'Unknown loc'}, {m.p1.experience_level}) 
+                  <span style={{ color: 'red', margin: '0 0.5rem' }}>VS</span> 
+                  <strong>{m.p2.commander_name || 'Unknown'}</strong> ({m.p2.location || 'Unknown loc'}, {m.p2.experience_level}) 
+                  <span style={{ fontSize: '0.8rem', color: 'gray', marginLeft: '0.5rem' }}>[Score: {m.score}]</span>
+                </li>
+              ))}
+            </ul>
+            <button onClick={commitMatches} disabled={committingMatches} className="btn primary">
+              {committingMatches ? 'Committing to Postgres...' : 'Lock Initial Pairings'}
+            </button>
           </div>
         )}
       </div>

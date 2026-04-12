@@ -9,6 +9,8 @@ import Dashboard from './features/dashboard/Dashboard';
 import Logistics from './features/logistics/Logistics';
 import Assessments from './features/assessments/Assessments';
 import AdminDashboard from './features/admin/AdminDashboard';
+import CommanderProfile from './features/profile/CommanderProfile';
+import CampaignBattles from './features/battles/CampaignBattles';
 import './App.css';
 
 const FACTIONS = [
@@ -107,12 +109,22 @@ function App() {
             <Activity size={20} />
             Officer Assessment
           </div>
+          <div 
+            className={`nav-item ${activeView === 'battles' ? 'active' : ''}`}
+            onClick={() => navigate('/battles')}
+          >
+            <Shield size={20} />
+            Matchups & Lore
+          </div>
         </div>
 
         <div style={{ marginTop: 'auto' }}>
-          <div className="nav-item">
+          <div 
+            className={`nav-item ${activeView === 'profile' ? 'active' : ''}`}
+            onClick={() => navigate('/profile')}
+          >
             <UserCircle size={20} />
-            Profile (Empty)
+            Commander Profile
           </div>
           <div className="nav-item" onClick={() => supabase.auth.signOut()}>
             <LogOut size={20} />
@@ -151,7 +163,9 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/logistics" element={<Logistics />} />
           <Route path="/assessments" element={<Assessments />} />
+          <Route path="/battles" element={<CampaignBattles />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/profile" element={<CommanderProfile />} />
         </Routes>
       </main>
     </div>

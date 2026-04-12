@@ -81,12 +81,17 @@ describe('Login Component', () => {
     const realNameInput = screen.getByPlaceholderText(/Real Name/i);
     const cmdNameInput = screen.getByPlaceholderText(/Commander Name/i);
     const discordInput = screen.getByPlaceholderText(/Discord Handle/i);
+    const locationInput = screen.getByPlaceholderText(/Your Location/i);
+    const factionInput = screen.getByPlaceholderText(/e\.g\. Ultramarines/i);
+    // Note: Experience defaults to 'beginner' via <select> element 
     
     fireEvent.change(emailInput, { target: { value: 'newplayer@admin.com' } });
     fireEvent.change(passwordInput, { target: { value: 'securepassword123' } });
     fireEvent.change(realNameInput, { target: { value: 'Leman Russ' } });
     fireEvent.change(cmdNameInput, { target: { value: 'WolfKing' } });
     fireEvent.change(discordInput, { target: { value: 'leman_russ#1234' } });
+    fireEvent.change(locationInput, { target: { value: 'Fenris' } });
+    fireEvent.change(factionInput, { target: { value: 'Space Wolves' } });
 
     // Submit
     const registerBtn = screen.getByRole('button', { name: /Register/i });
@@ -100,7 +105,10 @@ describe('Login Component', () => {
         data: {
           real_name: 'Leman Russ',
           commander_name: 'WolfKing',
-          discord_name: 'leman_russ#1234'
+          discord_name: 'leman_russ#1234',
+          location: 'Fenris',
+          experience_level: 'beginner',
+          army_faction: 'Space Wolves'
         }
       }
     });
