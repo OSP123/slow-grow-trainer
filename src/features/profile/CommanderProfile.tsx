@@ -16,11 +16,14 @@ export default function CommanderProfile() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
     if (data) {
       setProfile(data);
       setLore(data.army_lore || '');
       setAvatarUrl(data.avatar_url || '');
+    } else {
+      setProfile({ commander_name: 'Unregistered' });
+      setMessage('Profile missing from PostgreSQL ledger. You may need to create a new test account.');
     }
   };
 
