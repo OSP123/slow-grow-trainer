@@ -33,7 +33,7 @@ export default function AdminDashboard() {
 
   const fetchVotes = async () => {
     setFetchingVotes(true);
-    const { data, error } = await supabase.from('campaign_votes').select('*, profiles(commander_name)');
+    const { data, error } = await supabase.from('campaign_votes').select('*, profiles:profiles!campaign_votes_nominee_id_fkey(commander_name)');
     if (!error && data) {
       setVotes(data);
     }
