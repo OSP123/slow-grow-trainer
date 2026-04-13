@@ -18,14 +18,14 @@ export default function CommanderProfile() {
 
     let { data } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
     
-    // Auto-Rescue Protocol for Ghost Accounts (Users who registered before the DB trigger was formulated)
+    // Auto-Rescue Protocol for Ghost Accounts & Signup Race Conditions
     if (!data) {
-      const { data: rescueData, error } = await supabase.from('profiles').insert({
+      const { data: rescueData, error } = await supabase.from('profiles').upsert({
         id: user.id,
         email: user.email,
         role: user.email === 'omarpatel123@gmail.com' ? 'admin' : 'user',
         commander_name: user.user_metadata?.commander_name || 'Legacy Commander'
-      }).select().single();
+      }, { onConflict: 'id' }).select().single();
       
       if (!error && rescueData) {
         data = rescueData;

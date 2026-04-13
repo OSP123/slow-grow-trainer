@@ -36,13 +36,13 @@ describe('CommanderProfile Component Validation', () => {
       })
     }));
 
-    const insertMock = vi.fn().mockImplementation(() => ({
+    const upsertMock = vi.fn().mockImplementation(() => ({
       select: selectMock
     }));
 
     (supabase.from as any).mockImplementation((table: string) => {
       if (table === 'profiles') {
-        return { select: selectMock, insert: insertMock, update: vi.fn() };
+        return { select: selectMock, upsert: upsertMock, update: vi.fn() };
       }
       return {};
     });
@@ -54,10 +54,10 @@ describe('CommanderProfile Component Validation', () => {
 
     // Verify it drops into auto-rescue natively and bypasses the UI crash
     await waitFor(() => {
-      expect(insertMock).toHaveBeenCalledWith(expect.objectContaining({
+      expect(upsertMock).toHaveBeenCalledWith(expect.objectContaining({
         id: 'ghost-123',
         email: 'test@ghost.com'
-      }));
+      }), { onConflict: 'id' });
     });
 
     // Validates that the UI eventually maps the successfully created ghost profile
