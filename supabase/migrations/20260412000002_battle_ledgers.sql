@@ -20,7 +20,7 @@ CREATE POLICY "Public Read for Matchups" ON public.matchups
 
 -- Only Admins can explicitly Create (schedule) matchups
 CREATE POLICY "Admins can insert matchups" ON public.matchups
-    FOR INSERT USING (
+    FOR INSERT WITH CHECK (
       EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
     );
 
