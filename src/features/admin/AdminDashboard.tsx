@@ -41,7 +41,7 @@ export default function AdminDashboard() {
   };
 
   const handleGenerateMatches = async () => {
-    const { data } = await supabase.from('profiles').select('id, location, experience_level, army_faction, commander_name').is('role', 'user');
+    const { data } = await supabase.from('profiles').select('id, location, experience_level, army_faction, commander_name').eq('role', 'user');
     if (data) {
       const pairings = generateMatchups(data);
       setGeneratedMatches(pairings);
