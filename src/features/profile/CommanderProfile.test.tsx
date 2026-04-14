@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import CommanderProfile from './CommanderProfile';
 import { supabase } from '../../supabaseClient';
 
@@ -22,7 +22,7 @@ describe('CommanderProfile Component Validation', () => {
 
   it('generates a ghost profile gracefully and renders without throwing HTTP 403', async () => {
     // 1. Mock Auth
-    (supabase.auth.getUser as any).mockResolvedValue({
+    (supabase.auth.getUser as import("vitest").Mock).mockResolvedValue({
       data: { user: { id: 'ghost-123', email: 'test@ghost.com' } }
     });
 
@@ -40,7 +40,7 @@ describe('CommanderProfile Component Validation', () => {
       select: selectMock
     }));
 
-    (supabase.from as any).mockImplementation((table: string) => {
+    (supabase.from as import("vitest").Mock).mockImplementation((table: string) => {
       if (table === 'profiles') {
         return { select: selectMock, upsert: upsertMock, update: vi.fn() };
       }

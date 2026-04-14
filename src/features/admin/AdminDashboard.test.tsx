@@ -18,7 +18,7 @@ describe('AdminDashboard (RBAC)', () => {
   });
 
   it('rejects users without the root admin email', async () => {
-    (supabase.auth.getUser as any).mockResolvedValue({
+    (supabase.auth.getUser as import("vitest").Mock).mockResolvedValue({
       data: { user: { email: 'standard_commander@admin.com' } }
     });
 
@@ -30,7 +30,7 @@ describe('AdminDashboard (RBAC)', () => {
   });
 
   it('presents the security gateway to the root email', async () => {
-    (supabase.auth.getUser as any).mockResolvedValue({
+    (supabase.auth.getUser as import("vitest").Mock).mockResolvedValue({
       data: { user: { email: 'omarpatel123@gmail.com' } }
     });
 
@@ -42,14 +42,14 @@ describe('AdminDashboard (RBAC)', () => {
   });
 
   it('reveals the tally logic when correct administrative code is provided', async () => {
-    (supabase.auth.getUser as any).mockResolvedValue({
+    (supabase.auth.getUser as import("vitest").Mock).mockResolvedValue({
       data: { user: { email: 'omarpatel123@gmail.com' } }
     });
 
     const mockSelect = vi.fn().mockResolvedValue({ data: [
       { id: 'vote1', category: 'best_painted', profiles: { commander_name: 'Leman Russ' } }
     ], error: null });
-    (supabase.from as any).mockReturnValue({ select: mockSelect });
+    (supabase.from as import("vitest").Mock).mockReturnValue({ select: mockSelect });
 
     render(<AdminDashboard />);
 
@@ -64,7 +64,7 @@ describe('AdminDashboard (RBAC)', () => {
       expect(screen.getByText(/Campaign Voting Tallies/i)).toBeInTheDocument();
       expect(screen.getByText(/Leman Russ/i)).toBeInTheDocument();
       expect(supabase.from).toHaveBeenCalledWith('campaign_votes');
-      expect(mockSelect).toHaveBeenCalledWith('*, profiles(commander_name)');
+      expect(mockSelect).toHaveBeenCalledWith('*, profiles:profiles!campaign_votes_nominee_id_fkey(commander_name)');
     });
   });
 });

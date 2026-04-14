@@ -1,8 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 
+export interface MatchupData {
+  id: string;
+  p1_id: string;
+  p2_id: string;
+  p1_score?: number;
+  p2_score?: number;
+  p1_lore?: string;
+  p2_lore?: string;
+  game_result?: string;
+  p1_profile?: { commander_name: string };
+  p2_profile?: { commander_name: string };
+}
+
 export default function CampaignBattles() {
-  const [matchups, setMatchups] = useState<any[]>([]);
+  const [matchups, setMatchups] = useState<MatchupData[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -13,9 +26,7 @@ export default function CampaignBattles() {
   const [oppScore, setOppScore] = useState<number | ''>('');
   const [message, setMessage] = useState('');
 
-  useEffect(() => {
-    fetchActiveBattles();
-  }, []);
+
 
   const fetchActiveBattles = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -32,7 +43,12 @@ export default function CampaignBattles() {
     setLoading(false);
   };
 
-  const handleSelectMatch = (m: any) => {
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchActiveBattles();
+  }, []);
+
+  const handleSelectMatch = (m: MatchupData) => {
     setActiveMatch(m.id);
     const isP1 = m.p1_id === userId;
     setMyScore(isP1 ? (m.p1_score ?? '') : (m.p2_score ?? ''));
@@ -59,7 +75,7 @@ export default function CampaignBattles() {
       else gameResult = 'draw';
     }
 
-    const payload: any = { game_result: gameResult };
+    const payload: Partial<MatchupData> = { game_result: gameResult };
     
     if (isP1) {
       payload.p1_score = myScore;

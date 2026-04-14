@@ -2,13 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { generateMatchups, type MatchPair } from './Matchmaker';
 
+export interface CampaignVote {
+  id: string;
+  category: string;
+  nominee_id: string;
+  voter_id: string;
+  profiles?: { commander_name: string };
+}
+
 export default function AdminDashboard() {
   const [email, setEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [unlocked, setUnlocked] = useState(false);
   const [code, setCode] = useState('');
   
-  const [votes, setVotes] = useState<any[]>([]);
+  const [votes, setVotes] = useState<CampaignVote[]>([]);
   const [fetchingVotes, setFetchingVotes] = useState(false);
   
   const [generatedMatches, setGeneratedMatches] = useState<MatchPair[]>([]);

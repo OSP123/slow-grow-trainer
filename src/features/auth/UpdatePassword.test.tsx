@@ -22,7 +22,7 @@ describe('Update Password Component', () => {
   });
 
   it('submits new password to supabase successfully', async () => {
-    (supabase.auth.updateUser as any).mockResolvedValue({ error: null });
+    (supabase.auth.updateUser as import("vitest").Mock).mockResolvedValue({ error: null });
     const mockSetIsRecovering = vi.fn();
 
     render(<UpdatePassword setIsRecovering={mockSetIsRecovering} />);

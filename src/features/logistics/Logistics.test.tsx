@@ -22,7 +22,7 @@ describe('Logistics & Deployment Tracker', () => {
 
   it('renders standard milestones empty natively without mock history', async () => {
     const mockSelect = vi.fn().mockResolvedValue({ data: [], error: null });
-    (supabase.from as any).mockReturnValue({ select: mockSelect });
+    (supabase.from as import("vitest").Mock).mockReturnValue({ select: mockSelect });
 
     render(<Logistics />);
 
@@ -35,7 +35,7 @@ describe('Logistics & Deployment Tracker', () => {
 
   it('reveals upload portal when checking off a new milestone', async () => {
     const mockSelect = vi.fn().mockResolvedValue({ data: [], error: null });
-    (supabase.from as any).mockReturnValue({ select: mockSelect });
+    (supabase.from as import("vitest").Mock).mockReturnValue({ select: mockSelect });
 
     render(<Logistics />);
 
@@ -49,10 +49,10 @@ describe('Logistics & Deployment Tracker', () => {
   it('triggers storage upload when file is submitted', async () => {
     const mockSelect = vi.fn().mockResolvedValue({ data: [], error: null });
     const mockInsert = vi.fn().mockResolvedValue({ error: null });
-    (supabase.from as any).mockReturnValue({ select: mockSelect, insert: mockInsert });
+    (supabase.from as import("vitest").Mock).mockReturnValue({ select: mockSelect, insert: mockInsert });
 
     const mockUpload = vi.fn().mockResolvedValue({ data: { path: 'test/path.png' }, error: null });
-    (supabase.storage.from as any).mockReturnValue({ upload: mockUpload, getPublicUrl: vi.fn().mockReturnValue({ data: { publicUrl: 'url' } }) });
+    (supabase.storage.from as import("vitest").Mock).mockReturnValue({ upload: mockUpload, getPublicUrl: vi.fn().mockReturnValue({ data: { publicUrl: 'url' } }) });
 
     render(<Logistics />);
 

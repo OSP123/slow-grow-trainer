@@ -18,7 +18,7 @@ describe('Dashboard (Megafactions War Effort Map)', () => {
   it('renders an empty state if no real data is found (Strict NO MOCK DATA rule)', async () => {
     // Mock the query to return empty data
     const mockSelect = vi.fn().mockResolvedValue({ data: [], error: null });
-    (supabase.from as any).mockReturnValue({ select: mockSelect });
+    (supabase.from as import("vitest").Mock).mockReturnValue({ select: mockSelect });
 
     render(<Dashboard />);
 
@@ -38,7 +38,7 @@ describe('Dashboard (Megafactions War Effort Map)', () => {
     ];
 
     const mockSelect = vi.fn().mockResolvedValue({ data: mockScores, error: null });
-    (supabase.from as any).mockReturnValue({ select: mockSelect });
+    (supabase.from as import("vitest").Mock).mockReturnValue({ select: mockSelect });
 
     render(<Dashboard />);
 

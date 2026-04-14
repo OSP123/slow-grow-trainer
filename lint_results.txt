@@ -1,0 +1,111 @@
+
+/Users/omar.patel/projects/personal/slow-grow-trainer/src/App.tsx
+  42:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/omar.patel/projects/personal/slow-grow-trainer/src/features/admin/AdminDashboard.test.tsx
+  21:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  33:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  45:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  52:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/omar.patel/projects/personal/slow-grow-trainer/src/features/admin/AdminDashboard.tsx
+  11:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/omar.patel/projects/personal/slow-grow-trainer/src/features/assessments/Assessments.test.tsx
+  34:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/omar.patel/projects/personal/slow-grow-trainer/src/features/assessments/Assessments.tsx
+   9:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  45:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/omar.patel/projects/personal/slow-grow-trainer/src/features/auth/UpdatePassword.test.tsx
+  25:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/omar.patel/projects/personal/slow-grow-trainer/src/features/battles/CampaignBattles.tsx
+   5:44  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+  17:5   error  Error: Cannot access variable before it is declared
+
+`fetchActiveBattles` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/Users/omar.patel/projects/personal/slow-grow-trainer/src/features/battles/CampaignBattles.tsx:17:5
+  15 |
+  16 |   useEffect(() => {
+> 17 |     fetchActiveBattles();
+     |     ^^^^^^^^^^^^^^^^^^ `fetchActiveBattles` accessed before it is declared
+  18 |   }, []);
+  19 |
+  20 |   const fetchActiveBattles = async () => {
+
+/Users/omar.patel/projects/personal/slow-grow-trainer/src/features/battles/CampaignBattles.tsx:20:3
+  18 |   }, []);
+  19 |
+> 20 |   const fetchActiveBattles = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 21 |     const { data: { user } } = await supabase.auth.getUser();
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 22 |     if (!user) return;
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 32 |     setLoading(false);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 33 |   };
+     | ^^^^^ `fetchActiveBattles` is declared here
+  34 |
+  35 |   const handleSelectMatch = (m: any) => {
+  36 |     setActiveMatch(m.id);  react-hooks/immutability
+  35:33  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+  62:20  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+
+/Users/omar.patel/projects/personal/slow-grow-trainer/src/features/dashboard/Dashboard.test.tsx
+  21:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  41:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/omar.patel/projects/personal/slow-grow-trainer/src/features/logistics/Logistics.test.tsx
+  25:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  38:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  52:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  55:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/omar.patel/projects/personal/slow-grow-trainer/src/features/logistics/Logistics.tsx
+  12:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/omar.patel/projects/personal/slow-grow-trainer/src/features/profile/CommanderProfile.test.tsx
+   2:35  error  'fireEvent' is defined but never used     @typescript-eslint/no-unused-vars
+  25:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  43:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/omar.patel/projects/personal/slow-grow-trainer/src/features/profile/CommanderProfile.tsx
+   5:42  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-explicit-any
+  12:5   error  Error: Cannot access variable before it is declared
+
+`fetchProfile` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/Users/omar.patel/projects/personal/slow-grow-trainer/src/features/profile/CommanderProfile.tsx:12:5
+  10 |
+  11 |   useEffect(() => {
+> 12 |     fetchProfile();
+     |     ^^^^^^^^^^^^ `fetchProfile` accessed before it is declared
+  13 |   }, []);
+  14 |
+  15 |   const fetchProfile = async () => {
+
+/Users/omar.patel/projects/personal/slow-grow-trainer/src/features/profile/CommanderProfile.tsx:15:3
+  13 |   }, []);
+  14 |
+> 15 |   const fetchProfile = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 16 |     const { data: { user } } = await supabase.auth.getUser();
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 17 |     if (!user) return;
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |     }
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   };
+     | ^^^^^ `fetchProfile` is declared here
+  44 |
+  45 |   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  46 |     if (!e.target.files || e.target.files.length === 0 || !profile) return;  react-hooks/immutability
+
+✖ 26 problems (26 errors, 0 warnings)
+

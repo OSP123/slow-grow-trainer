@@ -8,8 +8,13 @@ const MILESTONES = [
   '1000 Points Painted'
 ];
 
+interface HobbyMilestone {
+  points_threshold: number;
+  status: string;
+}
+
 export default function Logistics() {
-  const [history, setHistory] = useState<any[]>([]);
+  const [history, setHistory] = useState<HobbyMilestone[]>([]);
   const [activeUpload, setActiveUpload] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);

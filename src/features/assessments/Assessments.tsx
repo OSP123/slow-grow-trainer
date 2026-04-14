@@ -6,7 +6,7 @@ export default function Assessments() {
   const [nomineeId, setNomineeId] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
-  const [profiles, setProfiles] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<{ id: string; commander_name: string }[]>([]);
 
   useEffect(() => {
     supabase.from('profiles').select('id, commander_name').then(({ data }) => {
@@ -42,9 +42,13 @@ export default function Assessments() {
         setMessage('Vote logged securely into the Simulation Protocol.');
         setNomineeId('');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setMessage('Error submitting vote. Check connection.');
+      if (err instanceof Error) {
+        setMessage('Error submitting vote: ' + err.message);
+      } else {
+        setMessage('Error submitting vote. Check connection.');
+      }
     } finally {
       setSubmitting(false);
     }

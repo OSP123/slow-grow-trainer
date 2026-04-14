@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { Session } from '@supabase/supabase-js';
 
 import { Route, Routes, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Shield, Map, Activity, UserCircle, LogOut } from 'lucide-react';
@@ -39,7 +40,7 @@ const FACTIONS = [
 ];
 
 function App() {
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [activeTheme, setActiveTheme] = useState('imperium');
   const [isRecovering, setIsRecovering] = useState(false);
 

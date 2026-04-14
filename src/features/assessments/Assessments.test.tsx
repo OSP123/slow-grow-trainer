@@ -15,6 +15,8 @@ vi.mock('../../supabaseClient', () => ({
 describe('Officer Assessment (Voting Module)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    const mockSelect = vi.fn().mockResolvedValue({ data: [], error: null });
+    (supabase.from as import("vitest").Mock).mockReturnValue({ select: mockSelect });
   });
 
   it('renders voting categories successfully without injecting mock opponents', async () => {
@@ -31,7 +33,7 @@ describe('Officer Assessment (Voting Module)', () => {
     const mockSelect = vi.fn().mockResolvedValue({ data: [{ id: 'test-opponent-uuid', commander_name: 'Leman Russ' }], error: null });
     const mockInsert = vi.fn().mockResolvedValue({ error: null });
     
-    (supabase.from as any).mockImplementation((table: string) => {
+    (supabase.from as import("vitest").Mock).mockImplementation((table: string) => {
       if (table === 'profiles') return { select: mockSelect };
       if (table === 'campaign_votes') return { insert: mockInsert };
       return {};
