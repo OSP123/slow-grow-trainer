@@ -78,12 +78,12 @@ export default function CampaignBattles() {
     const payload: Partial<MatchupData> = { game_result: gameResult };
     
     if (isP1) {
-      payload.p1_score = myScore;
-      payload.p2_score = oppScore;
+      payload.p1_score = myScore === '' ? undefined : myScore;
+      payload.p2_score = oppScore === '' ? undefined : oppScore;
       payload.p1_lore = myLore;
     } else {
-      payload.p2_score = myScore;
-      payload.p1_score = oppScore;
+      payload.p2_score = myScore === '' ? undefined : myScore;
+      payload.p1_score = oppScore === '' ? undefined : oppScore;
       payload.p2_lore = myLore;
     }
 
