@@ -20,7 +20,7 @@ describe('Login Component', () => {
     
     expect(screen.getByPlaceholderText(/Email/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Password/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Engage/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Deploy/i })).toBeInTheDocument();
   });
 
   it('calls Supabase auth on submit', async () => {
@@ -29,7 +29,7 @@ describe('Login Component', () => {
     // Fill out the form
     const emailInput = screen.getByPlaceholderText(/Email/i);
     const passwordInput = screen.getByPlaceholderText(/Password/i);
-    const button = screen.getByRole('button', { name: /Engage/i });
+    const button = screen.getByRole('button', { name: /Deploy/i });
 
     fireEvent.change(emailInput, { target: { value: 'test@admin.com' } });
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
