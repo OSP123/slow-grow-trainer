@@ -1,5 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
+
+export interface GameStore {
+  id: string;
+  name: string;
+}
 
 export default function Login() {
   const [view, setView] = useState<'login' | 'forgot' | 'signup'>('login');
@@ -11,7 +16,16 @@ export default function Login() {
   const [location, setLocation] = useState('');
   const [experience, setExperience] = useState('beginner');
   const [faction, setFaction] = useState('');
+  const [subfaction, setSubfaction] = useState('');
+  const [storeId, setStoreId] = useState('');
+  const [gameStores, setGameStores] = useState<GameStore[]>([]);
   const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    supabase.from('game_stores').select('id, name').order('name').then(({ data }) => {
+      if (data) setGameStores(data);
+    });
+  }, []);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +56,9 @@ export default function Login() {
           discord_name: discord,
           location: location,
           experience_level: experience,
-          army_faction: faction
+          army_faction: faction,
+          army_subfaction: subfaction,
+          preferred_store_id: storeId
         }
       }
     });
@@ -178,16 +194,44 @@ export default function Login() {
             </select>
           </div>
           <div>
-            <label htmlFor="faction">Army Faction Name</label>
+            <label htmlFor="faction">Army Core Faction</label>
             <input 
               id="faction" 
               type="text" 
-              placeholder="e.g. Ultramarines, Tyranids..." 
+              placeholder="e.g. Space Marines, Chaos..." 
               value={faction}
               onChange={(e) => setFaction(e.target.value)}
               required
               style={{ width: '100%', boxSizing: 'border-box' }}
             />
+          </div>
+          <div>
+            <label htmlFor="subfaction">Army Subfaction</label>
+            <input 
+              id="subfaction" 
+              type="text" 
+              placeholder="e.g. Blood Angels, World Eaters..." 
+              value={subfaction}
+              onChange={(e) => setSubfaction(e.target.value)}
+              required
+              style={{ width: '100%', boxSizing: 'border-box' }}
+            />
+          </div>
+          <div>
+            <label htmlFor="store">Preferred Game Store</label>
+            <select 
+              id="store" 
+              value={storeId}
+              onChange={(e) => setStoreId(e.target.value)}
+              required
+              style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }}
+            >
+              <option value="" disabled>Select your local operational venue...</option>
+              {gameStores.map(store => (
+                <option key={store.id} value={store.id}>{store.name}</option>
+              ))}
+            </select>
+            {gameStores.length === 0 && <span style={{ color: 'var(--theme-accent)', fontSize: '0.8rem' }}>No venues registered globally. Registration locked.</span>}
           </div>
           <button type="submit" className="btn primary" style={{ marginTop: '1rem' }}>
             Register

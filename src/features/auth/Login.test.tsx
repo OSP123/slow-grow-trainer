@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import Login from './Login';
 import { supabase } from '../../supabaseClient';
@@ -11,6 +11,11 @@ vi.mock('../../supabaseClient', () => ({
       resetPasswordForEmail: vi.fn().mockResolvedValue({ error: null }),
       signUp: vi.fn().mockResolvedValue({ data: { user: {} }, error: null }),
     },
+    from: vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        order: vi.fn().mockResolvedValue({ data: [{ id: 'store-123', name: 'Warhammer Citadel' }] })
+      })
+    }),
   },
 }));
 
@@ -82,35 +87,46 @@ describe('Login Component', () => {
     const cmdNameInput = screen.getByPlaceholderText(/Commander Name/i);
     const discordInput = screen.getByPlaceholderText(/Discord Handle/i);
     const locationInput = screen.getByPlaceholderText(/Your Location/i);
-    const factionInput = screen.getByPlaceholderText(/e\.g\. Ultramarines/i);
-    // Note: Experience defaults to 'beginner' via <select> element 
-    
+    const factionInput = screen.getByPlaceholderText(/e\.g\. Space Marines, Chaos/i);
+    const subfactionInput = screen.getByPlaceholderText(/e\.g\. Blood Angels/i);
+    const storeSelect = screen.getByLabelText(/Preferred Game Store/i);
+    // Wait for Game Stores API fetch to populate options natively
+    await waitFor(() => {
+      expect(screen.getByText(/Warhammer Citadel/i)).toBeInTheDocument();
+    });
+
     fireEvent.change(emailInput, { target: { value: 'newplayer@admin.com' } });
     fireEvent.change(passwordInput, { target: { value: 'securepassword123' } });
     fireEvent.change(realNameInput, { target: { value: 'Leman Russ' } });
     fireEvent.change(cmdNameInput, { target: { value: 'WolfKing' } });
     fireEvent.change(discordInput, { target: { value: 'leman_russ#1234' } });
     fireEvent.change(locationInput, { target: { value: 'Fenris' } });
-    fireEvent.change(factionInput, { target: { value: 'Space Wolves' } });
+    fireEvent.change(factionInput, { target: { value: 'Space Marines' } });
+    fireEvent.change(subfactionInput, { target: { value: 'Space Wolves' } });
+    fireEvent.change(storeSelect, { target: { value: 'store-123' } });
 
     // Submit
     const registerBtn = screen.getByRole('button', { name: /Register/i });
     fireEvent.click(registerBtn);
 
     // Assert the mocked supabase function was called with meta-data
-    expect(supabase.auth.signUp).toHaveBeenCalledWith({
-      email: 'newplayer@admin.com',
-      password: 'securepassword123',
-      options: {
-        data: {
-          real_name: 'Leman Russ',
-          commander_name: 'WolfKing',
-          discord_name: 'leman_russ#1234',
-          location: 'Fenris',
-          experience_level: 'beginner',
-          army_faction: 'Space Wolves'
+    await waitFor(() => {
+      expect(supabase.auth.signUp).toHaveBeenCalledWith({
+        email: 'newplayer@admin.com',
+        password: 'securepassword123',
+        options: {
+          data: {
+            real_name: 'Leman Russ',
+            commander_name: 'WolfKing',
+            discord_name: 'leman_russ#1234',
+            location: 'Fenris',
+            experience_level: 'beginner',
+            army_faction: 'Space Marines',
+            army_subfaction: 'Space Wolves',
+            preferred_store_id: 'store-123'
+          }
         }
-      }
+      });
     });
   });
 });

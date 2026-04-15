@@ -46,10 +46,19 @@ describe('AdminDashboard (RBAC)', () => {
       data: { user: { email: 'omarpatel123@gmail.com' } }
     });
 
-    const mockSelect = vi.fn().mockResolvedValue({ data: [
+    const mockVotesSelect = vi.fn().mockResolvedValue({ data: [
       { id: 'vote1', category: 'best_painted', profiles: { commander_name: 'Leman Russ' } }
     ], error: null });
-    (supabase.from as import("vitest").Mock).mockReturnValue({ select: mockSelect });
+
+    const mockStoresSelect = vi.fn().mockReturnValue({
+      order: vi.fn().mockResolvedValue({ data: [] })
+    });
+
+    (supabase.from as import("vitest").Mock).mockImplementation((table: string) => {
+      if (table === 'campaign_votes') return { select: mockVotesSelect };
+      if (table === 'game_stores') return { select: mockStoresSelect };
+      return {};
+    });
 
     render(<AdminDashboard />);
 
@@ -64,7 +73,7 @@ describe('AdminDashboard (RBAC)', () => {
       expect(screen.getByText(/Campaign Voting Tallies/i)).toBeInTheDocument();
       expect(screen.getByText(/Leman Russ/i)).toBeInTheDocument();
       expect(supabase.from).toHaveBeenCalledWith('campaign_votes');
-      expect(mockSelect).toHaveBeenCalledWith('*, profiles:profiles!campaign_votes_nominee_id_fkey(commander_name)');
+      expect(mockVotesSelect).toHaveBeenCalledWith('*, profiles:profiles!campaign_votes_nominee_id_fkey(commander_name)');
     });
   });
 });

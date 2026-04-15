@@ -10,6 +10,11 @@ vi.mock('./supabaseClient', () => ({
       getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
       onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } })
     },
+    from: vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        order: vi.fn().mockResolvedValue({ data: [] })
+      })
+    })
   },
 }));
 

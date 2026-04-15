@@ -44,6 +44,11 @@ describe('CommanderProfile Component Validation', () => {
       if (table === 'profiles') {
         return { select: selectMock, upsert: upsertMock, update: vi.fn() };
       }
+      if (table === 'game_stores') {
+        return { 
+          select: vi.fn().mockReturnValue({ order: vi.fn().mockResolvedValue({ data: [] }) }) 
+        };
+      }
       return {};
     });
 

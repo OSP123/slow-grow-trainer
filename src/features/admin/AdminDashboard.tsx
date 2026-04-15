@@ -10,6 +10,12 @@ export interface CampaignVote {
   profiles?: { commander_name: string };
 }
 
+export interface GameStore {
+  id: string;
+  name: string;
+  location?: string;
+}
+
 export default function AdminDashboard() {
   const [email, setEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -21,6 +27,10 @@ export default function AdminDashboard() {
   
   const [generatedMatches, setGeneratedMatches] = useState<MatchPair[]>([]);
   const [committingMatches, setCommittingMatches] = useState(false);
+
+  const [stores, setStores] = useState<GameStore[]>([]);
+  const [newStoreName, setNewStoreName] = useState('');
+  const [newStoreLoc, setNewStoreLoc] = useState('');
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -34,9 +44,15 @@ export default function AdminDashboard() {
     if (code === 'TERMINUS_ROOT') {
       setUnlocked(true);
       fetchVotes();
+      fetchStores();
     } else {
       alert('Access Denied. Incorrect Phase Code.');
     }
+  };
+
+  const fetchStores = async () => {
+    const { data } = await supabase.from('game_stores').select('*').order('name');
+    if (data) setStores(data);
   };
 
   const fetchVotes = async () => {
@@ -74,6 +90,20 @@ export default function AdminDashboard() {
       alert('Error committing Matchups.');
     }
     setCommittingMatches(false);
+  };
+
+  const handleAddStore = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newStoreName) return;
+    await supabase.from('game_stores').insert({ name: newStoreName, location: newStoreLoc });
+    setNewStoreName('');
+    setNewStoreLoc('');
+    fetchStores();
+  };
+
+  const handleDeleteStore = async (storeId: string) => {
+    await supabase.from('game_stores').delete().eq('id', storeId);
+    fetchStores();
   };
 
   if (loading) return <div style={{ textAlign: 'center', marginTop: '4rem' }}>Scanning biometric signatures...</div>;
@@ -159,6 +189,50 @@ export default function AdminDashboard() {
             </button>
           </div>
         )}
+      </div>
+
+      <div className="card">
+        <h2>Sanctioned Venue Control (Game Stores)</h2>
+        <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1rem' }}>
+          Manage global store endpoints where physical operations map via Registration forms.
+        </p>
+
+        <form onSubmit={handleAddStore} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+          <input 
+            type="text" 
+            placeholder="Store Name" 
+            value={newStoreName}
+            onChange={(e) => setNewStoreName(e.target.value)}
+            required
+            style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box' }}
+          />
+          <input 
+            type="text" 
+            placeholder="Location (Optional)" 
+            value={newStoreLoc}
+            onChange={(e) => setNewStoreLoc(e.target.value)}
+            style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box' }}
+          />
+          <button type="submit" className="btn primary">Add Venue</button>
+        </form>
+
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {stores.length === 0 && <span style={{ color: 'var(--theme-fg-muted)' }}>No Active Stores Connected...</span>}
+          {stores.map(store => (
+            <li key={store.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem', borderBottom: '1px solid var(--theme-border)' }}>
+              <div>
+                <strong>{store.name}</strong> 
+                {store.location && <span style={{ color: 'var(--theme-fg-muted)', marginLeft: '0.5rem' }}>({store.location})</span>}
+              </div>
+              <button 
+                onClick={() => handleDeleteStore(store.id)}
+                style={{ backgroundColor: 'transparent', color: 'red', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+              >
+                Delete
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
