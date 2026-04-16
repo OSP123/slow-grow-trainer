@@ -45,3 +45,12 @@ Tasks:
 
 Follow-ups:
 - Manually seed Game Stores to unlock pending registration blocks.
+
+Date: 2026-04-16
+Tasks:
+- Added "Field Manual" (Briefing) section to sidebar navigation explaining the platform purpose and all modules.
+- Wrote migration `20260416000000_matchup_extended_metrics.sql` adding `p1_temperament`, `p2_temperament`, `p1_rules_engagement`, `p2_rules_engagement` columns to `matchups` table; pushed to Supabase.
+- Completely rewrote `CampaignBattles.tsx` with three distinct layers: Global Warzone Board (all players visible), Live VP Tracker (save mid-game scores without finalizing), and Final Assessment modal with Command Temperament and Rules of Engagement star ratings (1-5).
+- Updated `CampaignBattles.test.tsx` with 4 tests covering loading state, global board render, VP tracker panel, and finalization flow — 25/25 total tests passing.
+Follow-ups:
+- Admin must schedule matchups via the Admin Dashboard for players to see them in "My Assigned Frontlines".

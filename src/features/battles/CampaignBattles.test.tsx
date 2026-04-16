@@ -73,10 +73,9 @@ describe('Campaign Battles Integrations', () => {
     render(<CampaignBattles />);
     await waitFor(() => screen.getByText('My Assigned Frontlines'));
 
-    // Click the matchup in the sidebar list
-    const listItems = screen.getAllByText(/Commander Alpha/i);
-    // The sidebar list item is clickable
-    fireEvent.click(listItems[listItems.length - 1].closest('li')!);
+    // Sidebar shows "vs Commander Beta" for a p1 user
+    const sidebarItem = await screen.findByText(/vs Commander Beta/i);
+    fireEvent.click(sidebarItem.closest('li')!);
 
     await waitFor(() => {
       expect(screen.getByText(/Live VP Tracker/i)).toBeInTheDocument();
@@ -88,15 +87,20 @@ describe('Campaign Battles Integrations', () => {
     render(<CampaignBattles />);
     await waitFor(() => screen.getByText('My Assigned Frontlines'));
 
-    const listItems = screen.getAllByText(/Commander Alpha/i);
-    fireEvent.click(listItems[listItems.length - 1].closest('li')!);
+    const sidebarItem = await screen.findByText(/vs Commander Beta/i);
+    fireEvent.click(sidebarItem.closest('li')!);
 
-    await waitFor(() => screen.getByText(/Finalize Battle/i));
-    fireEvent.click(screen.getByText(/Finalize Battle/i));
+    // Wait for the VP tracker to appear (match is selected)
+    await waitFor(() => screen.getByText(/Live VP Tracker/i));
+
+    // Click Finalize to switch to the assessment panel
+    const finalizeBtn = await screen.findByText(/Finalize Battle/i);
+    fireEvent.click(finalizeBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/Command Temperament/i)).toBeInTheDocument();
-      expect(screen.getByText(/Rules of Engagement/i)).toBeInTheDocument();
+      expect(screen.getByText(/Rate Your Opponent's Honour/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Command Temperament/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Rules of Engagement/i).length).toBeGreaterThan(0);
       expect(screen.getByText(/Seal Battle Report/i)).toBeInTheDocument();
     });
   });
