@@ -16,21 +16,42 @@ export interface GameStore {
   location?: string;
 }
 
+interface EditableMatchup {
+  id: string;
+  p1_id: string;
+  p2_id: string;
+  p1_score: number | '';
+  p2_score: number | '';
+  game_result: string;
+  status: string;
+  p1_temperament: number | '';
+  p2_temperament: number | '';
+  p1_rules_engagement: number | '';
+  p2_rules_engagement: number | '';
+  p1_profile?: { commander_name: string };
+  p2_profile?: { commander_name: string };
+}
+
 export default function AdminDashboard() {
   const [email, setEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [unlocked, setUnlocked] = useState(false);
   const [code, setCode] = useState('');
-  
+
   const [votes, setVotes] = useState<CampaignVote[]>([]);
   const [fetchingVotes, setFetchingVotes] = useState(false);
-  
+
   const [generatedMatches, setGeneratedMatches] = useState<MatchPair[]>([]);
   const [committingMatches, setCommittingMatches] = useState(false);
 
   const [stores, setStores] = useState<GameStore[]>([]);
   const [newStoreName, setNewStoreName] = useState('');
   const [newStoreLoc, setNewStoreLoc] = useState('');
+
+  // Matchup management
+  const [allMatchups, setAllMatchups] = useState<EditableMatchup[]>([]);
+  const [editingMatchup, setEditingMatchup] = useState<EditableMatchup | null>(null);
+  const [matchupMessage, setMatchupMessage] = useState('');
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -45,6 +66,7 @@ export default function AdminDashboard() {
       setUnlocked(true);
       fetchVotes();
       fetchStores();
+      fetchAllMatchups();
     } else {
       alert('Access Denied. Incorrect Phase Code.');
     }
@@ -58,10 +80,26 @@ export default function AdminDashboard() {
   const fetchVotes = async () => {
     setFetchingVotes(true);
     const { data, error } = await supabase.from('campaign_votes').select('*, profiles:profiles!campaign_votes_nominee_id_fkey(commander_name)');
-    if (!error && data) {
-      setVotes(data);
-    }
+    if (!error && data) setVotes(data);
     setFetchingVotes(false);
+  };
+
+  const fetchAllMatchups = async () => {
+    const { data } = await supabase
+      .from('matchups')
+      .select('*, p1_profile:profiles!p1_id(commander_name), p2_profile:profiles!p2_id(commander_name)')
+      .order('created_at', { ascending: false });
+    if (data) setAllMatchups(data.map(m => ({
+      ...m,
+      p1_score: m.p1_score ?? '',
+      p2_score: m.p2_score ?? '',
+      p1_temperament: m.p1_temperament ?? '',
+      p2_temperament: m.p2_temperament ?? '',
+      p1_rules_engagement: m.p1_rules_engagement ?? '',
+      p2_rules_engagement: m.p2_rules_engagement ?? '',
+      game_result: m.game_result ?? '',
+      status: m.status ?? 'scheduled',
+    })));
   };
 
   const handleGenerateMatches = async () => {
@@ -75,17 +113,12 @@ export default function AdminDashboard() {
   const commitMatches = async () => {
     if (generatedMatches.length === 0) return;
     setCommittingMatches(true);
-    
-    const payload = generatedMatches.map(m => ({
-      p1_id: m.p1.id,
-      p2_id: m.p2.id,
-      status: 'scheduled'
-    }));
-
+    const payload = generatedMatches.map(m => ({ p1_id: m.p1.id, p2_id: m.p2.id, status: 'scheduled' }));
     const { error } = await supabase.from('matchups').insert(payload);
     if (!error) {
       alert('Matchups actively committed to the Ledger!');
       setGeneratedMatches([]);
+      fetchAllMatchups();
     } else {
       alert('Error committing Matchups.');
     }
@@ -96,14 +129,59 @@ export default function AdminDashboard() {
     e.preventDefault();
     if (!newStoreName) return;
     await supabase.from('game_stores').insert({ name: newStoreName, location: newStoreLoc });
-    setNewStoreName('');
-    setNewStoreLoc('');
+    setNewStoreName(''); setNewStoreLoc('');
     fetchStores();
   };
 
   const handleDeleteStore = async (storeId: string) => {
     await supabase.from('game_stores').delete().eq('id', storeId);
     fetchStores();
+  };
+
+  const handleEditMatchup = (m: EditableMatchup) => {
+    setEditingMatchup({ ...m });
+    setMatchupMessage('');
+  };
+
+  const handleSaveMatchup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingMatchup) return;
+
+    type MatchupPayload = {
+      p1_score?: number | null;
+      p2_score?: number | null;
+      game_result?: string | null;
+      status: string;
+      p1_temperament?: number | null;
+      p2_temperament?: number | null;
+      p1_rules_engagement?: number | null;
+      p2_rules_engagement?: number | null;
+    };
+
+    const payload: MatchupPayload = {
+      p1_score: editingMatchup.p1_score !== '' ? editingMatchup.p1_score as number : null,
+      p2_score: editingMatchup.p2_score !== '' ? editingMatchup.p2_score as number : null,
+      game_result: editingMatchup.game_result || null,
+      status: editingMatchup.status,
+      p1_temperament: editingMatchup.p1_temperament !== '' ? editingMatchup.p1_temperament as number : null,
+      p2_temperament: editingMatchup.p2_temperament !== '' ? editingMatchup.p2_temperament as number : null,
+      p1_rules_engagement: editingMatchup.p1_rules_engagement !== '' ? editingMatchup.p1_rules_engagement as number : null,
+      p2_rules_engagement: editingMatchup.p2_rules_engagement !== '' ? editingMatchup.p2_rules_engagement as number : null,
+    };
+
+    const { error } = await supabase.from('matchups').update(payload).eq('id', editingMatchup.id);
+    if (error) {
+      setMatchupMessage('Error: ' + error.message);
+    } else {
+      setMatchupMessage('Matchup record updated.');
+      setEditingMatchup(null);
+      fetchAllMatchups();
+    }
+  };
+
+  const handleDeleteMatchup = async (matchupId: string) => {
+    const { error } = await supabase.from('matchups').delete().eq('id', matchupId);
+    if (!error) fetchAllMatchups();
   };
 
   if (loading) return <div style={{ textAlign: 'center', marginTop: '4rem' }}>Scanning biometric signatures...</div>;
@@ -124,15 +202,8 @@ export default function AdminDashboard() {
         <form onSubmit={handleUnlock} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
             <label htmlFor="code">Security Code</label>
-            <input 
-              id="code" 
-              type="password" 
-              placeholder="Enter Admin Override Code" 
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              required
-              style={{ width: '100%', boxSizing: 'border-box' }}
-            />
+            <input id="code" type="password" placeholder="Enter Admin Override Code" value={code}
+              onChange={e => setCode(e.target.value)} required style={{ width: '100%', boxSizing: 'border-box' }} />
           </div>
           <button type="submit" className="btn primary">Unlock Root Access</button>
         </form>
@@ -143,43 +214,168 @@ export default function AdminDashboard() {
   return (
     <div style={{ padding: '2rem' }}>
       <h1 style={{ marginBottom: '1rem' }}>Administration Override Station</h1>
-      
+
+      {/* ── MATCHUP MANAGEMENT ── */}
       <div className="card" style={{ marginBottom: '2rem' }}>
-        <h2>Campaign Voting Tallies</h2>
-        {fetchingVotes ? (
-          <p>Decrypting anonymous voting ledgers...</p>
-        ) : (
-          <div>
-            <p>Total Votes Securely Logged: {votes.length}</p>
-            {/* Extended tally map reduction easily constructed here */}
-            <ul style={{ marginTop: '1rem', color: 'var(--theme-fg-muted)' }}>
-              {votes.map(v => (
-                <li key={v.id}>Category [{v.category}] nominated: [{v.profiles?.commander_name || v.nominee_id}]</li>
-              ))}
-            </ul>
+        <h2 style={{ marginBottom: '0.5rem' }}>Matchup Command Override</h2>
+        <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1.5rem' }}>
+          Edit scores, result, status, and honour ratings for any matchup. Changes override player submissions.
+        </p>
+
+        {matchupMessage && (
+          <div style={{ marginBottom: '1rem', padding: '0.75rem', border: '1px solid var(--theme-accent)', color: 'var(--theme-accent)', fontSize: '0.85rem' }}>
+            {matchupMessage}
           </div>
+        )}
+
+        {/* Edit form */}
+        {editingMatchup && (
+          <div style={{ marginBottom: '2rem', padding: '1.25rem', border: '1px solid var(--theme-accent)', borderRadius: '6px', backgroundColor: 'var(--theme-bg-secondary)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1rem' }}>
+                Editing: {editingMatchup.p1_profile?.commander_name} vs {editingMatchup.p2_profile?.commander_name}
+              </h3>
+              <button onClick={() => setEditingMatchup(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--theme-fg-muted)' }}>✕ Cancel</button>
+            </div>
+            <form onSubmit={handleSaveMatchup} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>
+                    {editingMatchup.p1_profile?.commander_name} VP
+                  </label>
+                  <input type="number" min={0}
+                    value={editingMatchup.p1_score}
+                    onChange={e => setEditingMatchup(prev => prev ? { ...prev, p1_score: parseInt(e.target.value) || '' } : null)}
+                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>
+                    {editingMatchup.p2_profile?.commander_name} VP
+                  </label>
+                  <input type="number" min={0}
+                    value={editingMatchup.p2_score}
+                    onChange={e => setEditingMatchup(prev => prev ? { ...prev, p2_score: parseInt(e.target.value) || '' } : null)}
+                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Result</label>
+                  <select
+                    value={editingMatchup.game_result}
+                    onChange={e => setEditingMatchup(prev => prev ? { ...prev, game_result: e.target.value } : null)}
+                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  >
+                    <option value="">— None —</option>
+                    <option value="p1_win">{editingMatchup.p1_profile?.commander_name} Wins</option>
+                    <option value="p2_win">{editingMatchup.p2_profile?.commander_name} Wins</option>
+                    <option value="draw">Draw</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Status</label>
+                  <select
+                    value={editingMatchup.status}
+                    onChange={e => setEditingMatchup(prev => prev ? { ...prev, status: e.target.value } : null)}
+                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  >
+                    <option value="scheduled">Scheduled</option>
+                    <option value="completed">Completed</option>
+                    <option value="verified">Verified</option>
+                  </select>
+                </div>
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '1px' }}>Honour Ratings (1–5)</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
+                {[
+                  { key: 'p1_temperament' as const, label: `${editingMatchup.p1_profile?.commander_name} Temperament` },
+                  { key: 'p1_rules_engagement' as const, label: `${editingMatchup.p1_profile?.commander_name} Rules` },
+                  { key: 'p2_temperament' as const, label: `${editingMatchup.p2_profile?.commander_name} Temperament` },
+                  { key: 'p2_rules_engagement' as const, label: `${editingMatchup.p2_profile?.commander_name} Rules` },
+                ].map(({ key, label }) => (
+                  <div key={key}>
+                    <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>{label}</label>
+                    <input type="number" min={1} max={5}
+                      value={editingMatchup[key]}
+                      onChange={e => setEditingMatchup(prev => prev ? { ...prev, [key]: parseInt(e.target.value) || '' } : null)}
+                      style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                ))}
+              </div>
+              <button type="submit" className="btn primary" style={{ alignSelf: 'flex-start' }}>Save Override</button>
+            </form>
+          </div>
+        )}
+
+        {/* Matchup List */}
+        {allMatchups.length === 0 ? (
+          <p style={{ color: 'var(--theme-fg-muted)' }}>No matchups in the ledger yet.</p>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid var(--theme-border)', textAlign: 'left' }}>
+                <th style={{ padding: '0.5rem' }}>Player 1</th>
+                <th style={{ padding: '0.5rem' }}>Player 2</th>
+                <th style={{ padding: '0.5rem', textAlign: 'center' }}>Score</th>
+                <th style={{ padding: '0.5rem', textAlign: 'center' }}>Result</th>
+                <th style={{ padding: '0.5rem', textAlign: 'center' }}>Status</th>
+                <th style={{ padding: '0.5rem' }}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {allMatchups.map(m => (
+                <tr key={m.id} style={{ borderBottom: '1px solid var(--theme-border)' }}>
+                  <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>{m.p1_profile?.commander_name || '—'}</td>
+                  <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>{m.p2_profile?.commander_name || '—'}</td>
+                  <td style={{ padding: '0.5rem', textAlign: 'center', color: 'var(--theme-fg-muted)' }}>
+                    {m.p1_score !== '' ? m.p1_score : '—'} : {m.p2_score !== '' ? m.p2_score : '—'}
+                  </td>
+                  <td style={{ padding: '0.5rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--theme-fg-muted)' }}>
+                    {m.game_result || '—'}
+                  </td>
+                  <td style={{ padding: '0.5rem', textAlign: 'center' }}>
+                    <span style={{
+                      fontSize: '0.7rem', letterSpacing: '1px', padding: '2px 8px', borderRadius: '3px',
+                      backgroundColor: m.status === 'completed' ? '#166534' : m.status === 'verified' ? '#1e40af' : '#713f12',
+                      color: '#fff',
+                    }}>
+                      {m.status}
+                    </span>
+                  </td>
+                  <td style={{ padding: '0.5rem', display: 'flex', gap: '0.5rem' }}>
+                    <button onClick={() => handleEditMatchup(m)} className="btn secondary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem' }}>
+                      Edit
+                    </button>
+                    <button onClick={() => handleDeleteMatchup(m.id)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '0.75rem' }}>
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
 
-      <div className="card">
+      {/* ── MATCHMAKING ENGINE ── */}
+      <div className="card" style={{ marginBottom: '2rem' }}>
         <h2>Matchmaking Engine Override</h2>
         <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1rem' }}>
-          Automatically pairs commanders globally across their Locations, Experience Tiers, and Army differences.
+          Automatically pairs commanders globally across Locations, Experience Tiers, and Army differences.
         </p>
-        
         <button onClick={handleGenerateMatches} className="btn secondary" style={{ marginBottom: '1rem' }}>
           Simulate Pairings via Algorithm
         </button>
-
         {generatedMatches.length > 0 && (
           <div style={{ marginTop: '1rem', padding: '1rem', border: '1px solid var(--theme-border)' }}>
             <h3>Proposed Round Ledgers</h3>
             <ul style={{ listStyle: 'none', padding: 0, margin: '1rem 0' }}>
               {generatedMatches.map((m, idx) => (
                 <li key={idx} style={{ marginBottom: '0.5rem' }}>
-                  <strong>{m.p1.commander_name || 'Unknown'}</strong> ({m.p1.location || 'Unknown loc'}, {m.p1.experience_level}) 
-                  <span style={{ color: 'red', margin: '0 0.5rem' }}>VS</span> 
-                  <strong>{m.p2.commander_name || 'Unknown'}</strong> ({m.p2.location || 'Unknown loc'}, {m.p2.experience_level}) 
+                  <strong>{m.p1.commander_name || 'Unknown'}</strong> ({m.p1.location || '?'}, {m.p1.experience_level})
+                  <span style={{ color: 'red', margin: '0 0.5rem' }}>VS</span>
+                  <strong>{m.p2.commander_name || 'Unknown'}</strong> ({m.p2.location || '?'}, {m.p2.experience_level})
                   <span style={{ fontSize: '0.8rem', color: 'gray', marginLeft: '0.5rem' }}>[Score: {m.score}]</span>
                 </li>
               ))}
@@ -191,48 +387,51 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      <div className="card">
+      {/* ── SANCTIONED VENUES ── */}
+      <div className="card" style={{ marginBottom: '2rem' }}>
         <h2>Sanctioned Venue Control (Game Stores)</h2>
         <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1rem' }}>
           Manage global store endpoints where physical operations map via Registration forms.
         </p>
-
         <form onSubmit={handleAddStore} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
-          <input 
-            type="text" 
-            placeholder="Store Name" 
-            value={newStoreName}
-            onChange={(e) => setNewStoreName(e.target.value)}
-            required
-            style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box' }}
-          />
-          <input 
-            type="text" 
-            placeholder="Location (Optional)" 
-            value={newStoreLoc}
-            onChange={(e) => setNewStoreLoc(e.target.value)}
-            style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box' }}
-          />
+          <input type="text" placeholder="Store Name" value={newStoreName}
+            onChange={e => setNewStoreName(e.target.value)} required style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box' }} />
+          <input type="text" placeholder="Location (Optional)" value={newStoreLoc}
+            onChange={e => setNewStoreLoc(e.target.value)} style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box' }} />
           <button type="submit" className="btn primary">Add Venue</button>
         </form>
-
         <ul style={{ listStyle: 'none', padding: 0 }}>
           {stores.length === 0 && <span style={{ color: 'var(--theme-fg-muted)' }}>No Active Stores Connected...</span>}
           {stores.map(store => (
             <li key={store.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem', borderBottom: '1px solid var(--theme-border)' }}>
               <div>
-                <strong>{store.name}</strong> 
+                <strong>{store.name}</strong>
                 {store.location && <span style={{ color: 'var(--theme-fg-muted)', marginLeft: '0.5rem' }}>({store.location})</span>}
               </div>
-              <button 
-                onClick={() => handleDeleteStore(store.id)}
-                style={{ backgroundColor: 'transparent', color: 'red', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
-              >
+              <button onClick={() => handleDeleteStore(store.id)}
+                style={{ backgroundColor: 'transparent', color: 'red', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
                 Delete
               </button>
             </li>
           ))}
         </ul>
+      </div>
+
+      {/* ── CAMPAIGN VOTES ── */}
+      <div className="card">
+        <h2>Campaign Voting Tallies</h2>
+        {fetchingVotes ? (
+          <p>Decrypting anonymous voting ledgers...</p>
+        ) : (
+          <div>
+            <p>Total Votes Securely Logged: {votes.length}</p>
+            <ul style={{ marginTop: '1rem', color: 'var(--theme-fg-muted)' }}>
+              {votes.map(v => (
+                <li key={v.id}>Category [{v.category}] nominated: [{v.profiles?.commander_name || v.nominee_id}]</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );

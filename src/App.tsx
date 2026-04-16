@@ -176,6 +176,7 @@ function App() {
           <Route path="/battles" element={<CampaignBattles />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/profile" element={<CommanderProfile />} />
+          <Route path="/profile/:profileId" element={<CommanderProfile />} />
         </Routes>
       </main>
     </div>

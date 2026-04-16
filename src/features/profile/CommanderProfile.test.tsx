@@ -1,73 +1,117 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import CommanderProfile from './CommanderProfile';
 import { supabase } from '../../supabaseClient';
+import type { Mock } from 'vitest';
 
 vi.mock('../../supabaseClient', () => ({
   supabase: {
-    auth: {
-      getUser: vi.fn(),
-    },
+    auth: { getUser: vi.fn() },
     from: vi.fn(),
-    storage: {
-      from: vi.fn(),
-    }
+    storage: { from: vi.fn() },
   }
 }));
 
-describe('CommanderProfile Component Validation', () => {
+// Mock ArmyRoster to isolate CommanderProfile tests
+vi.mock('./ArmyRoster', () => ({
+  default: () => <div>ArmyRoster Mock</div>,
+}));
+
+const mockProfile = {
+  id: 'profile-123',
+  commander_name: 'Lord Castellan',
+  army_lore: 'We march for the Emperor.',
+  avatar_url: '',
+  location: 'Los Angeles',
+  army_faction: 'Space Marines',
+  army_subfaction: 'Blood Angels',
+  preferred_store_id: 'store-1',
+};
+
+function renderProfile(profileId?: string) {
+  return render(
+    <MemoryRouter initialEntries={[profileId ? `/profile/${profileId}` : '/profile']}>
+      <Routes>
+        <Route path="/profile" element={<CommanderProfile />} />
+        <Route path="/profile/:profileId" element={<CommanderProfile />} />
+      </Routes>
+    </MemoryRouter>
+  );
+}
+
+describe('CommanderProfile', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-  });
 
-  it('generates a ghost profile gracefully and renders without throwing HTTP 403', async () => {
-    // 1. Mock Auth
-    (supabase.auth.getUser as import("vitest").Mock).mockResolvedValue({
-      data: { user: { id: 'ghost-123', email: 'test@ghost.com' } }
+    (supabase.auth.getUser as Mock).mockResolvedValue({
+      data: { user: { id: 'profile-123', email: 'test@example.com', user_metadata: {} } }
     });
 
-    // 2. Mock missing profile fetch (maybeSingle returns null)
-    const selectMock = vi.fn().mockImplementation(() => ({
-      eq: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-      single: vi.fn().mockResolvedValue({ 
-        data: { id: 'ghost-123', commander_name: 'Rescued Ghost' }, 
-        error: null 
-      })
-    }));
-
-    const upsertMock = vi.fn().mockImplementation(() => ({
-      select: selectMock
-    }));
-
-    (supabase.from as import("vitest").Mock).mockImplementation((table: string) => {
+    (supabase.from as Mock).mockImplementation((table: string) => {
       if (table === 'profiles') {
-        return { select: selectMock, upsert: upsertMock, update: vi.fn() };
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              maybeSingle: vi.fn().mockResolvedValue({ data: mockProfile, error: null }),
+            }),
+          }),
+          upsert: vi.fn().mockReturnValue({
+            select: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: mockProfile, error: null }) }),
+          }),
+          update: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ error: null }),
+          }),
+        };
       }
       if (table === 'game_stores') {
-        return { 
-          select: vi.fn().mockReturnValue({ order: vi.fn().mockResolvedValue({ data: [] }) }) 
+        return {
+          select: vi.fn().mockReturnValue({
+            order: vi.fn().mockResolvedValue({ data: [{ id: 'store-1', name: 'Battlefront Games' }], error: null }),
+          }),
         };
       }
       return {};
     });
+  });
 
-    render(<CommanderProfile />);
-
-    // Validate Loading State explicitly
+  it('shows loading state initially', () => {
+    renderProfile();
     expect(screen.getByText(/Downloading Profile/i)).toBeInTheDocument();
+  });
 
-    // Verify it drops into auto-rescue natively and bypasses the UI crash
+  it('renders commander name and tabs after load', async () => {
+    renderProfile();
     await waitFor(() => {
-      expect(upsertMock).toHaveBeenCalledWith(expect.objectContaining({
-        id: 'ghost-123',
-        email: 'test@ghost.com'
-      }), { onConflict: 'id' });
+      expect(screen.getByText(/Lord Castellan/i)).toBeInTheDocument();
+      expect(screen.getByText('Commander Specs')).toBeInTheDocument();
+      expect(screen.getByText('Army Roster')).toBeInTheDocument();
+      expect(screen.getByText('Army Chronicles')).toBeInTheDocument();
     });
+  });
 
-    // Validates that the UI eventually maps the successfully created ghost profile
+  it('shows specs by default with faction info', async () => {
+    renderProfile();
     await waitFor(() => {
-      expect(screen.getByText(/Commander Rescued Ghost/i)).toBeInTheDocument();
+      expect(screen.getByText('Space Marines')).toBeInTheDocument();
+    });
+  });
+
+  it('switches to roster tab and renders ArmyRoster', async () => {
+    renderProfile();
+    await waitFor(() => screen.getByText('Army Roster'));
+    fireEvent.click(screen.getByText('Army Roster'));
+    await waitFor(() => {
+      expect(screen.getByText('ArmyRoster Mock')).toBeInTheDocument();
+    });
+  });
+
+  it('switches to lore tab and shows lore text', async () => {
+    renderProfile();
+    await waitFor(() => screen.getByText('Army Chronicles'));
+    fireEvent.click(screen.getByText('Army Chronicles'));
+    await waitFor(() => {
+      expect(screen.getByText(/We march for the Emperor/i)).toBeInTheDocument();
     });
   });
 });
