@@ -54,3 +54,15 @@ Tasks:
 - Updated `CampaignBattles.test.tsx` with 4 tests covering loading state, global board render, VP tracker panel, and finalization flow — 25/25 total tests passing.
 Follow-ups:
 - Admin must schedule matchups via the Admin Dashboard for players to see them in "My Assigned Frontlines".
+
+Date: 2026-04-16 (session continued)
+Tasks:
+- Created `army_units` Postgres table with RLS (public read, owner-only writes); pushed migration to Supabase.
+- Built `ArmyRoster.tsx` component — pulls live 10th Edition unit data from OpenHammer API (34 factions, full datasheet library), gracefully degrades to manual entry if API is unreachable. Tracks Built/Painted/Played per unit with instant-save toggles and progress bar summary.
+- Refactored `CommanderProfile.tsx` into a tabbed layout: Commander Specs | Army Roster | Army Chronicles. Added public profile viewing via `/profile/:profileId` route.
+- Updated `AdminDashboard.tsx` with full Matchup Command Override panel — admin can edit VP scores, result, status, and all honour ratings for any matchup, or delete matchups entirely.
+- Updated Field Manual (`Briefing.tsx`) with Getting Started checklist, Army Roster section, Honour Ratings explained section, and all updated module descriptions.
+- Added `/profile/:profileId` route to `App.tsx` for public roster viewing.
+- Wrote 5 new tests for ArmyRoster, 5 for CommanderProfile, updated AdminDashboard tests — 34/34 total tests passing.
+Follow-ups:
+- To view another player's roster, navigate directly to /profile/<their-uuid>. Consider adding a Commander directory page for easier discovery.

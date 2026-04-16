@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../../supabaseClient';
+import { compressImage, getTransformUrl } from '../../utils/imageCompression';
 import ArmyRoster from './ArmyRoster';
 
 export interface ProfileData {
@@ -78,10 +79,20 @@ export default function CommanderProfile() {
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0 || !profile) return;
-    const file = e.target.files[0];
+    const rawFile = e.target.files[0];
+
     setUploading(true);
-    setMessage('');
-    const fileExt = file.name.split('.').pop();
+    setMessage('Compressing image...');
+
+    const { file, error: compressError } = await compressImage(rawFile, 1200, 0.82);
+    if (compressError) {
+      setMessage(compressError);
+      setUploading(false);
+      return;
+    }
+
+    setMessage('Uploading...');
+    const fileExt = 'jpg'; // compressImage always outputs JPEG
     const filePath = `${profile.id}/avatar.${fileExt}`;
     const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
     if (uploadError) { setMessage('Avatar Error: ' + uploadError.message); setUploading(false); return; }
@@ -130,7 +141,7 @@ export default function CommanderProfile() {
           backgroundColor: 'var(--theme-bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           {avatarUrl
-            ? <img src={avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ? <img src={getTransformUrl(avatarUrl, 160, 80)} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             : <span style={{ fontSize: '2rem' }}>⚔</span>}
         </div>
         <div style={{ flex: 1 }}>

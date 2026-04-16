@@ -6,13 +6,15 @@ import { supabase } from '../../supabaseClient';
 vi.mock('../../supabaseClient', () => ({
   supabase: {
     from: vi.fn(),
-    storage: {
-      from: vi.fn(),
-    },
-    auth: {
-      getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'test-user-id' } } })
-    }
+    storage: { from: vi.fn() },
+    auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'test-user-id' } } }) }
   },
+}));
+
+// Bypass canvas/Image APIs — just pass the file through unchanged
+vi.mock('../../utils/imageCompression', () => ({
+  compressImage: vi.fn(async (file: File) => ({ file, originalSizeMB: 0.1, compressedSizeMB: 0.05 })),
+  getTransformUrl: (url: string) => url,
 }));
 
 describe('Logistics & Deployment Tracker', () => {

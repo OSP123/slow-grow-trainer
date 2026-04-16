@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
+import { compressImage } from '../../utils/imageCompression';
 
 const MILESTONES = [
   '500 Points Built',
@@ -27,36 +28,47 @@ export default function Logistics() {
     loadHistory();
   }, []);
 
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
+      setUploadError(null);
     }
   };
 
   const handleUploadSubmit = async () => {
     if (!file || !activeUpload) return;
     setUploading(true);
+    setUploadError(null);
 
     try {
       const { data } = await supabase.auth.getUser();
       const userId = data.user?.id;
       if (!userId) return;
 
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}-${Math.random()}.${fileExt}`;
+      // Compress before upload
+      const { file: compressed, error: compressError } = await compressImage(file, 1920, 0.8);
+      if (compressError) {
+        setUploadError(compressError);
+        setUploading(false);
+        return;
+      }
+
+      const fileName = `${userId}-${Math.random()}.jpg`;
       const filePath = `milestones/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadErr } = await supabase.storage
         .from('hobby_photos')
-        .upload(filePath, file);
+        .upload(filePath, compressed);
 
-      if (uploadError) throw uploadError;
+      if (uploadErr) throw uploadErr;
 
       const { data: urlData } = supabase.storage.from('hobby_photos').getPublicUrl(filePath);
 
       await supabase.from('hobby_milestones').insert({
         user_id: userId,
-        mega_faction: 'imperium', // Placeholder until user profile exists
+        mega_faction: 'imperium',
         points_threshold: parseInt(activeUpload),
         status: 'pending',
         photo_url: urlData.publicUrl
@@ -64,9 +76,9 @@ export default function Logistics() {
 
       setFile(null);
       setActiveUpload(null);
-      // Realistically we'd reload history here
     } catch (error) {
       console.error('Error uploading milestone proof:', error);
+      setUploadError('Upload failed. Please try again.');
     } finally {
       setUploading(false);
     }
@@ -117,8 +129,13 @@ export default function Logistics() {
                     disabled={!file || uploading}
                     className="btn primary"
                   >
-                    {uploading ? 'UPLOADING...' : 'Submit Clearance Request'}
+                    {uploading ? 'Compressing & Uploading...' : 'Submit Clearance Request'}
                   </button>
+                  {uploadError && (
+                    <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: '#f87171' }}>
+                      ⚠ {uploadError}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
