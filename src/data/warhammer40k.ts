@@ -620,3 +620,66 @@ export function getFactionsGrouped(): Record<string, string[]> {
   }
   return grouped;
 }
+
+/** 
+ * Primary army categories for high-level selection. 
+ */
+export const CORE_FACTIONS = [
+  "Space Marines",
+  "Astra Militarum",
+  "Adepta Sororitas",
+  "Adeptus Custodes",
+  "Adeptus Mechanicus",
+  "Imperial Knights",
+  "Agents of the Imperium",
+  "Chaos Space Marines",
+  "World Eaters",
+  "Death Guard",
+  "Thousand Sons",
+  "Chaos Daemons",
+  "Chaos Knights",
+  "Aeldari",
+  "Drukhari",
+  "Orks",
+  "Necrons",
+  "Tyranids",
+  "Genestealer Cults",
+  "T'au Empire",
+  "Leagues of Votann"
+];
+
+/**
+ * Mapping of core factions to their specific sub-factions/variations.
+ */
+export const SUBFACTIONS_MAP: Record<string, string[]> = {
+  "Space Marines": [
+    "Ultramarines", "Blood Angels", "Dark Angels", "Space Wolves", 
+    "Black Templars", "Deathwatch", "Grey Knights", "Imperial Fists", 
+    "Iron Hands", "Raven Guard", "Salamanders", "White Scars"
+  ],
+  "Chaos Space Marines": [
+    "Emperor's Children", "Black Legion", "Iron Warriors", 
+    "Night Lords", "Word Bearers", "Alpha Legion"
+  ],
+  "Orks": [
+    "Goffs", "Bad Moons", "Evil Sunz", "Snakebites", 
+    "Deathskulls", "Blood Axes", "Freebooterz"
+  ],
+  "Tyranids": [
+    "Hive Fleet Leviathan", "Hive Fleet Kraken", "Hive Fleet Behemoth", 
+    "Hive Fleet Jormungandr", "Hive Fleet Hydra", "Hive Fleet Kronos"
+  ],
+  "Necrons": [
+    "Szarekhan Dynasty", "Sautekh Dynasty", "Mephrit Dynasty", 
+    "Novokh Dynasty", "Nephrekh Dynasty"
+  ],
+  "Astra Militarum": [
+    "Cadian", "Catachan", "Krieg", "Tallarn", "Armageddon Steel Legion", "Tanith"
+  ],
+  "Aeldari": [
+    "Biel-Tan", "Ulthwé", "Saim-Hann", "Iyanden", "Alaitoc", "Ynnari"
+  ],
+  "T'au Empire": [
+    "T'au Sept", "Farsight Enclaves", "Vior'la Sept", "Sa'cea Sept", "Dal'yth Sept"
+  ]
+};

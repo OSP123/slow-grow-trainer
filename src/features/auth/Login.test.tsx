@@ -87,8 +87,8 @@ describe('Login Component', () => {
     const cmdNameInput = screen.getByPlaceholderText(/Commander Name/i);
     const discordInput = screen.getByPlaceholderText(/Discord Handle/i);
     const locationInput = screen.getByPlaceholderText(/Your Location/i);
-    const factionInput = screen.getByPlaceholderText(/e\.g\. Space Marines, Chaos/i);
-    const subfactionInput = screen.getByPlaceholderText(/e\.g\. Blood Angels/i);
+    const factionSelect = screen.getByLabelText(/Army Core Faction/i);
+    const subfactionSelect = screen.getByLabelText(/Army Subfaction/i);
     const storeSelect = screen.getByLabelText(/Preferred Game Store/i);
     // Wait for Game Stores API fetch to populate options natively
     await waitFor(() => {
@@ -101,8 +101,8 @@ describe('Login Component', () => {
     fireEvent.change(cmdNameInput, { target: { value: 'WolfKing' } });
     fireEvent.change(discordInput, { target: { value: 'leman_russ#1234' } });
     fireEvent.change(locationInput, { target: { value: 'Fenris' } });
-    fireEvent.change(factionInput, { target: { value: 'Space Marines' } });
-    fireEvent.change(subfactionInput, { target: { value: 'Space Wolves' } });
+    fireEvent.change(factionSelect, { target: { value: 'Space Marines' } });
+    fireEvent.change(subfactionSelect, { target: { value: 'Space Wolves' } });
     fireEvent.change(storeSelect, { target: { value: 'store-123' } });
 
     // Submit

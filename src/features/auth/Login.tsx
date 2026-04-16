@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
+import { CORE_FACTIONS, SUBFACTIONS_MAP } from '../../data/warhammer40k';
 
 export interface GameStore {
   id: string;
@@ -17,6 +18,7 @@ export default function Login() {
   const [experience, setExperience] = useState('beginner');
   const [faction, setFaction] = useState('');
   const [subfaction, setSubfaction] = useState('');
+  const [isSubfactionCustom, setIsSubfactionCustom] = useState(false);
   const [storeId, setStoreId] = useState('');
   const [gameStores, setGameStores] = useState<GameStore[]>([]);
   const [message, setMessage] = useState('');
@@ -30,6 +32,22 @@ export default function Login() {
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await supabase.auth.signInWithPassword({ email, password });
+  };
+
+  const handleCoreFactionChange = (val: string) => {
+    setFaction(val);
+    setSubfaction('');
+    setIsSubfactionCustom(false);
+  };
+
+  const handleSubfactionChange = (val: string) => {
+    if (val === 'CUSTOM_OTHER') {
+      setIsSubfactionCustom(true);
+      setSubfaction('');
+    } else {
+      setIsSubfactionCustom(false);
+      setSubfaction(val);
+    }
   };
 
   const handleForgotSubmit = async (e: React.FormEvent) => {
@@ -196,27 +214,54 @@ export default function Login() {
           </div>
           <div>
             <label htmlFor="faction">Army Core Faction</label>
-            <input 
-              id="faction" 
-              type="text" 
-              placeholder="e.g. Space Marines, Chaos..." 
+            <select
+              id="faction"
               value={faction}
-              onChange={(e) => setFaction(e.target.value)}
+              onChange={(e) => handleCoreFactionChange(e.target.value)}
               required
-              style={{ width: '100%', boxSizing: 'border-box' }}
-            />
+              style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }}
+            >
+              <option value="" disabled>Select Core Faction...</option>
+              {CORE_FACTIONS.map(f => <option key={f} value={f}>{f}</option>)}
+            </select>
           </div>
           <div>
             <label htmlFor="subfaction">Army Subfaction</label>
-            <input 
-              id="subfaction" 
-              type="text" 
-              placeholder="e.g. Blood Angels, World Eaters..." 
-              value={subfaction}
-              onChange={(e) => setSubfaction(e.target.value)}
-              required
-              style={{ width: '100%', boxSizing: 'border-box' }}
-            />
+            {!isSubfactionCustom ? (
+              <select
+                id="subfaction"
+                value={subfaction}
+                onChange={(e) => handleSubfactionChange(e.target.value)}
+                required
+                style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }}
+                disabled={!faction}
+              >
+                <option value="" disabled>{faction ? 'Select Subfaction...' : 'Select Core Faction first'}</option>
+                {faction && (SUBFACTIONS_MAP[faction] || []).map(sf => (
+                  <option key={sf} value={sf}>{sf}</option>
+                ))}
+                <option value="CUSTOM_OTHER">Custom / Other...</option>
+              </select>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <input
+                  id="subfaction"
+                  type="text"
+                  placeholder="Enter custom chapter/fleet name..."
+                  value={subfaction}
+                  onChange={(e) => setSubfaction(e.target.value)}
+                  required
+                  autoFocus
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                />
+                <span 
+                  onClick={() => setIsSubfactionCustom(false)} 
+                  style={{ fontSize: '0.75rem', color: 'var(--theme-accent)', cursor: 'pointer', textAlign: 'right' }}
+                >
+                  Return to dropdown
+                </span>
+              </div>
+            )}
           </div>
           <div>
             <label htmlFor="store">Preferred Game Store</label>
