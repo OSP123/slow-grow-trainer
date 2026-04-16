@@ -60,6 +60,7 @@ export default function CommanderProfile() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProfile();
     supabase.from('game_stores').select('id, name').order('name').then(({ data }) => {
       if (data) setGameStores(data);
