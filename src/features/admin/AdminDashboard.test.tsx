@@ -31,6 +31,15 @@ const mockFromUnlocked = (table: string) => {
       delete: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
     };
   }
+  if (table === 'unit_points') {
+    return {
+      select: vi.fn().mockReturnValue({
+        order: vi.fn().mockReturnValue({ order: vi.fn().mockResolvedValue({ data: [], error: null }) }),
+      }),
+      upsert: vi.fn().mockResolvedValue({ error: null }),
+      delete: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
+    };
+  }
   return {};
 };
 
@@ -73,6 +82,7 @@ describe('AdminDashboard (RBAC)', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Matchup Command Override/i)).toBeInTheDocument();
+      expect(screen.getByText(/Munitorum Field Manual/i)).toBeInTheDocument();
       expect(screen.getByText(/Campaign Voting Tallies/i)).toBeInTheDocument();
       expect(screen.getByText(/Leman Russ/i)).toBeInTheDocument();
     });

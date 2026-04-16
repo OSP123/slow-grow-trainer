@@ -19,20 +19,32 @@ describe('ArmyRoster', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    (supabase.from as Mock).mockImplementation(() => ({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          order: vi.fn().mockResolvedValue({ data: mockUnits, error: null }),
-        }),
-      }),
-      update: vi.fn().mockReturnValue({
-        eq: vi.fn().mockResolvedValue({ error: null }),
-      }),
-      delete: vi.fn().mockReturnValue({
-        eq: vi.fn().mockResolvedValue({ error: null }),
-      }),
-      insert: vi.fn().mockResolvedValue({ error: null }),
-    }));
+    (supabase.from as Mock).mockImplementation((table: string) => {
+      if (table === 'army_units') {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              order: vi.fn().mockResolvedValue({ data: mockUnits, error: null }),
+            }),
+          }),
+          update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
+          delete: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
+          insert: vi.fn().mockResolvedValue({ error: null }),
+        };
+      }
+      if (table === 'unit_points') {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                maybeSingle: vi.fn().mockResolvedValue({ data: { base_points: 125 }, error: null }),
+              }),
+            }),
+          }),
+        };
+      }
+      return {};
+    });
   });
 
   it('renders roster table with units after load', async () => {
@@ -92,6 +104,28 @@ describe('ArmyRoster', () => {
 
     await waitFor(() => {
       expect(supabase.from).toHaveBeenCalledWith('army_units');
+    });
+  });
+
+  it('auto-fills points when a known unit is selected', async () => {
+    render(<ArmyRoster profileId="profile-123" isOwner={true} />);
+    
+    // Wait for load
+    await waitFor(() => screen.getByText(/Muster Unit/i));
+
+    // Select faction
+    const factionSelect = screen.getAllByRole('combobox')[0];
+    fireEvent.change(factionSelect, { target: { value: 'Space Marines' } });
+
+    // Type unit name
+    const unitInput = screen.getAllByRole('combobox')[1];
+    fireEvent.change(unitInput, { target: { value: 'Intercessor Squad' } });
+
+    // Check if points field updated to mocked value (125)
+    await waitFor(() => {
+      const pointsInput = screen.getByPlaceholderText('—') as HTMLInputElement;
+      expect(pointsInput.value).toBe('125');
+      expect(screen.getByText(/auto-filled/i)).toBeInTheDocument();
     });
   });
 });

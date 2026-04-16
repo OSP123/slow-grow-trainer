@@ -47,6 +47,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
   const [selectedUnit, setSelectedUnit] = useState('');
   const [modelCount, setModelCount] = useState<number>(1);
   const [points, setPoints] = useState<number | ''>('');
+  const [pointsLookedUp, setPointsLookedUp] = useState(false); // true if auto-filled from DB
   const [notes, setNotes] = useState('');
   const [addingUnit, setAddingUnit] = useState(false);
   const [formMessage, setFormMessage] = useState('');
@@ -77,6 +78,25 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
     setSelectedFaction(f);
     setSelectedUnit('');
     setUnitSearch('');
+    setPoints('');
+    setPointsLookedUp(false);
+  };
+
+  const lookupUnitPoints = async (unitName: string, faction: string) => {
+    if (!unitName || !faction) return;
+    const { data } = await supabase
+      .from('unit_points')
+      .select('base_points')
+      .eq('faction', faction)
+      .eq('unit_name', unitName)
+      .maybeSingle();
+    if (data?.base_points != null) {
+      setPoints(data.base_points);
+      setPointsLookedUp(true);
+    } else {
+      // No registry entry — clear auto-fill but don't overwrite manual input
+      setPointsLookedUp(false);
+    }
   };
 
   const handleAddUnit = async (e: React.FormEvent) => {
@@ -105,6 +125,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
       setUnitSearch('');
       setModelCount(1);
       setPoints('');
+      setPointsLookedUp(false);
       setNotes('');
       setFormMessage('Unit mustered to roster.');
       fetchRoster();
@@ -188,7 +209,16 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                 <input
                   type="text"
                   value={selectedUnit || unitSearch}
-                  onChange={e => { setUnitSearch(e.target.value); setSelectedUnit(''); }}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setUnitSearch(val);
+                    setSelectedUnit('');
+                    setPointsLookedUp(false);
+                    // If the typed value exactly matches a known unit, auto-lookup
+                    if (selectedFaction && UNITS_BY_FACTION[selectedFaction]?.includes(val)) {
+                      lookupUnitPoints(val, selectedFaction);
+                    }
+                  }}
                   placeholder={selectedFaction ? 'Search or type unit name...' : 'Type unit name...'}
                   style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
                   list="unit-suggestions"
@@ -204,7 +234,11 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                       <button
                         type="button"
                         key={u}
-                        onClick={() => { setSelectedUnit(u); setUnitSearch(u); }}
+                        onClick={() => {
+                          setSelectedUnit(u);
+                          setUnitSearch(u);
+                          lookupUnitPoints(u, selectedFaction);
+                        }}
                         style={{
                           padding: '2px 10px', fontSize: '0.75rem',
                           border: `1px solid ${selectedUnit === u ? 'var(--theme-accent)' : 'var(--theme-border)'}`,
@@ -232,12 +266,15 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>Pts</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>
+                  Pts {pointsLookedUp && <span style={{ color: 'var(--theme-accent)', fontSize: '0.7rem' }}>✓ auto-filled</span>}
+                </label>
                 <input
                   type="number" min={0} value={points}
-                  onChange={e => setPoints(parseInt(e.target.value) || '')}
+                  onChange={e => { setPoints(parseInt(e.target.value) || ''); setPointsLookedUp(false); }}
                   placeholder="—"
-                  style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box',
+                    borderColor: pointsLookedUp ? 'var(--theme-accent)' : undefined }}
                 />
               </div>
               <div>

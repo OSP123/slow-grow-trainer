@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { generateMatchups, type MatchPair } from './Matchmaker';
+import { UNITS_BY_FACTION, getFactionsGrouped } from '../../data/warhammer40k';
+
+export interface UnitPoint {
+  id: string;
+  faction: string;
+  unit_name: string;
+  base_points: number;
+  updated_at: string;
+}
 
 export interface CampaignVote {
   id: string;
@@ -53,6 +62,17 @@ export default function AdminDashboard() {
   const [editingMatchup, setEditingMatchup] = useState<EditableMatchup | null>(null);
   const [matchupMessage, setMatchupMessage] = useState('');
 
+  // Unit Points management
+  const [unitPoints, setUnitPoints] = useState<UnitPoint[]>([]);
+  const [fetchingUP, setFetchingUP] = useState(false);
+  const [newUPFaction, setNewUPFaction] = useState('');
+  const [newUPUnit, setNewUPUnit] = useState('');
+  const [newUPPoints, setNewUPPoints] = useState<number | ''>('');
+  const [upMessage, setUPMessage] = useState('');
+
+  const GROUPED_FACTIONS = getFactionsGrouped();
+  const ALLIANCE_ORDER: ('Imperium' | 'Chaos' | 'Xenos')[] = ['Imperium', 'Chaos', 'Xenos'];
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setEmail(data.user?.email || null);
@@ -67,6 +87,7 @@ export default function AdminDashboard() {
       fetchVotes();
       fetchStores();
       fetchAllMatchups();
+      fetchUnitPoints();
     } else {
       alert('Access Denied. Incorrect Phase Code.');
     }
@@ -182,6 +203,42 @@ export default function AdminDashboard() {
   const handleDeleteMatchup = async (matchupId: string) => {
     const { error } = await supabase.from('matchups').delete().eq('id', matchupId);
     if (!error) fetchAllMatchups();
+  };
+
+  const fetchUnitPoints = async () => {
+    setFetchingUP(true);
+    const { data } = await supabase.from('unit_points').select('*').order('faction').order('unit_name');
+    if (data) setUnitPoints(data);
+    setFetchingUP(false);
+  };
+
+  const handleAddUnitPoint = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUPFaction || !newUPUnit || newUPPoints === '') {
+      setUPMessage('Faction, Unit, and Points are required.');
+      return;
+    }
+
+    const { error } = await supabase.from('unit_points').upsert({
+      faction: newUPFaction,
+      unit_name: newUPUnit,
+      base_points: newUPPoints
+    }, { onConflict: 'faction,unit_name' });
+
+    if (error) {
+      setUPMessage('Error: ' + error.message);
+    } else {
+      setUPMessage(`Successfully registered ${newUPUnit} (${newUPPoints} pts).`);
+      setNewUPUnit('');
+      setNewUPPoints('');
+      fetchUnitPoints();
+    }
+  };
+
+  const handleDeleteUnitPoint = async (id: string) => {
+    if (!confirm('Are you sure you want to remove this unit from the point registry?')) return;
+    const { error } = await supabase.from('unit_points').delete().eq('id', id);
+    if (!error) fetchUnitPoints();
   };
 
   if (loading) return <div style={{ textAlign: 'center', marginTop: '4rem' }}>Scanning biometric signatures...</div>;
@@ -415,6 +472,81 @@ export default function AdminDashboard() {
             </li>
           ))}
         </ul>
+      </div>
+
+      {/* ── MUNITORUM FIELD MANUAL (UNIT POINTS) ── */}
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <h2>Munitorum Field Manual (Unit Points Registry)</h2>
+        <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1.5rem' }}>
+          Define the standard point costs for units. These auto-fill in player rosters when units are selected.
+        </p>
+
+        {upMessage && (
+          <div style={{ marginBottom: '1rem', padding: '0.75rem', border: '1px solid var(--theme-accent)', color: 'var(--theme-accent)', fontSize: '0.85rem' }}>
+            {upMessage}
+          </div>
+        )}
+
+        <form onSubmit={handleAddUnitPoint} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 100px auto', gap: '0.75rem', marginBottom: '2rem', alignItems: 'end' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Faction</label>
+            <select value={newUPFaction} onChange={e => { setNewUPFaction(e.target.value); setNewUPUnit(''); }} required style={{ width: '100%', padding: '0.6rem' }}>
+              <option value="">Select Faction...</option>
+              {ALLIANCE_ORDER.map(alliance => (
+                <optgroup key={alliance} label={`── ${alliance} ──`}>
+                  {GROUPED_FACTIONS[alliance].map(f => <option key={f} value={f}>{f}</option>)}
+                </optgroup>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Unit Name</label>
+            <input type="text" placeholder="e.g. Intercessor Squad" list="admin-unit-suggestions" value={newUPUnit}
+              onChange={e => setNewUPUnit(e.target.value)} required style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }} />
+            <datalist id="admin-unit-suggestions">
+              {newUPFaction && (UNITS_BY_FACTION[newUPFaction] || []).map(u => <option key={u} value={u} />)}
+            </datalist>
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Base Pts</label>
+            <input type="number" min={0} value={newUPPoints} onChange={e => setNewUPPoints(parseInt(e.target.value) || '')}
+              required style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }} />
+          </div>
+          <button type="submit" className="btn primary">Register Points</button>
+        </form>
+
+        {fetchingUP ? (
+          <p>Syncing Field Manual with Administratum scrolls...</p>
+        ) : unitPoints.length === 0 ? (
+          <p style={{ color: 'var(--theme-fg-muted)' }}>No units currently registered in the database.</p>
+        ) : (
+          <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--theme-border)', borderRadius: '4px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+              <thead style={{ position: 'sticky', top: 0, backgroundColor: 'var(--theme-bg-secondary)', zIndex: 1 }}>
+                <tr style={{ borderBottom: '2px solid var(--theme-border)', textAlign: 'left' }}>
+                  <th style={{ padding: '0.75rem' }}>Faction</th>
+                  <th style={{ padding: '0.75rem' }}>Unit</th>
+                  <th style={{ padding: '0.75rem', textAlign: 'center' }}>Points</th>
+                  <th style={{ padding: '0.75rem' }}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {unitPoints.map(up => (
+                  <tr key={up.id} style={{ borderBottom: '1px solid var(--theme-border)' }}>
+                    <td style={{ padding: '0.6rem 0.75rem', color: 'var(--theme-fg-muted)' }}>{up.faction}</td>
+                    <td style={{ padding: '0.6rem 0.75rem', fontWeight: 'bold' }}>{up.unit_name}</td>
+                    <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>{up.base_points}</td>
+                    <td style={{ padding: '0.6rem 0.75rem', textAlign: 'right' }}>
+                      <button onClick={() => handleDeleteUnitPoint(up.id)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '0.75rem' }}>
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* ── CAMPAIGN VOTES ── */}

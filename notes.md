@@ -76,3 +76,21 @@ Tasks:
 - 42/42 tests passing, clean tsc and eslint.
 Follow-ups:
 - Supabase bucket max-file-size policies should also be set server-side (in Supabase Dashboard → Storage → Bucket settings → Max upload size) as a belt-and-suspenders safety net.
+
+Date: 2026-04-16 (faction data overhaul)
+Tasks:
+- Dropped the unreliable OpenHammer API entirely (was missing Astra Militarum, Drukhari, etc. and fabricating entries like "Aeldari Library" and "Library").
+- Created `src/data/warhammer40k.ts` — curated static 40k 10th Edition data with 19 proper factions (Imperium, Chaos, Xenos) and hundreds of unit datasheets per faction. Works offline, no API dependency.
+- ArmyRoster rewritten to use static data: grouped `<optgroup>` selects by grand alliance, native datalist autocomplete + pill suggestions, free-text fallback for any unlisted unit, colour-coded faction badges (blue=Imperium, red=Chaos, purple=Xenos).
+- 43/43 tests passing.
+Follow-ups:
+- Unit lists in warhammer40k.ts can be expanded as new codexes release — just add entries to the UNITS_BY_FACTION record.
+
+Date: 2026-04-16
+Tasks:
+- Fixed email confirmation redirect bug; `signUp` now correctly uses `window.location.origin` as `emailRedirectTo`.
+- Implemented "Munitorum Field Manual" points registry in `AdminDashboard`. Admins can now manage the global points dictionary for all 40k units.
+- Integrated points auto-fill in `ArmyRoster.tsx`. When a user selects or types a known unit, the points cost is automatically retrieved and pre-populated with a status indicator.
+- Updated comprehensive test suite (Admin, Auth, Roster) to cover new points-management flows and redirect logic. 14 relevant tests passing.
+Follow-ups:
+- Remind user to update "Site URL" and "Redirect URLs" in Supabase Dashboard.

@@ -115,6 +115,7 @@ describe('Login Component', () => {
         email: 'newplayer@admin.com',
         password: 'securepassword123',
         options: {
+          emailRedirectTo: expect.any(String),
           data: {
             real_name: 'Leman Russ',
             commander_name: 'WolfKing',
