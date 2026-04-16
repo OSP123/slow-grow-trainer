@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Session } from '@supabase/supabase-js';
 
 import { Route, Routes, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, Map, Activity, UserCircle, LogOut } from 'lucide-react';
+import { Shield, Map, Activity, UserCircle, LogOut, BookOpen } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import Login from './features/auth/Login';
 import UpdatePassword from './features/auth/UpdatePassword';
@@ -12,6 +12,7 @@ import Assessments from './features/assessments/Assessments';
 import AdminDashboard from './features/admin/AdminDashboard';
 import CommanderProfile from './features/profile/CommanderProfile';
 import CampaignBattles from './features/battles/CampaignBattles';
+import Briefing from './features/briefing/Briefing';
 import './App.css';
 
 const FACTIONS = [
@@ -97,6 +98,13 @@ function App() {
             War Effort Map
           </div>
           <div 
+            className={`nav-item ${activeView === 'briefing' ? 'active' : ''}`}
+            onClick={() => navigate('/briefing')}
+          >
+            <BookOpen size={20} />
+            Field Manual
+          </div>
+          <div 
             className={`nav-item ${activeView === 'logistics' ? 'active' : ''}`}
             onClick={() => navigate('/logistics')}
           >
@@ -162,6 +170,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/briefing" element={<Briefing />} />
           <Route path="/logistics" element={<Logistics />} />
           <Route path="/assessments" element={<Assessments />} />
           <Route path="/battles" element={<CampaignBattles />} />
