@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
-
-const OPENHAMMER = 'https://openhammer-api-production.up.railway.app';
+import { FACTIONS, UNITS_BY_FACTION, getFactionsGrouped } from '../../data/warhammer40k';
 
 interface ArmyUnit {
   id: string;
@@ -13,19 +12,6 @@ interface ArmyUnit {
   painted: boolean;
   played: boolean;
   notes: string | null;
-}
-
-interface OpenHammerFaction {
-  name: string;
-  faction_type: string;
-  unit_count: number;
-}
-
-interface OpenHammerUnit {
-  name: string;
-  id: string;
-  points: { base: number };
-  composition: { min_models: number; max_models: number };
 }
 
 interface Props {
@@ -48,21 +34,21 @@ function ProgressBar({ label, done, total }: { label: string; done: number; tota
   );
 }
 
+const GROUPED_FACTIONS = getFactionsGrouped();
+const ALLIANCE_ORDER: ('Imperium' | 'Chaos' | 'Xenos')[] = ['Imperium', 'Chaos', 'Xenos'];
+
 export default function ArmyRoster({ profileId, isOwner }: Props) {
   const [units, setUnits] = useState<ArmyUnit[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Add unit form state
-  const [factions, setFactions] = useState<OpenHammerFaction[]>([]);
+  // Add unit form
   const [selectedFaction, setSelectedFaction] = useState('');
-  const [apiUnits, setApiUnits] = useState<OpenHammerUnit[]>([]);
+  const [unitSearch, setUnitSearch] = useState('');
   const [selectedUnit, setSelectedUnit] = useState('');
-  const [selectedUnitPoints, setSelectedUnitPoints] = useState<number | ''>('');
   const [modelCount, setModelCount] = useState<number>(1);
+  const [points, setPoints] = useState<number | ''>('');
   const [notes, setNotes] = useState('');
   const [addingUnit, setAddingUnit] = useState(false);
-  const [apiFailed, setApiFailed] = useState(false);
-  const [manualName, setManualName] = useState('');
   const [formMessage, setFormMessage] = useState('');
 
   const fetchRoster = async () => {
@@ -75,50 +61,30 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
     setLoading(false);
   };
 
-  const fetchFactions = async () => {
-    try {
-      const res = await fetch(`${OPENHAMMER}/factions`);
-      if (!res.ok) throw new Error('Failed');
-      const data: OpenHammerFaction[] = await res.json();
-      setFactions(data.sort((a, b) => a.name.localeCompare(b.name)));
-    } catch {
-      setApiFailed(true);
-    }
-  };
-
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchRoster();
-    if (isOwner) fetchFactions();
-  }, [profileId, isOwner]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [profileId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleFactionChange = async (factionName: string) => {
-    setSelectedFaction(factionName);
+  // Unit list for the selected faction, filtered by search
+  const availableUnits: string[] = selectedFaction
+    ? (UNITS_BY_FACTION[selectedFaction] ?? []).filter(u =>
+        u.toLowerCase().includes(unitSearch.toLowerCase())
+      )
+    : [];
+
+  const handleFactionChange = (f: string) => {
+    setSelectedFaction(f);
     setSelectedUnit('');
-    setSelectedUnitPoints('');
-    if (!factionName) { setApiUnits([]); return; }
-    try {
-      const res = await fetch(`${OPENHAMMER}/units?faction=${encodeURIComponent(factionName)}`);
-      if (!res.ok) throw new Error('Failed');
-      const data: OpenHammerUnit[] = await res.json();
-      setApiUnits(data.sort((a, b) => a.name.localeCompare(b.name)));
-    } catch {
-      setApiFailed(true);
-      setApiUnits([]);
-    }
-  };
-
-  const handleUnitSelect = (unitName: string) => {
-    setSelectedUnit(unitName);
-    const found = apiUnits.find(u => u.name === unitName);
-    setSelectedUnitPoints(found?.points?.base ?? '');
-    const min = found?.composition?.min_models ?? 1;
-    setModelCount(min);
+    setUnitSearch('');
   };
 
   const handleAddUnit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const name = apiFailed ? manualName : selectedUnit;
-    if (!name) { setFormMessage('Select or enter a unit name.'); return; }
+    // Allow free-text entry if nothing from the list was selected
+    const name = selectedUnit || unitSearch.trim();
+    if (!name) { setFormMessage('Enter or select a unit name.'); return; }
+
     setAddingUnit(true);
     setFormMessage('');
     const { error } = await supabase.from('army_units').insert({
@@ -126,7 +92,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
       unit_name: name,
       faction: selectedFaction || null,
       model_count: modelCount,
-      points: selectedUnitPoints !== '' ? selectedUnitPoints : null,
+      points: points !== '' ? points : null,
       notes: notes || null,
       built: false,
       painted: false,
@@ -136,11 +102,11 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
       setFormMessage('Error: ' + error.message);
     } else {
       setSelectedUnit('');
-      setManualName('');
+      setUnitSearch('');
       setModelCount(1);
+      setPoints('');
       setNotes('');
-      setSelectedUnitPoints('');
-      setFormMessage('Unit added to roster.');
+      setFormMessage('Unit mustered to roster.');
       fetchRoster();
     }
     setAddingUnit(false);
@@ -164,6 +130,16 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
   const paintedCount = units.filter(u => u.painted).length;
   const playedCount = units.filter(u => u.played).length;
 
+  // Alliance colour coding for faction badge
+  const factionAlliance = (name: string) =>
+    FACTIONS.find(f => f.name === name)?.grandAlliance;
+
+  const allianceColour: Record<string, string> = {
+    Imperium: '#3b82f6',
+    Chaos: '#ef4444',
+    Xenos: '#a855f7',
+  };
+
   if (loading) return <div style={{ color: 'var(--theme-fg-muted)', padding: '1rem' }}>Loading roster...</div>;
 
   return (
@@ -181,57 +157,74 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
       {isOwner && (
         <div style={{ marginBottom: '2rem', padding: '1.25rem', border: '1px solid var(--theme-border)', borderRadius: '6px', backgroundColor: 'var(--theme-bg-secondary)' }}>
           <h3 style={{ margin: '0 0 1rem 0', color: 'var(--theme-accent)', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Add Unit to Roster
+            Muster Unit
           </h3>
           <form onSubmit={handleAddUnit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {!apiFailed ? (
-              <>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>Faction</label>
-                    <select
-                      value={selectedFaction}
-                      onChange={e => handleFactionChange(e.target.value)}
-                      style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
-                    >
-                      <option value="">Select faction...</option>
-                      {factions.map(f => (
-                        <option key={f.name} value={f.name}>{f.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>Unit</label>
-                    <select
-                      value={selectedUnit}
-                      onChange={e => handleUnitSelect(e.target.value)}
-                      disabled={!selectedFaction || apiUnits.length === 0}
-                      style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
-                    >
-                      <option value="">Select unit...</option>
-                      {apiUnits.map(u => (
-                        <option key={u.id} value={u.name}>{u.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </>
-            ) : (
+
+            {/* Row 1: Faction + Unit search */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>Unit Name (manual)</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>Faction</label>
+                <select
+                  value={selectedFaction}
+                  onChange={e => handleFactionChange(e.target.value)}
+                  style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                >
+                  <option value="">Select faction...</option>
+                  {ALLIANCE_ORDER.map(alliance => (
+                    <optgroup key={alliance} label={`── ${alliance} ──`}>
+                      {GROUPED_FACTIONS[alliance].map(name => (
+                        <option key={name} value={name}>{name}</option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>
+                  Unit {!selectedFaction && <span style={{ color: 'var(--theme-fg-muted)' }}>(select faction first, or type freely)</span>}
+                </label>
                 <input
                   type="text"
-                  value={manualName}
-                  onChange={e => setManualName(e.target.value)}
-                  placeholder="e.g. Intercessor Squad"
+                  value={selectedUnit || unitSearch}
+                  onChange={e => { setUnitSearch(e.target.value); setSelectedUnit(''); }}
+                  placeholder={selectedFaction ? 'Search or type unit name...' : 'Type unit name...'}
                   style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  list="unit-suggestions"
                 />
+                {/* Native datalist for autocomplete */}
+                <datalist id="unit-suggestions">
+                  {availableUnits.map(u => <option key={u} value={u} />)}
+                </datalist>
+                {/* Suggestion pills when few results */}
+                {unitSearch.length >= 2 && availableUnits.length > 0 && availableUnits.length <= 8 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.35rem' }}>
+                    {availableUnits.map(u => (
+                      <button
+                        type="button"
+                        key={u}
+                        onClick={() => { setSelectedUnit(u); setUnitSearch(u); }}
+                        style={{
+                          padding: '2px 10px', fontSize: '0.75rem',
+                          border: `1px solid ${selectedUnit === u ? 'var(--theme-accent)' : 'var(--theme-border)'}`,
+                          backgroundColor: selectedUnit === u ? 'var(--theme-accent)' : 'var(--theme-bg)',
+                          color: selectedUnit === u ? '#fff' : 'var(--theme-fg)',
+                          borderRadius: '12px', cursor: 'pointer',
+                        }}
+                      >
+                        {u}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '0.75rem' }}>
+            {/* Row 2: Model count, Points, Notes */}
+            <div style={{ display: 'grid', gridTemplateColumns: '80px 80px 1fr', gap: '0.75rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>Model Count</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>Models</label>
                 <input
                   type="number" min={1} value={modelCount}
                   onChange={e => setModelCount(parseInt(e.target.value) || 1)}
@@ -239,28 +232,31 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>Points</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>Pts</label>
                 <input
-                  type="number" min={0} value={selectedUnitPoints}
-                  onChange={e => setSelectedUnitPoints(parseInt(e.target.value) || '')}
+                  type="number" min={0} value={points}
+                  onChange={e => setPoints(parseInt(e.target.value) || '')}
+                  placeholder="—"
                   style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>Notes</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>Notes (optional)</label>
                 <input
                   type="text" value={notes}
                   onChange={e => setNotes(e.target.value)}
-                  placeholder="e.g. Magnetized, Proxied..."
+                  placeholder="e.g. Magnetized, Proxied, Custom conversion..."
                   style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
                 />
               </div>
             </div>
 
-            <button type="submit" disabled={addingUnit} className="btn primary" style={{ alignSelf: 'flex-start' }}>
-              {addingUnit ? 'Adding...' : '+ Add to Roster'}
-            </button>
-            {formMessage && <div style={{ fontSize: '0.8rem', color: 'var(--theme-accent)' }}>{formMessage}</div>}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <button type="submit" disabled={addingUnit} className="btn primary" style={{ alignSelf: 'flex-start' }}>
+                {addingUnit ? 'Mustering...' : '+ Add to Roster'}
+              </button>
+              {formMessage && <span style={{ fontSize: '0.8rem', color: 'var(--theme-accent)' }}>{formMessage}</span>}
+            </div>
           </form>
         </div>
       )}
@@ -268,7 +264,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
       {/* Roster Table */}
       {units.length === 0 ? (
         <p style={{ color: 'var(--theme-fg-muted)', fontStyle: 'italic' }}>
-          {isOwner ? 'No units added yet. Begin building your roster above.' : 'This Commander has not added any units yet.'}
+          {isOwner ? 'No units mustered yet. Add your first unit above.' : 'This Commander has not added any units yet.'}
         </p>
       ) : (
         <div style={{ overflowX: 'auto' }}>
@@ -286,56 +282,69 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
               </tr>
             </thead>
             <tbody>
-              {units.map(u => (
-                <tr key={u.id} style={{ borderBottom: '1px solid var(--theme-border)' }}>
-                  <td style={{ padding: '0.6rem 0.75rem', fontWeight: 'bold' }}>
-                    {u.unit_name}
-                    {u.notes && <div style={{ fontSize: '0.75rem', color: 'var(--theme-fg-muted)', fontWeight: 'normal' }}>{u.notes}</div>}
-                  </td>
-                  <td style={{ padding: '0.6rem 0.75rem', color: 'var(--theme-fg-muted)', fontSize: '0.8rem' }}>{u.faction || '—'}</td>
-                  <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>{u.model_count}</td>
-                  <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--theme-fg-muted)' }}>{u.points ?? '—'}</td>
-                  {(['built', 'painted', 'played'] as const).map(field => (
-                    <td key={field} style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>
-                      {isOwner ? (
-                        <button
-                          onClick={() => toggleField(u, field)}
-                          style={{
-                            background: 'none', border: 'none', cursor: 'pointer',
-                            fontSize: '1.1rem',
-                            opacity: u[field] ? 1 : 0.3,
-                            transition: 'opacity 0.15s',
-                          }}
-                          title={u[field] ? `Mark as not ${field}` : `Mark as ${field}`}
-                        >
-                          {u[field] ? '✅' : '⬜'}
-                        </button>
-                      ) : (
-                        <span style={{ fontSize: '1rem', opacity: u[field] ? 1 : 0.3 }}>
-                          {u[field] ? '✅' : '⬜'}
-                        </span>
-                      )}
+              {units.map(u => {
+                const alliance = u.faction ? factionAlliance(u.faction) : undefined;
+                return (
+                  <tr key={u.id} style={{ borderBottom: '1px solid var(--theme-border)' }}>
+                    <td style={{ padding: '0.6rem 0.75rem', fontWeight: 'bold' }}>
+                      {u.unit_name}
+                      {u.notes && <div style={{ fontSize: '0.75rem', color: 'var(--theme-fg-muted)', fontWeight: 'normal' }}>{u.notes}</div>}
                     </td>
-                  ))}
-                  {isOwner && (
                     <td style={{ padding: '0.6rem 0.75rem' }}>
-                      <button
-                        onClick={() => handleDeleteUnit(u.id)}
-                        style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '0.8rem' }}
-                      >
-                        Remove
-                      </button>
+                      {u.faction ? (
+                        <span style={{
+                          fontSize: '0.72rem', padding: '2px 8px', borderRadius: '10px',
+                          backgroundColor: alliance ? `${allianceColour[alliance]}22` : 'transparent',
+                          border: `1px solid ${alliance ? allianceColour[alliance] : 'var(--theme-border)'}`,
+                          color: alliance ? allianceColour[alliance] : 'var(--theme-fg-muted)',
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {u.faction}
+                        </span>
+                      ) : '—'}
                     </td>
-                  )}
-                </tr>
-              ))}
+                    <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>{u.model_count}</td>
+                    <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--theme-fg-muted)' }}>{u.points ?? '—'}</td>
+                    {(['built', 'painted', 'played'] as const).map(field => (
+                      <td key={field} style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>
+                        {isOwner ? (
+                          <button
+                            onClick={() => toggleField(u, field)}
+                            style={{
+                              background: 'none', border: 'none', cursor: 'pointer',
+                              fontSize: '1.1rem', opacity: u[field] ? 1 : 0.3,
+                              transition: 'opacity 0.15s',
+                            }}
+                            title={u[field] ? `Mark as not ${field}` : `Mark as ${field}`}
+                          >
+                            {u[field] ? '✅' : '⬜'}
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: '1rem', opacity: u[field] ? 1 : 0.3 }}>
+                            {u[field] ? '✅' : '⬜'}
+                          </span>
+                        )}
+                      </td>
+                    ))}
+                    {isOwner && (
+                      <td style={{ padding: '0.6rem 0.75rem' }}>
+                        <button
+                          onClick={() => handleDeleteUnit(u.id)}
+                          style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '0.8rem' }}
+                        >
+                          Remove
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
-          {total > 0 && (
-            <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--theme-fg-muted)', textAlign: 'right' }}>
-              Total: {units.reduce((sum, u) => sum + u.model_count, 0)} models · {units.reduce((sum, u) => sum + (u.points ?? 0), 0)} pts
-            </div>
-          )}
+          <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--theme-fg-muted)', textAlign: 'right' }}>
+            {total} entries · {units.reduce((s, u) => s + u.model_count, 0)} models
+            {units.some(u => u.points) && ` · ${units.reduce((s, u) => s + (u.points ?? 0), 0)} pts`}
+          </div>
         </div>
       )}
     </div>

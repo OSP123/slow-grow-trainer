@@ -66,3 +66,13 @@ Tasks:
 - Wrote 5 new tests for ArmyRoster, 5 for CommanderProfile, updated AdminDashboard tests — 34/34 total tests passing.
 Follow-ups:
 - To view another player's roster, navigate directly to /profile/<their-uuid>. Consider adding a Commander directory page for easier discovery.
+
+Date: 2026-04-16 (image compression)
+Tasks:
+- Built `src/utils/imageCompression.ts` — shared Canvas API utility that validates file type, enforces a 20MB hard reject, scales images to max 1920px, and converts to JPEG at 80% quality. Also exports `getTransformUrl()` for Supabase Image Transformation params.
+- Wired compression into `CommanderProfile.tsx` avatar upload (max 1200px, 82% quality) — shows "Compressing..." status during processing.
+- Wired compression into `Logistics.tsx` milestone photo upload (max 1920px) — shows upload errors inline in the UI.
+- Added 8 tests for imageCompression utility (getTransformUrl, type reject, size reject, jsdom pass-through). Mocked imageCompression in Logistics tests.
+- 42/42 tests passing, clean tsc and eslint.
+Follow-ups:
+- Supabase bucket max-file-size policies should also be set server-side (in Supabase Dashboard → Storage → Bucket settings → Max upload size) as a belt-and-suspenders safety net.
