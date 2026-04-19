@@ -11,12 +11,14 @@
   display: flex;
   flex-direction: column;
   padding: 1.5rem;
+  flex-shrink: 0;
 }
 
 .main-content {
   flex-grow: 1;
   padding: 2rem 3rem;
   overflow-y: auto;
+  min-width: 0; /* prevent flex child overflow */
 }
 
 .faction-header {
@@ -26,6 +28,8 @@
   margin-bottom: 2rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--theme-border);
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .faction-header h1 {
@@ -67,3 +71,114 @@
   color: var(--theme-accent);
   border-left: 3px solid var(--theme-accent);
 }
+
+/* ── Mobile hamburger button ── */
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1001;
+  background-color: var(--theme-bg-secondary);
+  border: 1px solid var(--theme-border);
+  color: var(--theme-accent);
+  font-size: 1.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--panel-radius);
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* ── Mobile overlay ── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+}
+
+/* ─────────────────────────────────────────────
+   MOBILE BREAKPOINT (≤ 768px)
+   ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  .mobile-menu-btn {
+    display: block;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 280px;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+    padding-top: 3.5rem;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  .sidebar-overlay.open {
+    display: block;
+  }
+
+  .main-content {
+    padding: 1rem;
+    padding-top: 4rem; /* room for hamburger */
+  }
+
+  .faction-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .faction-header h1 {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+  }
+
+  .theme-selector {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .theme-selector select {
+    width: 100%;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   TABLET BREAKPOINT (≤ 1024px)
+   ───────────────────────────────────────────── */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .sidebar {
+    width: 220px;
+    padding: 1rem;
+  }
+
+  .main-content {
+    padding: 1.5rem;
+  }
+
+  .faction-header h1 {
+    font-size: 2rem;
+  }
+
+  .nav-item {
+    font-size: 0.85rem;
+    padding: 0.6rem 0.75rem;
+  }
+}
+

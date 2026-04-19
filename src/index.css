@@ -100,3 +100,36 @@ label {
   font-size: 0.875rem;
   text-transform: uppercase;
 }
+
+/* ── Global responsive helpers ── */
+img, video, svg, table {
+  max-width: 100%;
+}
+
+/* ── Mobile global styles ── */
+@media (max-width: 768px) {
+  .card {
+    padding: 1rem;
+  }
+
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.25rem; }
+
+  input, select, textarea {
+    font-size: 16px; /* prevents iOS zoom on focus */
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
+}

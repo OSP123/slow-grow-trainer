@@ -295,7 +295,7 @@ export default function AdminDashboard() {
               <button onClick={() => setEditingMatchup(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--theme-fg-muted)' }}>✕ Cancel</button>
             </div>
             <form onSubmit={handleSaveMatchup} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>
                     {editingMatchup.p1_profile?.commander_name} VP
@@ -343,7 +343,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '1px' }}>Honour Ratings (1–5)</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
                 {[
                   { key: 'p1_temperament' as const, label: `${editingMatchup.p1_profile?.commander_name} Temperament` },
                   { key: 'p1_rules_engagement' as const, label: `${editingMatchup.p1_profile?.commander_name} Rules` },
@@ -450,7 +450,7 @@ export default function AdminDashboard() {
         <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1rem' }}>
           Manage global store endpoints where physical operations map via Registration forms.
         </p>
-        <form onSubmit={handleAddStore} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+        <form onSubmit={handleAddStore} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
           <input type="text" placeholder="Store Name" value={newStoreName}
             onChange={e => setNewStoreName(e.target.value)} required style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box' }} />
           <input type="text" placeholder="Location (Optional)" value={newStoreLoc}
@@ -487,7 +487,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        <form onSubmit={handleAddUnitPoint} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 100px auto', gap: '0.75rem', marginBottom: '2rem', alignItems: 'end' }}>
+        <form onSubmit={handleAddUnitPoint} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem', marginBottom: '2rem', alignItems: 'end' }}>
           <div>
             <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Faction</label>
             <select value={newUPFaction} onChange={e => { setNewUPFaction(e.target.value); setNewUPUnit(''); }} required style={{ width: '100%', padding: '0.6rem' }}>

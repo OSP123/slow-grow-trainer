@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Session } from '@supabase/supabase-js';
 
 import { Route, Routes, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, Map, Activity, UserCircle, LogOut, BookOpen } from 'lucide-react';
+import { Shield, Map, Activity, UserCircle, LogOut, BookOpen, Menu, X } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import Login from './features/auth/Login';
 import UpdatePassword from './features/auth/UpdatePassword';
@@ -44,6 +44,7 @@ function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [activeTheme, setActiveTheme] = useState('imperium');
   const [isRecovering, setIsRecovering] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -78,10 +79,23 @@ function App() {
     return <Login />;
   }
 
+  const navigateTo = (path: string) => {
+    navigate(path);
+    setMobileMenuOpen(false);
+  };
+
   return (
     <div className="app-container">
+      {/* Mobile hamburger button */}
+      <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+        {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      {/* Mobile overlay */}
+      <div className={`sidebar-overlay ${mobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(false)} />
+
       {/* Sidebar Navigation */}
-      <nav className="sidebar">
+      <nav className={`sidebar ${mobileMenuOpen ? 'open' : ''}`}>
         <h2 style={{ fontSize: '1.25rem', letterSpacing: '2px', marginBottom: '1rem', color: 'var(--theme-accent)' }}>
           Simulation Protocol
         </h2>
@@ -92,35 +106,35 @@ function App() {
         <div className="nav-menu">
           <div 
             className={`nav-item ${activeView === 'dashboard' ? 'active' : ''}`}
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigateTo('/dashboard')}
           >
             <Map size={20} />
             War Effort Map
           </div>
           <div 
             className={`nav-item ${activeView === 'briefing' ? 'active' : ''}`}
-            onClick={() => navigate('/briefing')}
+            onClick={() => navigateTo('/briefing')}
           >
             <BookOpen size={20} />
             Field Manual
           </div>
           <div 
             className={`nav-item ${activeView === 'logistics' ? 'active' : ''}`}
-            onClick={() => navigate('/logistics')}
+            onClick={() => navigateTo('/logistics')}
           >
             <Shield size={20} />
             Logistics & Clearance
           </div>
           <div 
             className={`nav-item ${activeView === 'assessments' ? 'active' : ''}`}
-            onClick={() => navigate('/assessments')}
+            onClick={() => navigateTo('/assessments')}
           >
             <Activity size={20} />
             Officer Assessment
           </div>
           <div 
             className={`nav-item ${activeView === 'battles' ? 'active' : ''}`}
-            onClick={() => navigate('/battles')}
+            onClick={() => navigateTo('/battles')}
           >
             <Shield size={20} />
             Matchups & Lore
@@ -130,7 +144,7 @@ function App() {
         <div style={{ marginTop: 'auto' }}>
           <div 
             className={`nav-item ${activeView === 'profile' ? 'active' : ''}`}
-            onClick={() => navigate('/profile')}
+            onClick={() => navigateTo('/profile')}
           >
             <UserCircle size={20} />
             Commander Profile

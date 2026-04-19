@@ -94,3 +94,13 @@ Tasks:
 - Updated comprehensive test suite (Admin, Auth, Roster) to cover new points-management flows and redirect logic. 14 relevant tests passing.
 Follow-ups:
 - Remind user to update "Site URL" and "Redirect URLs" in Supabase Dashboard.
+
+Date: 2026-04-16
+Tasks:
+- Refactored `warhammer40k.ts` to include hierarchical `CORE_FACTIONS` and `SUBFACTIONS_MAP` for cleaner data consumption.
+- Replaced registration text inputs with prefilled dropdowns for Faction/Subfaction.
+- Implemented dynamic subfaction logic: selecting "Space Marines" now reveals specific chapters like Blood Angels, Ultramarines, etc.
+- Added "Custom/Other..." option for subfactions to allow for homebrew armies while keeping the Core Faction selection strict.
+- Verified with 44/44 passing tests and successful production build.
+Follow-ups:
+- None.

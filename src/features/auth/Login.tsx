@@ -90,7 +90,7 @@ export default function Login() {
 
   if (view === 'forgot') {
     return (
-      <div className="card" style={{ maxWidth: '400px', margin: '4rem auto' }}>
+      <div className="card" style={{ maxWidth: '400px', margin: '2rem auto', padding: '1.5rem', boxSizing: 'border-box', width: '100%' }}>
         <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Identity Recovery</h2>
         <form onSubmit={handleForgotSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
@@ -124,7 +124,7 @@ export default function Login() {
 
   if (view === 'signup') {
     return (
-      <div className="card" style={{ maxWidth: '400px', margin: '4rem auto' }}>
+      <div className="card" style={{ maxWidth: '400px', margin: '2rem auto', padding: '1.5rem', boxSizing: 'border-box', width: '100%' }}>
         <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>New Commander Registration</h2>
         <form onSubmit={handleSignupSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
@@ -297,7 +297,7 @@ export default function Login() {
   }
 
   return (
-    <div className="card" style={{ maxWidth: '400px', margin: '4rem auto' }}>
+    <div className="card" style={{ maxWidth: '400px', margin: '2rem auto', padding: '1.5rem', boxSizing: 'border-box', width: '100%' }}>
       <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Secure Access</h2>
       <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div>
