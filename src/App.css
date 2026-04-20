@@ -116,17 +116,18 @@
   .sidebar {
     position: fixed;
     top: 0;
-    left: -300px;
+    left: 0;
     width: 280px;
     height: 100vh;
     z-index: 1000;
-    transition: left 0.3s ease;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
     overflow-y: auto;
     padding-top: 3.5rem;
   }
 
   .sidebar.open {
-    left: 0;
+    transform: translateX(0);
   }
 
   .sidebar-overlay.open {
@@ -135,7 +136,7 @@
 
   .main-content {
     padding: 1rem;
-    padding-top: 4rem; /* room for hamburger */
+    padding-top: 4.5rem; /* room for hamburger */
   }
 
   .faction-header {

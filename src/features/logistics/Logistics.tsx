@@ -3,14 +3,20 @@ import { supabase } from '../../supabaseClient';
 import { compressImage } from '../../utils/imageCompression';
 
 const MILESTONES = [
+  'Warlord Built',
+  'Warlord Painted',
   '500 Points Built',
   '500 Points Painted',
   '1000 Points Built',
-  '1000 Points Painted'
+  '1000 Points Painted',
+  '1500 Points Built',
+  '1500 Points Painted',
+  '2000 Points Built',
+  '2000 Points Painted'
 ];
 
 interface HobbyMilestone {
-  points_threshold: number;
+  milestone_step: string;
   status: string;
 }
 
@@ -69,7 +75,7 @@ export default function Logistics() {
       await supabase.from('hobby_milestones').insert({
         user_id: userId,
         mega_faction: 'imperium',
-        points_threshold: parseInt(activeUpload),
+        milestone_step: activeUpload,
         status: 'pending',
         photo_url: urlData.publicUrl
       });
@@ -94,8 +100,8 @@ export default function Logistics() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {MILESTONES.map((milestone) => {
-          const isCompleted = history.some(h => h.points_threshold === parseInt(milestone) && h.status === 'approved');
-          const isPending = history.some(h => h.points_threshold === parseInt(milestone) && h.status === 'pending');
+          const isCompleted = history.some(h => h.milestone_step === milestone && h.status === 'approved');
+          const isPending = history.some(h => h.milestone_step === milestone && h.status === 'pending');
           const isSelectedForUpload = activeUpload === milestone;
 
           return (

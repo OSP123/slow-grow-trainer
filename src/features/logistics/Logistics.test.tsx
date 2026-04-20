@@ -29,7 +29,8 @@ describe('Logistics & Deployment Tracker', () => {
     render(<Logistics />);
 
     // Fast assertion for empty state or native default thresholds
-    expect(await screen.findByText(/500 Points Built/i)).toBeInTheDocument();
+    expect(await screen.findByText('Warlord Built')).toBeInTheDocument();
+    expect(await screen.findByText('500 Points Built')).toBeInTheDocument();
     
     // Ensure "fake uploaded photo data" doesn't exist
     expect(screen.queryByAltText(/Uploaded visual analysis/i)).not.toBeInTheDocument();
@@ -41,7 +42,7 @@ describe('Logistics & Deployment Tracker', () => {
 
     render(<Logistics />);
 
-    const checkbox = await screen.findByRole('checkbox', { name: /500 Points Built/i });
+    const checkbox = await screen.findByRole('checkbox', { name: 'Warlord Built' });
     fireEvent.click(checkbox);
 
     // It should now demand photo upload proof before saving
@@ -59,7 +60,7 @@ describe('Logistics & Deployment Tracker', () => {
     render(<Logistics />);
 
     // Select milestone
-    const checkbox = await screen.findByRole('checkbox', { name: /500 Points Built/i });
+    const checkbox = await screen.findByRole('checkbox', { name: 'Warlord Built' });
     fireEvent.click(checkbox);
 
     // Provide a file to the input
