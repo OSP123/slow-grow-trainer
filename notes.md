@@ -127,3 +127,10 @@ Tasks:
 - All 44 tests passing, production build verified, pushed to main.
 Follow-ups:
 - None.
+
+Date: 2026-04-20 (session continued)
+Tasks:
+- Mapped sorting logic to `warhammer40k.ts` `getFactionsGrouped()` resolving UI bug where Army Factions weren't properly alphabetized.
+- Generated `20260420000002_seed_points.sql` migration pulling the 900+ static string data entries from `UNITS_BY_FACTION` map. The database dynamically pre-fills all listed units with `0` base points. This enables the Admin to query all existing elements and update their costs gracefully within the AdminDashboard.
+Follow-ups:
+- Need to execute `20260420000002_seed_points.sql` inside the live Supabase SQL portal.
