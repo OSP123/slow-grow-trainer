@@ -206,23 +206,53 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                 <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>
                   Unit {!selectedFaction && <span style={{ color: 'var(--theme-fg-muted)' }}>(select faction first, or type freely)</span>}
                 </label>
-                <input
-                  type="text"
-                  value={selectedUnit || unitSearch}
-                  onChange={e => {
-                    const val = e.target.value;
-                    setUnitSearch(val);
-                    setSelectedUnit('');
-                    setPointsLookedUp(false);
-                    // If the typed value exactly matches a known unit, auto-lookup
-                    if (selectedFaction && UNITS_BY_FACTION[selectedFaction]?.includes(val)) {
-                      lookupUnitPoints(val, selectedFaction);
-                    }
-                  }}
-                  placeholder={selectedFaction ? 'Search or type unit name...' : 'Type unit name...'}
-                  style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
-                  list="unit-suggestions"
-                />
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    value={selectedUnit || unitSearch}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setUnitSearch(val);
+                      setSelectedUnit('');
+                      setPointsLookedUp(false);
+                      // If the typed value exactly matches a known unit, auto-lookup
+                      if (selectedFaction && UNITS_BY_FACTION[selectedFaction]?.includes(val)) {
+                        lookupUnitPoints(val, selectedFaction);
+                      }
+                    }}
+                    placeholder={selectedFaction ? 'Search or type unit name...' : 'Type unit name...'}
+                    style={{ width: '100%', padding: '0.6rem', paddingRight: '2rem', boxSizing: 'border-box' }}
+                    list="unit-suggestions"
+                  />
+                  {(selectedUnit || unitSearch) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUnitSearch('');
+                        setSelectedUnit('');
+                        setPoints('');
+                        setPointsLookedUp(false);
+                      }}
+                      style={{
+                        position: 'absolute',
+                        right: '8px',
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--theme-fg-muted)',
+                        cursor: 'pointer',
+                        fontSize: '1.2rem',
+                        padding: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        lineHeight: 1
+                      }}
+                      title="Clear selection"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
                 {/* Native datalist for autocomplete */}
                 <datalist id="unit-suggestions">
                   {availableUnits.map(u => <option key={u} value={u} />)}
