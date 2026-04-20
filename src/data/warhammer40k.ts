@@ -618,6 +618,11 @@ export function getFactionsGrouped(): Record<string, string[]> {
   for (const f of FACTIONS) {
     grouped[f.grandAlliance].push(f.name);
   }
+  
+  grouped.Imperium.sort();
+  grouped.Chaos.sort();
+  grouped.Xenos.sort();
+  
   return grouped;
 }
 

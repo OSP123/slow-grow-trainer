@@ -105,6 +105,16 @@ Tasks:
 Follow-ups:
 - None.
 
+Date: 2026-04-20
+Tasks:
+- Refactored `hobby_milestones` schema to replace overlapping `points_threshold` integer column with robust `milestone_step` text column.
+- Expanded Logistics milestone tracking beyond 1000 points to include 1500 and 2000 points tiers.
+- Added explicit starting milestones for "Warlord Built" and "Warlord Painted".
+- Updated UI array rendering and component mapping to track exact string matching instead of parsed logic.
+- Created local `20260420000000_milestones_refactor.sql` Supabase migration structure.
+- Resolved Testing regex match limitations and verified structural components against new specific test cases.
+Follow-ups:
+- None.
 Date: 2026-04-19
 Tasks:
 - Implemented full mobile responsive design with hamburger menu and collapsible sidebar.
