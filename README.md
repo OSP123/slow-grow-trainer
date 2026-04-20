@@ -22,6 +22,7 @@ To initialize the application locally with all real-world base point costs alrea
    - `20260420000002_seed_points.sql` (Creates the fundamental data structure)
    - `20260420000003_update_real_points.sql` (Bridges base points via community Datasheet datasets)
    - `20260420000004_update_openhammer_points.sql` (Bridges edge cases using OpenHammer historical schemas)
+   - `20260420000005_fuzzy_points_bridge.sql` (Heuristic fuzzy-matching bridge for remaining naming discrepancies)
 
 Any obscure units or unmapped items will default neutrally to `0` Points in the live database. The Administrator can modify these directly within the application's Admin Dashboard.
 
