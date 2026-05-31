@@ -134,3 +134,16 @@ Tasks:
 - Generated `20260420000002_seed_points.sql` migration pulling the 900+ static string data entries from `UNITS_BY_FACTION` map. The database dynamically pre-fills all listed units with `0` base points. This enables the Admin to query all existing elements and update their costs gracefully within the AdminDashboard.
 Follow-ups:
 - Need to execute `20260420000002_seed_points.sql` inside the live Supabase SQL portal.
+
+Date: 2026-05-31
+Tasks:
+- Bridged Wahapedia and OpenHammer community point datasets dynamically generating `20260420000003_update_real_points.sql` and `20260420000004_update_openhammer_points.sql`.
+- Built custom Levenshtein string similarity script mapping 43 edge-case unmapped units with new points in `20260420000005_fuzzy_points_bridge.sql`.
+- Finalized database schema bridging; deleted scratch API bridging scripts.
+- Refactored `README.md` containing database deployment instructions.
+- Added a "Clear (✕)" button overlay to the Roster unit combobox to allow users to quickly swap units without backspacing text out of the input.
+- Verified test suite passes (44/44 passing).
+- Verified linter rules pass seamlessly.
+- Verified local deployment production build compiles with no internal TS compilation errors.
+Follow-ups:
+- None.
