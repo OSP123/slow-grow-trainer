@@ -5,12 +5,14 @@ import { compressImage } from '../../utils/imageCompression';
 const MILESTONES = [
   'Warlord Built',
   'Warlord Painted',
-  '500 Points Built',
-  '500 Points Painted',
-  '1000 Points Built',
-  '1000 Points Painted',
-  '1500 Points Built',
-  '1500 Points Painted',
+  '400 Points Built',
+  '400 Points Painted',
+  '800 Points Built',
+  '800 Points Painted',
+  '1200 Points Built',
+  '1200 Points Painted',
+  '1600 Points Built',
+  '1600 Points Painted',
   '2000 Points Built',
   '2000 Points Painted'
 ];

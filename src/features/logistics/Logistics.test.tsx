@@ -30,7 +30,7 @@ describe('Logistics & Deployment Tracker', () => {
 
     // Fast assertion for empty state or native default thresholds
     expect(await screen.findByText('Warlord Built')).toBeInTheDocument();
-    expect(await screen.findByText('500 Points Built')).toBeInTheDocument();
+    expect(await screen.findByText('400 Points Built')).toBeInTheDocument();
     
     // Ensure "fake uploaded photo data" doesn't exist
     expect(screen.queryByAltText(/Uploaded visual analysis/i)).not.toBeInTheDocument();
