@@ -31,7 +31,11 @@ export default function Login() {
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await supabase.auth.signInWithPassword({ email, password });
+    setMessage('');
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setMessage(error.message);
+    }
   };
 
   const handleCoreFactionChange = (val: string) => {
@@ -299,6 +303,11 @@ export default function Login() {
   return (
     <div className="card" style={{ maxWidth: '400px', margin: '2rem auto', padding: '1.5rem', boxSizing: 'border-box', width: '100%' }}>
       <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Secure Access</h2>
+      {message && (
+        <div style={{ padding: '0.75rem', marginBottom: '1rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '4px', textAlign: 'center', fontSize: '0.9rem' }}>
+          {message}
+        </div>
+      )}
       <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div>
           <label htmlFor="email">Email</label>
