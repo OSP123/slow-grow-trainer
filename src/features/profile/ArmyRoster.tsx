@@ -42,6 +42,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
   const [units, setUnits] = useState<ArmyUnit[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadingUnitId, setUploadingUnitId] = useState<string | null>(null);
+  const [editingUnitId, setEditingUnitId] = useState<string | null>(null);
 
   // Add unit form
   const [selectedFaction, setSelectedFaction] = useState('');
@@ -109,30 +110,74 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
 
     setAddingUnit(true);
     setFormMessage('');
-    const { error } = await supabase.from('army_units').insert({
-      profile_id: profileId,
-      unit_name: name,
-      faction: selectedFaction || null,
-      model_count: modelCount,
-      points: points !== '' ? points : null,
-      notes: notes || null,
-      built: false,
-      painted: false,
-      played: false,
-    });
-    if (error) {
-      setFormMessage('Error: ' + error.message);
+
+    if (editingUnitId) {
+      const { error } = await supabase.from('army_units').update({
+        unit_name: name,
+        faction: selectedFaction || null,
+        model_count: modelCount,
+        points: points !== '' ? points : null,
+        notes: notes || null,
+      }).eq('id', editingUnitId);
+
+      if (error) {
+        setFormMessage('Error: ' + error.message);
+      } else {
+        setUnits(prev => prev.map(u => u.id === editingUnitId ? {
+          ...u,
+          unit_name: name,
+          faction: selectedFaction || null,
+          model_count: modelCount,
+          points: points !== '' ? Number(points) : null,
+          notes: notes || null,
+        } : u));
+        resetForm();
+        setFormMessage('Unit updated successfully.');
+      }
     } else {
-      setSelectedUnit('');
-      setUnitSearch('');
-      setModelCount(1);
-      setPoints('');
-      setPointsLookedUp(false);
-      setNotes('');
-      setFormMessage('Unit mustered to roster.');
-      fetchRoster();
+      const { error } = await supabase.from('army_units').insert({
+        profile_id: profileId,
+        unit_name: name,
+        faction: selectedFaction || null,
+        model_count: modelCount,
+        points: points !== '' ? points : null,
+        notes: notes || null,
+        built: false,
+        painted: false,
+        played: false,
+      });
+      if (error) {
+        setFormMessage('Error: ' + error.message);
+      } else {
+        resetForm();
+        setFormMessage('Unit mustered to roster.');
+        fetchRoster();
+      }
     }
     setAddingUnit(false);
+  };
+
+  const resetForm = () => {
+    setSelectedUnit('');
+    setUnitSearch('');
+    setModelCount(1);
+    setPoints('');
+    setPointsLookedUp(false);
+    setNotes('');
+    setEditingUnitId(null);
+  };
+
+  const handleEditUnit = (unit: ArmyUnit) => {
+    setEditingUnitId(unit.id);
+    setSelectedFaction(unit.faction || '');
+    setUnitSearch(unit.unit_name);
+    setSelectedUnit(unit.unit_name);
+    setModelCount(unit.model_count);
+    setPoints(unit.points ?? '');
+    setPointsLookedUp(false);
+    setNotes(unit.notes || '');
+    setFormMessage('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const toggleField = async (unit: ArmyUnit, field: 'built' | 'painted' | 'played') => {
@@ -208,7 +253,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
       {isOwner && (
         <div style={{ marginBottom: '2rem', padding: '1.25rem', border: '1px solid var(--theme-border)', borderRadius: '6px', backgroundColor: 'var(--theme-bg-secondary)' }}>
           <h3 style={{ margin: '0 0 1rem 0', color: 'var(--theme-accent)', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Muster Unit
+            {editingUnitId ? 'Edit Unit' : 'Muster Unit'}
           </h3>
           <form onSubmit={handleAddUnit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
 
@@ -350,8 +395,13 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <button type="submit" disabled={addingUnit} className="btn primary" style={{ alignSelf: 'flex-start' }}>
-                {addingUnit ? 'Mustering...' : '+ Add to Roster'}
+                {addingUnit ? (editingUnitId ? 'Saving...' : 'Mustering...') : (editingUnitId ? 'Save Changes' : '+ Add to Roster')}
               </button>
+              {editingUnitId && (
+                <button type="button" onClick={() => { resetForm(); setFormMessage(''); }} className="btn secondary" style={{ alignSelf: 'flex-start' }}>
+                  Cancel
+                </button>
+              )}
               {formMessage && <span style={{ fontSize: '0.8rem', color: 'var(--theme-accent)' }}>{formMessage}</span>}
             </div>
           </form>
@@ -445,7 +495,13 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                       )}
                     </td>
                     {isOwner && (
-                      <td style={{ padding: '0.6rem 0.75rem' }}>
+                      <td style={{ padding: '0.6rem 0.75rem', display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <button
+                          onClick={() => handleEditUnit(u)}
+                          style={{ background: 'none', border: 'none', color: 'var(--theme-accent)', cursor: 'pointer', fontSize: '0.8rem' }}
+                        >
+                          Edit
+                        </button>
                         <button
                           onClick={() => handleDeleteUnit(u.id)}
                           style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '0.8rem' }}
