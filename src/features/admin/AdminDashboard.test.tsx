@@ -40,7 +40,17 @@ const mockFromUnlocked = (table: string) => {
       delete: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
     };
   }
-  return {};
+  if (table === 'profiles') {
+    return {
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          order: vi.fn().mockResolvedValue({ data: [{ id: '1', commander_name: 'Test', payment_status: false }], error: null })
+        })
+      }),
+      update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) })
+    };
+  }
+  return { select: vi.fn().mockResolvedValue({ data: [], error: null }) };
 };
 
 describe('AdminDashboard (RBAC)', () => {

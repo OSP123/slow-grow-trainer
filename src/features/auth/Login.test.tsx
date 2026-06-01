@@ -7,7 +7,7 @@ import { supabase } from '../../supabaseClient';
 vi.mock('../../supabaseClient', () => ({
   supabase: {
     auth: {
-      signInWithPassword: vi.fn(),
+      signInWithPassword: vi.fn().mockResolvedValue({ data: {}, error: null }),
       resetPasswordForEmail: vi.fn().mockResolvedValue({ error: null }),
       signUp: vi.fn().mockResolvedValue({ data: { user: {} }, error: null }),
     },

@@ -62,6 +62,10 @@ export default function AdminDashboard() {
   const [editingMatchup, setEditingMatchup] = useState<EditableMatchup | null>(null);
   const [matchupMessage, setMatchupMessage] = useState('');
 
+  // Roster Management
+  const [users, setUsers] = useState<any[]>([]);
+  const [fetchingUsers, setFetchingUsers] = useState(false);
+
   // Unit Points management
   const [unitPoints, setUnitPoints] = useState<UnitPoint[]>([]);
   const [fetchingUP, setFetchingUP] = useState(false);
@@ -88,6 +92,7 @@ export default function AdminDashboard() {
       fetchStores();
       fetchAllMatchups();
       fetchUnitPoints();
+      fetchUsers();
     } else {
       alert('Access Denied. Incorrect Phase Code.');
     }
@@ -121,6 +126,18 @@ export default function AdminDashboard() {
       game_result: m.game_result ?? '',
       status: m.status ?? 'scheduled',
     })));
+  };
+
+  const fetchUsers = async () => {
+    setFetchingUsers(true);
+    const { data, error } = await supabase.from('profiles').select('id, location, experience_level, army_faction, commander_name, payment_status').eq('role', 'user').order('commander_name');
+    if (!error && data) setUsers(data);
+    setFetchingUsers(false);
+  };
+
+  const handleTogglePayment = async (userId: string, currentStatus: boolean) => {
+    const { error } = await supabase.from('profiles').update({ payment_status: !currentStatus }).eq('id', userId);
+    if (!error) fetchUsers();
   };
 
   const handleGenerateMatches = async () => {
@@ -406,6 +423,57 @@ export default function AdminDashboard() {
                     </button>
                     <button onClick={() => handleDeleteMatchup(m.id)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '0.75rem' }}>
                       Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* ── CAMPAIGN ROSTER & PAYMENTS ── */}
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <h2 style={{ marginBottom: '0.5rem' }}>Campaign Roster & Payments</h2>
+        <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1.5rem' }}>
+          Manage entry fees and review registered commanders.
+        </p>
+
+        {fetchingUsers ? (
+          <p>Loading roster...</p>
+        ) : users.length === 0 ? (
+          <p style={{ color: 'var(--theme-fg-muted)' }}>No commanders registered yet.</p>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid var(--theme-border)', textAlign: 'left' }}>
+                <th style={{ padding: '0.5rem' }}>Commander</th>
+                <th style={{ padding: '0.5rem' }}>Faction</th>
+                <th style={{ padding: '0.5rem' }}>Location</th>
+                <th style={{ padding: '0.5rem', textAlign: 'center' }}>Payment Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map(u => (
+                <tr key={u.id} style={{ borderBottom: '1px solid var(--theme-border)' }}>
+                  <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>{u.commander_name || '—'}</td>
+                  <td style={{ padding: '0.5rem' }}>{u.army_faction || '—'}</td>
+                  <td style={{ padding: '0.5rem', color: 'var(--theme-fg-muted)' }}>{u.location || '—'}</td>
+                  <td style={{ padding: '0.5rem', textAlign: 'center' }}>
+                    <button
+                      onClick={() => handleTogglePayment(u.id, !!u.payment_status)}
+                      style={{
+                        padding: '4px 12px',
+                        borderRadius: '4px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                        fontSize: '0.75rem',
+                        backgroundColor: u.payment_status ? '#166534' : '#991b1b',
+                        color: 'white',
+                      }}
+                    >
+                      {u.payment_status ? 'PAID' : 'UNPAID'}
                     </button>
                   </td>
                 </tr>
