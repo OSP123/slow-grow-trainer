@@ -100,7 +100,7 @@ describe('Campaign Battles Integrations', () => {
     await waitFor(() => {
       expect(screen.getByText(/Rate Your Opponent's Honour/i)).toBeInTheDocument();
       expect(screen.getAllByText(/Command Temperament/i).length).toBeGreaterThan(0);
-      expect(screen.getAllByText(/Rules of Engagement/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Hobby Spirit/i).length).toBeGreaterThan(0);
       expect(screen.getByText(/Seal Battle Report/i)).toBeInTheDocument();
     });
   });

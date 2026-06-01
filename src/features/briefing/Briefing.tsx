@@ -15,7 +15,7 @@ export default function Briefing() {
           Its purpose is to organise your slow-grow league from start to finish — tracking hobby progress on your army, scheduling fair pairings at your local game store, logging battle outcomes, and recording the honour and conduct of every Commander through the campaign.
         </p>
         <p style={{ lineHeight: '1.6' }}>
-          <strong style={{ color: 'var(--theme-accent)' }}>Honour comes first.</strong> Command Temperament and Rules of Engagement ratings matter more than kill counts or Victory Points. 
+          <strong style={{ color: 'var(--theme-accent)' }}>Honour comes first.</strong> Command Temperament and Hobby Spirit ratings matter more than kill counts or Victory Points. 
           Be a sporting opponent and know your rules — that is how you earn renown in this campaign.
         </p>
       </div>
@@ -116,14 +116,14 @@ export default function Briefing() {
             </p>
           </div>
           <div style={{ padding: '1rem', border: '1px solid var(--theme-accent)', borderRadius: '6px' }}>
-            <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-accent)' }}>⚔ Rules of Engagement</h4>
+            <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-accent)' }}>⚔ Hobby Spirit & Helpfulness</h4>
             <p style={{ margin: 0, fontSize: '0.85rem', lineHeight: '1.5' }}>
-              How well did your opponent understand and apply the game rules? Did the game flow smoothly thanks to their rules knowledge?
+              Did your opponent help clarify rules and ensure a fun, patient, and welcoming game experience? Did they contribute positively to the hobby community?
             </p>
           </div>
         </div>
         <p style={{ lineHeight: '1.6', marginTop: '1rem', color: 'var(--theme-fg-muted)', fontSize: '0.85rem' }}>
-          Ratings are on a 1–5 star scale. They are permanent, visible to all Commanders on the Global Warzone Board, and represent the true measure of a warrior in this campaign.
+          Ratings are on a 1–5 star scale. These ratings are private and will not be displayed publicly on the Global Warzone Board. They are used purely for end-of-campaign celebratory awards and to ensure everyone is having a positive experience.
         </p>
       </div>
 

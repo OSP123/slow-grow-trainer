@@ -447,9 +447,9 @@ export default function AdminDashboard() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
                 {[
                   { key: 'p1_temperament' as const, label: `${editingMatchup.p1_profile?.commander_name} Temperament` },
-                  { key: 'p1_rules_engagement' as const, label: `${editingMatchup.p1_profile?.commander_name} Rules` },
+                  { key: 'p1_rules_engagement' as const, label: `${editingMatchup.p1_profile?.commander_name} Spirit` },
                   { key: 'p2_temperament' as const, label: `${editingMatchup.p2_profile?.commander_name} Temperament` },
-                  { key: 'p2_rules_engagement' as const, label: `${editingMatchup.p2_profile?.commander_name} Rules` },
+                  { key: 'p2_rules_engagement' as const, label: `${editingMatchup.p2_profile?.commander_name} Spirit` },
                 ].map(({ key, label }) => (
                   <div key={key}>
                     <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>{label}</label>
