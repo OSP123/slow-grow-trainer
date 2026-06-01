@@ -133,6 +133,12 @@ export default function Briefing() {
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <div>
+            <h4 style={{ margin: '0 0 0.5rem 0' }}>Q: What exactly is a "slow grow" campaign?</h4>
+            <p style={{ margin: 0, lineHeight: '1.6', fontSize: '0.9rem' }}>
+              <strong>A:</strong> A slow grow campaign is a structured way of gradually building and painting a new army over time. Instead of needing a full 2000-point army right away, players start small and add to their army in set increments (milestones), playing a game at each milestone. In our campaign, the milestones are set at 400-point increments.
+            </p>
+          </div>
+          <div>
             <h4 style={{ margin: '0 0 0.5rem 0' }}>Q: Can I use half-painted or primed models in the slow grow campaign?</h4>
             <p style={{ margin: 0, lineHeight: '1.6', fontSize: '0.9rem' }}>
               <strong>A:</strong> Absolutely. Our goal is to help commanders reduce their grey piles of shame and make progress on their armies. Bring your WIP, primed, or partially painted models to the table—what matters most is that you're getting games in and making progress over the course of the campaign!

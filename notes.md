@@ -225,8 +225,9 @@ Tasks:
   - Added `Real Name` and `Discord` columns to the Admin Dashboard table, pulling directly from the `profiles` table.
   - Fixed a mobile UI bug where the sidebar menu required scrolling to reach the Commander link by implementing `100dvh` in `App.css` to properly account for dynamic mobile browser toolbars.
   - Fixed flaky Matchmaker algorithm test by stubbing `Math.random` to ensure deterministic execution orders.
-  - Added an FAQ section to the Field Manual (`Briefing.tsx`) addressing the use of half-painted/primed models.
-  - Added a second FAQ entry to the Field Manual detailing the 5-month timeline, requiring 400 points and 1 game per month.
+  - Added an FAQ section to the Field Manual (`Briefing.tsx`) addressing what a slow grow campaign is, defining the 400-point milestones.
+  - Added an FAQ entry to the Field Manual addressing the use of half-painted/primed models.
+  - Added an FAQ entry to the Field Manual detailing the 5-month timeline, requiring 400 points and 1 game per month.
   - All unit tests verified (12/12 passing).
 Follow-ups:
   - None
