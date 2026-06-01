@@ -13,6 +13,7 @@ import AdminDashboard from './features/admin/AdminDashboard';
 import CommanderProfile from './features/profile/CommanderProfile';
 import CampaignBattles from './features/battles/CampaignBattles';
 import Briefing from './features/briefing/Briefing';
+import TranslatedHeader from './components/TranslatedHeader';
 import './App.css';
 
 const FACTIONS = [
@@ -66,6 +67,27 @@ function App() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Fetch user profile to automatically set theme
+  useEffect(() => {
+    async function loadTheme() {
+      if (session?.user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('army_faction')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (data?.army_faction) {
+          const matchedFaction = FACTIONS.find(f => f.label === data.army_faction);
+          if (matchedFaction) {
+            setActiveTheme(matchedFaction.id);
+          }
+        }
+      }
+    }
+    loadTheme();
+  }, [session]);
 
   useEffect(() => {
     document.body.setAttribute('data-theme', activeTheme);
@@ -171,24 +193,28 @@ function App() {
       <main className="main-content">
         <header className="faction-header">
           <div>
-            <h1>{FACTIONS.find(f => f.id === activeTheme)?.label} Network</h1>
+            <TranslatedHeader 
+              text={`${FACTIONS.find(f => f.id === activeTheme)?.label} Network`} 
+            />
             <p style={{ color: 'var(--theme-fg-muted)', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.9rem' }}>
               Connection secure. Welcome Commander.
             </p>
           </div>
           
-          <div className="theme-selector">
-            <label htmlFor="theme-select" style={{ margin: 0 }}>Theme Override:</label>
-            <select 
-              id="theme-select" 
-              value={activeTheme} 
-              onChange={(e) => setActiveTheme(e.target.value)}
-            >
-              {FACTIONS.map(f => (
-                <option key={f.id} value={f.id}>{f.label}</option>
-              ))}
-            </select>
-          </div>
+          {!session && (
+            <div className="theme-selector">
+              <label htmlFor="theme-select" style={{ margin: 0 }}>Theme Override:</label>
+              <select 
+                id="theme-select" 
+                value={activeTheme} 
+                onChange={(e) => setActiveTheme(e.target.value)}
+              >
+                {FACTIONS.map(f => (
+                  <option key={f.id} value={f.id}>{f.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </header>
 
         {/* Dashboard Router */}

@@ -231,6 +231,8 @@ Tasks:
   - Changed "Rules of Engagement" to "Hobby Spirit & Helpfulness" across the application to avoid dissuading new players.
   - Updated the Global Warzone Board to hide individual honour ratings to prevent public shaming.
   - Replaced individual ratings with an "Exemplars of the Campaign" leaderboard displaying three separate top-3 categories: Top Megafactions (by average VP across commanders), Finest Temperament, and Best Hobby Spirit.
+  - Moved `ImperialFont`, `ZeusBorne`, `NecronCrypt`, `Tau40k`, and `OCRAStd` fonts to the `public/fonts` directory and loaded them globally.
+  - Configured CSS themes to inject faction-specific fonts into UI headers.
+  - Modified `App.tsx` to automatically configure the UI theme based on the user's `army_faction`.
+  - Created a `<TranslatedHeader>` component that renders dual-font headers with High Gothic translations for alien languages, including a terminal-styled Binary translator for the Adeptus Mechanicus.
   - All unit tests verified (12/12 passing).
-Follow-ups:
-  - None

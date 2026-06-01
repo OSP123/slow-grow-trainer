@@ -1,6 +1,40 @@
 @import './styles/themes.css';
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cinzel+Decorative:wght@700&family=Orbitron:wght@500;700&family=Outfit:wght@400;600&family=Inter:wght@400;500;600&family=Teko:wght@500;600&family=Black+Ops+One&display=swap');
 
+@font-face {
+  font-family: 'ImperialFont';
+  src: url('/fonts/ImperialFont-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'ZeusBorne';
+  src: url('/fonts/Zeus-Borne.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'NecronCrypt';
+  src: url('/fonts/Necron-Crypt.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Tau40k';
+  src: url('/fonts/tau-40k.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'OCRAStd';
+  src: url('/fonts/OCRAStd.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
 :root {
   /* Default typography if not overridden by theme */
   --font-head: 'Outfit', sans-serif;
