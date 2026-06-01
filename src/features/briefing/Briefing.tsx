@@ -127,6 +127,20 @@ export default function Briefing() {
         </p>
       </div>
 
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <h3 style={{ color: 'var(--theme-accent)', marginBottom: '1rem', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>
+          Frequently Asked Questions (FAQ)
+        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div>
+            <h4 style={{ margin: '0 0 0.5rem 0' }}>Q: Can I use half-painted or primed models in the slow grow campaign?</h4>
+            <p style={{ margin: 0, lineHeight: '1.6', fontSize: '0.9rem' }}>
+              <strong>A:</strong> Absolutely. Our goal is to help commanders reduce their grey piles of shame and make progress on their armies. Bring your WIP, primed, or partially painted models to the table—what matters most is that you're getting games in and making progress over the course of the campaign!
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="card">
         <h3 style={{ color: 'var(--theme-accent)', marginBottom: '1rem', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>
           Thematic Override

@@ -225,6 +225,7 @@ Tasks:
   - Added `Real Name` and `Discord` columns to the Admin Dashboard table, pulling directly from the `profiles` table.
   - Fixed a mobile UI bug where the sidebar menu required scrolling to reach the Commander link by implementing `100dvh` in `App.css` to properly account for dynamic mobile browser toolbars.
   - Fixed flaky Matchmaker algorithm test by stubbing `Math.random` to ensure deterministic execution orders.
+  - Added an FAQ section to the Field Manual (`Briefing.tsx`) addressing the use of half-painted/primed models.
   - All unit tests verified (12/12 passing).
 Follow-ups:
   - None
