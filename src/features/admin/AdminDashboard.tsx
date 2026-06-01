@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { generateMatchups, type MatchPair } from './Matchmaker';
-import { UNITS_BY_FACTION, getFactionsGrouped } from '../../data/warhammer40k';
+import { getFactionsGrouped } from '../../data/warhammer40k';
+import { useUnitRegistry } from '../../hooks/useUnitRegistry';
 
 export interface UnitPoint {
   id: string;
@@ -67,11 +68,13 @@ export default function AdminDashboard() {
   const [fetchingUsers, setFetchingUsers] = useState(false);
 
   // Unit Points management
+  const { unitsByFaction, refreshRegistry } = useUnitRegistry();
   const [unitPoints, setUnitPoints] = useState<UnitPoint[]>([]);
   const [fetchingUP, setFetchingUP] = useState(false);
   const [newUPFaction, setNewUPFaction] = useState('');
   const [newUPUnit, setNewUPUnit] = useState('');
   const [newUPPoints, setNewUPPoints] = useState<number | ''>('');
+  const [editingUPId, setEditingUPId] = useState<string | null>(null);
   const [upMessage, setUPMessage] = useState('');
 
   const GROUPED_FACTIONS = getFactionsGrouped();
@@ -236,26 +239,61 @@ export default function AdminDashboard() {
       return;
     }
 
-    const { error } = await supabase.from('unit_points').upsert({
-      faction: newUPFaction,
-      unit_name: newUPUnit,
-      base_points: newUPPoints
-    }, { onConflict: 'faction,unit_name' });
+    if (editingUPId) {
+      const { error } = await supabase.from('unit_points').update({
+        faction: newUPFaction,
+        unit_name: newUPUnit,
+        base_points: newUPPoints
+      }).eq('id', editingUPId);
 
-    if (error) {
-      setUPMessage('Error: ' + error.message);
+      if (error) {
+        setUPMessage('Error: ' + error.message);
+      } else {
+        setUPMessage(`Successfully updated ${newUPUnit}.`);
+        resetUPForm();
+        fetchUnitPoints();
+        refreshRegistry();
+      }
     } else {
-      setUPMessage(`Successfully registered ${newUPUnit} (${newUPPoints} pts).`);
-      setNewUPUnit('');
-      setNewUPPoints('');
-      fetchUnitPoints();
+      const { error } = await supabase.from('unit_points').upsert({
+        faction: newUPFaction,
+        unit_name: newUPUnit,
+        base_points: newUPPoints
+      }, { onConflict: 'faction,unit_name' });
+
+      if (error) {
+        setUPMessage('Error: ' + error.message);
+      } else {
+        setUPMessage(`Successfully registered ${newUPUnit} (${newUPPoints} pts).`);
+        resetUPForm();
+        fetchUnitPoints();
+        refreshRegistry();
+      }
     }
   };
 
+  const resetUPForm = () => {
+    setNewUPUnit('');
+    setNewUPPoints('');
+    setEditingUPId(null);
+  };
+
+  const handleEditUnitPoint = (up: UnitPoint) => {
+    setEditingUPId(up.id);
+    setNewUPFaction(up.faction);
+    setNewUPUnit(up.unit_name);
+    setNewUPPoints(up.base_points);
+    setUPMessage('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleDeleteUnitPoint = async (id: string) => {
-    if (!confirm('Are you sure you want to remove this unit from the point registry?')) return;
+    if (!window.confirm('Are you sure you want to remove this unit from the point registry?')) return;
     const { error } = await supabase.from('unit_points').delete().eq('id', id);
-    if (!error) fetchUnitPoints();
+    if (!error) {
+      fetchUnitPoints();
+      refreshRegistry();
+    }
   };
 
   if (loading) return <div style={{ textAlign: 'center', marginTop: '4rem' }}>Scanning biometric signatures...</div>;
@@ -586,7 +624,7 @@ export default function AdminDashboard() {
             <input type="text" placeholder="e.g. Intercessor Squad" list="admin-unit-suggestions" value={newUPUnit}
               onChange={e => setNewUPUnit(e.target.value)} required style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }} />
             <datalist id="admin-unit-suggestions">
-              {newUPFaction && (UNITS_BY_FACTION[newUPFaction] || []).map(u => <option key={u} value={u} />)}
+              {newUPFaction && (unitsByFaction[newUPFaction] || []).map(u => <option key={u} value={u} />)}
             </datalist>
           </div>
           <div>
@@ -594,7 +632,12 @@ export default function AdminDashboard() {
             <input type="number" min={0} value={newUPPoints} onChange={e => setNewUPPoints(parseInt(e.target.value) || '')}
               required style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }} />
           </div>
-          <button type="submit" className="btn primary">Register Points</button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button type="submit" className="btn primary">{editingUPId ? 'Save Changes' : 'Register Points'}</button>
+            {editingUPId && (
+              <button type="button" onClick={() => { resetUPForm(); setUPMessage(''); }} className="btn secondary">Cancel</button>
+            )}
+          </div>
         </form>
 
         {fetchingUP ? (
@@ -619,6 +662,9 @@ export default function AdminDashboard() {
                     <td style={{ padding: '0.6rem 0.75rem', fontWeight: 'bold' }}>{up.unit_name}</td>
                     <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>{up.base_points}</td>
                     <td style={{ padding: '0.6rem 0.75rem', textAlign: 'right' }}>
+                      <button onClick={() => handleEditUnitPoint(up)} style={{ background: 'none', border: 'none', color: 'var(--theme-accent)', cursor: 'pointer', fontSize: '0.75rem', marginRight: '0.5rem' }}>
+                        Edit
+                      </button>
                       <button onClick={() => handleDeleteUnitPoint(up.id)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '0.75rem' }}>
                         Remove
                       </button>

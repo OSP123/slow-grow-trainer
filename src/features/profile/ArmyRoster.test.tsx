@@ -10,6 +10,18 @@ vi.mock('../../supabaseClient', () => ({
   }
 }));
 
+vi.mock('../../hooks/useUnitRegistry', () => ({
+  useUnitRegistry: vi.fn().mockReturnValue({
+    unitsByFaction: {
+      'Space Marines': ['Intercessor Squad', 'Dreadnought'],
+      'Astra Militarum': ['Infantry Squad']
+    },
+    rawRegistry: [],
+    loading: false,
+    refreshRegistry: vi.fn()
+  })
+}));
+
 const mockUnits = [
   { id: 'unit-1', unit_name: 'Intercessor Squad', faction: 'Space Marines', model_count: 5, points: 80, built: true, painted: false, played: false, notes: null },
   { id: 'unit-2', unit_name: 'Infantry Squad', faction: 'Astra Militarum', model_count: 10, points: 60, built: false, painted: false, played: false, notes: 'Magnetized' },

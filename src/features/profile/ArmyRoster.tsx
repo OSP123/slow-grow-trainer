@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
-import { FACTIONS, UNITS_BY_FACTION, getFactionsGrouped } from '../../data/warhammer40k';
+import { FACTIONS, getFactionsGrouped } from '../../data/warhammer40k';
+import { useUnitRegistry } from '../../hooks/useUnitRegistry';
 
 interface ArmyUnit {
   id: string;
@@ -39,6 +40,7 @@ const GROUPED_FACTIONS = getFactionsGrouped();
 const ALLIANCE_ORDER: ('Imperium' | 'Chaos' | 'Xenos')[] = ['Imperium', 'Chaos', 'Xenos'];
 
 export default function ArmyRoster({ profileId, isOwner }: Props) {
+  const { unitsByFaction, loading: registryLoading } = useUnitRegistry();
   const [units, setUnits] = useState<ArmyUnit[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadingUnitId, setUploadingUnitId] = useState<string | null>(null);
@@ -72,7 +74,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
 
   // Unit list for the selected faction, filtered by search
   const availableUnits: string[] = selectedFaction
-    ? (UNITS_BY_FACTION[selectedFaction] ?? []).filter(u =>
+    ? (unitsByFaction[selectedFaction] ?? []).filter(u =>
         u.toLowerCase().includes(unitSearch.toLowerCase())
       )
     : [];
@@ -236,7 +238,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
     Xenos: '#a855f7',
   };
 
-  if (loading) return <div style={{ color: 'var(--theme-fg-muted)', padding: '1rem' }}>Loading roster...</div>;
+  if (loading || registryLoading) return <div style={{ color: 'var(--theme-fg-muted)', padding: '1rem' }}>Loading roster...</div>;
 
   return (
     <div>
@@ -291,7 +293,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                       setSelectedUnit('');
                       setPointsLookedUp(false);
                       // If the typed value exactly matches a known unit, auto-lookup
-                      if (selectedFaction && UNITS_BY_FACTION[selectedFaction]?.includes(val)) {
+                      if (selectedFaction && unitsByFaction[selectedFaction]?.includes(val)) {
                         lookupUnitPoints(val, selectedFaction);
                       }
                     }}
@@ -480,7 +482,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                           <img src={u.image_url} alt="Unit" style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--theme-border)' }} />
                         </a>
                       )}
-                      {isOwner && u.faction && UNITS_BY_FACTION[u.faction]?.includes(u.unit_name) && (
+                      {isOwner && u.faction && unitsByFaction[u.faction]?.includes(u.unit_name) && (
                         <div>
                           <label style={{ cursor: uploadingUnitId === u.id ? 'wait' : 'pointer', fontSize: '0.7rem', color: 'var(--theme-accent)', textDecoration: 'underline' }}>
                             {uploadingUnitId === u.id ? 'Uploading...' : (u.image_url ? 'Replace' : 'Upload')}
@@ -488,7 +490,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                           </label>
                         </div>
                       )}
-                      {isOwner && (!u.faction || !UNITS_BY_FACTION[u.faction]?.includes(u.unit_name)) && (
+                      {isOwner && (!u.faction || !unitsByFaction[u.faction]?.includes(u.unit_name)) && (
                         <span style={{ fontSize: '0.6rem', color: 'var(--theme-fg-muted)' }} title="Must be a validated official unit to upload photos">
                           Custom Unit
                         </span>

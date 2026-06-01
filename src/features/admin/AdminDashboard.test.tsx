@@ -10,6 +10,18 @@ vi.mock('../../supabaseClient', () => ({
   },
 }));
 
+vi.mock('../../hooks/useUnitRegistry', () => ({
+  useUnitRegistry: vi.fn().mockReturnValue({
+    unitsByFaction: {
+      'Space Marines': ['Intercessor Squad', 'Dreadnought'],
+      'Astra Militarum': ['Infantry Squad']
+    },
+    rawRegistry: [],
+    loading: false,
+    refreshRegistry: vi.fn()
+  })
+}));
+
 const mockFromUnlocked = (table: string) => {
   if (table === 'campaign_votes') {
     return {
