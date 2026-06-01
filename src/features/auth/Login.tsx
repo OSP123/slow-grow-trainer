@@ -57,7 +57,9 @@ export default function Login() {
   const handleForgotSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage('');
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin,
+    });
     if (!error) {
       setMessage('Recovery link transmitted. Check your comms (email).');
     } else {

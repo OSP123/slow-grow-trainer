@@ -67,7 +67,9 @@ describe('Login Component', () => {
     fireEvent.click(sendBtn);
 
     // Assert supabase reset call
-    expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledWith('recover@admin.com');
+    expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledWith('recover@admin.com', {
+      redirectTo: window.location.origin
+    });
   });
 
   it('handles user registration (sign up) locally', async () => {

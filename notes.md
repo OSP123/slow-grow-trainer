@@ -165,3 +165,10 @@ Tasks:
   - Upgraded `CommanderProfile.tsx` to automatically query all uploaded photos matching the commander's faction and dynamically render them as a tiled background.
 Follow-ups:
   - None
+
+Date: 2026-06-01
+Tasks:
+  - Added an Edit button to the `ArmyRoster` component mapping to the Muster Unit state inline.
+  - Allowed unit records to be dynamically updated utilizing `UPDATE` SQL clauses against Supabase without needing deletion and recreation.
+Follow-ups:
+  - None
