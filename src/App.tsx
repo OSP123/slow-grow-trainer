@@ -195,6 +195,7 @@ function App() {
           <div>
             <TranslatedHeader 
               text={`${FACTIONS.find(f => f.id === activeTheme)?.label} Network`} 
+              theme={activeTheme}
             />
             <p style={{ color: 'var(--theme-fg-muted)', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.9rem' }}>
               Connection secure. Welcome Commander.
