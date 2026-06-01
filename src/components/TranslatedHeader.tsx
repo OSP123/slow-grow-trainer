@@ -57,7 +57,7 @@ export default function TranslatedHeader({ text, theme, className, style, as = '
   }
 
   // For Tau
-  if (theme === 'tau_empire') {
+  if (theme === 'tau') {
     return (
       <div style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
         <Component className={className} style={{ ...style, fontFamily: 'Tau40k, Teko, sans-serif', letterSpacing: '2px', marginBottom: '0.1rem', textTransform: 'lowercase' }}>
