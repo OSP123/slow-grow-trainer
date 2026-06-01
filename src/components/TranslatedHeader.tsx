@@ -49,7 +49,7 @@ export default function TranslatedHeader({ text, theme, className, style, as = '
         <Component className={className} style={{ ...style, fontFamily: 'NecronCrypt, Orbitron, sans-serif', letterSpacing: '2px', marginBottom: '0.1rem', textTransform: 'lowercase' }}>
           {text.toLowerCase()}
         </Component>
-        <div style={{ fontSize: '0.75rem', fontFamily: 'OCRAStd, monospace', color: 'var(--theme-fg-muted)', textTransform: 'uppercase', letterSpacing: '2px' }}>
+        <div style={{ fontSize: '0.75rem', fontFamily: 'Outfit, sans-serif', color: 'var(--theme-fg-muted)', textTransform: 'uppercase', letterSpacing: '2px' }}>
           {text}
         </div>
       </div>
