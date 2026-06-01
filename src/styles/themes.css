@@ -356,6 +356,8 @@ body[data-theme="necrons"] [data-text]::after,
 body[data-theme="tau"] [data-text]::after {
   content: attr(data-text);
   display: block !important;
+  flex-basis: 100% !important;
+  width: 100% !important;
   text-transform: uppercase !important;
   font-weight: 400 !important;
   margin-top: 0.25em !important;
@@ -385,3 +387,8 @@ body[data-theme="tau"] :is(h1, h2, h3, h4, h5, h6)[data-text]::after {
   font-size: 0.45em !important;
 }
 
+/* Force standard font on input/select so they are actually readable */
+body[data-theme="necrons"] input, body[data-theme="necrons"] select, body[data-theme="necrons"] textarea,
+body[data-theme="tau"] input, body[data-theme="tau"] select, body[data-theme="tau"] textarea {
+  font-family: 'Inter', sans-serif !important;
+}
