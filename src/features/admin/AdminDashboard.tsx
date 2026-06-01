@@ -130,7 +130,7 @@ export default function AdminDashboard() {
 
   const fetchUsers = async () => {
     setFetchingUsers(true);
-    const { data, error } = await supabase.from('profiles').select('id, location, experience_level, army_faction, commander_name, payment_status').eq('role', 'user').order('commander_name');
+    const { data, error } = await supabase.from('profiles').select('id, location, experience_level, army_faction, commander_name, payment_status, hobby_milestones(milestone_step)').eq('role', 'user').order('commander_name');
     if (!error && data) setUsers(data);
     setFetchingUsers(false);
   };
@@ -450,6 +450,7 @@ export default function AdminDashboard() {
                 <th style={{ padding: '0.5rem' }}>Commander</th>
                 <th style={{ padding: '0.5rem' }}>Faction</th>
                 <th style={{ padding: '0.5rem' }}>Location</th>
+                <th style={{ padding: '0.5rem' }}>Milestones Reached</th>
                 <th style={{ padding: '0.5rem', textAlign: 'center' }}>Payment Status</th>
               </tr>
             </thead>
@@ -459,6 +460,19 @@ export default function AdminDashboard() {
                   <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>{u.commander_name || '—'}</td>
                   <td style={{ padding: '0.5rem' }}>{u.army_faction || '—'}</td>
                   <td style={{ padding: '0.5rem', color: 'var(--theme-fg-muted)' }}>{u.location || '—'}</td>
+                  <td style={{ padding: '0.5rem', fontSize: '0.75rem' }}>
+                    {u.hobby_milestones && u.hobby_milestones.length > 0 ? (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                        {u.hobby_milestones.map((hm: any) => (
+                          <span key={hm.milestone_step} style={{ backgroundColor: 'var(--theme-accent)', color: 'white', padding: '2px 6px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
+                            {hm.milestone_step}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span style={{ color: 'var(--theme-fg-muted)' }}>No progress</span>
+                    )}
+                  </td>
                   <td style={{ padding: '0.5rem', textAlign: 'center' }}>
                     <button
                       onClick={() => handleTogglePayment(u.id, !!u.payment_status)}

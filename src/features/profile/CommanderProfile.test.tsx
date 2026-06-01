@@ -64,6 +64,19 @@ describe('CommanderProfile', () => {
           }),
         };
       }
+      if (table === 'army_units') {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              not: vi.fn().mockReturnValue({
+                order: vi.fn().mockReturnValue({
+                  limit: vi.fn().mockResolvedValue({ data: [], error: null })
+                })
+              })
+            })
+          })
+        };
+      }
       if (table === 'game_stores') {
         return {
           select: vi.fn().mockReturnValue({

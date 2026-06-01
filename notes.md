@@ -147,3 +147,11 @@ Tasks:
 - Verified local deployment production build compiles with no internal TS compilation errors.
 Follow-ups:
 - None.
+
+Date: 2026-05-31
+Tasks:
+  - Migrated point progression milestones to 400 point increments (400, 800, 1200, 1600, 2000).
+  - Designed missing campaign roster payment tracker panel inside AdminDashboard.
+  - Implemented 'payment_status' column migration in Supabase.
+Follow-ups:
+  - None

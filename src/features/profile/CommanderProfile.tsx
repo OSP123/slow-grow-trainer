@@ -33,6 +33,7 @@ export default function CommanderProfile() {
   const [editMode, setEditMode] = useState(false);
   const [message, setMessage] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('specs');
+  const [factionImages, setFactionImages] = useState<string[]>([]);
 
   const fetchProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -62,6 +63,11 @@ export default function CommanderProfile() {
       setFaction(data.army_faction || '');
       setSubfaction(data.army_subfaction || '');
       setStoreId(data.preferred_store_id || '');
+
+      if (data.army_faction) {
+        const { data: unitData } = await supabase.from('army_units').select('image_url').eq('faction', data.army_faction).not('image_url', 'is', null).order('created_at', { ascending: false }).limit(50);
+        if (unitData) setFactionImages(unitData.map(u => u.image_url!));
+      }
     } else {
       setProfile({ id: targetId, commander_name: 'Unregistered' });
     }
@@ -132,8 +138,30 @@ export default function CommanderProfile() {
   ];
 
   return (
-    <div style={{ maxWidth: '900px', margin: '2rem auto', padding: '0 1rem' }}>
-      {/* Header */}
+    <>
+      {factionImages.length > 0 && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          zIndex: -1,
+          opacity: 0.1,
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignContent: 'flex-start',
+          overflow: 'hidden',
+          pointerEvents: 'none'
+        }}>
+          {factionImages.map((src, i) => (
+            <img key={i} src={src} alt="" style={{ width: '250px', height: '250px', objectFit: 'cover' }} />
+          ))}
+          {/* Fill extra space by repeating */}
+          {[...Array(20)].map((_, i) => (
+            <img key={`repeat-${i}`} src={factionImages[i % factionImages.length]} alt="" style={{ width: '250px', height: '250px', objectFit: 'cover' }} />
+          ))}
+        </div>
+      )}
+      <div style={{ maxWidth: '900px', margin: '2rem auto', padding: '0 1rem', position: 'relative', zIndex: 1 }}>
+        {/* Header */}
       <div className="card" style={{ marginBottom: '1.5rem', display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
         <div style={{
           width: '80px', height: '80px', flexShrink: 0,
@@ -285,5 +313,6 @@ export default function CommanderProfile() {
         )}
       </div>
     </div>
+    </>
   );
 }

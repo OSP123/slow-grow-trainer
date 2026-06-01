@@ -12,6 +12,7 @@ interface ArmyUnit {
   painted: boolean;
   played: boolean;
   notes: string | null;
+  image_url: string | null;
 }
 
 interface Props {
@@ -40,6 +41,7 @@ const ALLIANCE_ORDER: ('Imperium' | 'Chaos' | 'Xenos')[] = ['Imperium', 'Chaos',
 export default function ArmyRoster({ profileId, isOwner }: Props) {
   const [units, setUnits] = useState<ArmyUnit[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploadingUnitId, setUploadingUnitId] = useState<string | null>(null);
 
   // Add unit form
   const [selectedFaction, setSelectedFaction] = useState('');
@@ -144,6 +146,34 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
   const handleDeleteUnit = async (unitId: string) => {
     await supabase.from('army_units').delete().eq('id', unitId);
     setUnits(prev => prev.filter(u => u.id !== unitId));
+  };
+
+  const handleUploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>, unit: ArmyUnit) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingUnitId(unit.id);
+
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${profileId}/${unit.id}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage.from('unit_photos').upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      alert('Error uploading photo: ' + uploadError.message);
+      setUploadingUnitId(null);
+      return;
+    }
+
+    const { data: publicData } = supabase.storage.from('unit_photos').getPublicUrl(filePath);
+
+    const { error: updateError } = await supabase.from('army_units').update({ image_url: publicData.publicUrl }).eq('id', unit.id);
+
+    if (!updateError) {
+      setUnits(prev => prev.map(u => u.id === unit.id ? { ...u, image_url: publicData.publicUrl } : u));
+    } else {
+      alert('Failed to save image URL to unit.');
+    }
+    setUploadingUnitId(null);
   };
 
   const total = units.length;
@@ -345,6 +375,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                 <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>⚙ Built</th>
                 <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>🎨 Painted</th>
                 <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>⚔ Played</th>
+                <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>📷 Photo</th>
                 {isOwner && <th style={{ padding: '0.5rem 0.75rem' }}></th>}
               </tr>
             </thead>
@@ -393,6 +424,26 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                         )}
                       </td>
                     ))}
+                    <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>
+                      {u.image_url && (
+                        <a href={u.image_url} target="_blank" rel="noreferrer" style={{ display: 'inline-block', marginBottom: isOwner ? '4px' : '0' }}>
+                          <img src={u.image_url} alt="Unit" style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--theme-border)' }} />
+                        </a>
+                      )}
+                      {isOwner && u.faction && UNITS_BY_FACTION[u.faction]?.includes(u.unit_name) && (
+                        <div>
+                          <label style={{ cursor: uploadingUnitId === u.id ? 'wait' : 'pointer', fontSize: '0.7rem', color: 'var(--theme-accent)', textDecoration: 'underline' }}>
+                            {uploadingUnitId === u.id ? 'Uploading...' : (u.image_url ? 'Replace' : 'Upload')}
+                            <input type="file" accept="image/*" onChange={(e) => handleUploadPhoto(e, u)} disabled={uploadingUnitId === u.id} style={{ display: 'none' }} />
+                          </label>
+                        </div>
+                      )}
+                      {isOwner && (!u.faction || !UNITS_BY_FACTION[u.faction]?.includes(u.unit_name)) && (
+                        <span style={{ fontSize: '0.6rem', color: 'var(--theme-fg-muted)' }} title="Must be a validated official unit to upload photos">
+                          Custom Unit
+                        </span>
+                      )}
+                    </td>
                     {isOwner && (
                       <td style={{ padding: '0.6rem 0.75rem' }}>
                         <button
