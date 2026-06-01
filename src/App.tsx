@@ -97,7 +97,6 @@ function App() {
   useEffect(() => {
     const isAlienTheme = activeTheme === 'necrons' || activeTheme === 'tau';
     const SKIP_TAGS = new Set(['INPUT','SELECT','TEXTAREA','OPTION','SCRIPT','STYLE','NOSCRIPT','IFRAME','CANVAS','VIDEO','AUDIO','IMG','BR','HR','SVG','PATH','CIRCLE','LINE','RECT','POLYGON','POLYLINE','ELLIPSE','G','DEFS','USE','SYMBOL','CLIPPATH']);
-    const BLOCK_TAGS = new Set(['DIV','SECTION','NAV','ARTICLE','ASIDE','HEADER','FOOTER','MAIN','UL','OL','TABLE','TBODY','THEAD','TFOOT','TR','FORM','FIELDSET','DETAILS','FIGURE','BLOCKQUOTE','PRE','ADDRESS','H1','H2','H3','H4','H5','H6','P','LI']);
 
     const clearDataText = () => {
       document.querySelectorAll('[data-text]').forEach(el => {
@@ -115,16 +114,17 @@ function App() {
       document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, td, th, button, label, a, span, div, dt, dd, caption, summary, figcaption, blockquote').forEach(el => {
         if (SKIP_TAGS.has(el.tagName)) return;
 
-        const text = (el.textContent || '').trim();
-        if (!text) return;
+        // Check if it is a leaf element: all of its children are in SKIP_TAGS
+        const isLeaf = Array.from(el.children).every(child => SKIP_TAGS.has(child.tagName));
+        if (!isLeaf) {
+          el.removeAttribute('data-text');
+          return;
+        }
 
-        // For generic containers (div, span, a), only target "leaf" elements
-        // that don't contain block-level children — prevents a parent div from
-        // showing a translation of ALL its nested children's text
-        if (['DIV', 'SPAN', 'A'].includes(el.tagName)) {
-          for (let i = 0; i < el.children.length; i++) {
-            if (BLOCK_TAGS.has(el.children[i].tagName)) return;
-          }
+        const text = (el.textContent || '').trim();
+        if (!text) {
+          el.removeAttribute('data-text');
+          return;
         }
 
         if (el.getAttribute('data-text') !== text) {
@@ -140,7 +140,11 @@ function App() {
       cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(updateTextElements);
     });
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, { 
+      childList: true, 
+      subtree: true,
+      characterData: true
+    });
 
     return () => {
       observer.disconnect();
