@@ -172,3 +172,22 @@ Tasks:
   - Allowed unit records to be dynamically updated utilizing `UPDATE` SQL clauses against Supabase without needing deletion and recreation.
 Follow-ups:
   - None
+
+Date: 2026-06-01 (Session Continued)
+Tasks:
+  - Migrated the master official "Unit Registry" from a hardcoded array in `src/data/warhammer40k.ts` to the Supabase `unit_points` database table.
+  - Built a `useUnitRegistry` hook to hydrate valid official units dynamically across the application upon load.
+  - Updated the `ArmyRoster` component to consume the dynamic context to filter and validate units.
+  - Upgraded the Munitorum Field Manual panel in the `AdminDashboard` to serve as a complete registry management tool, adding the ability to edit and safely remove unit records (e.g. Legends units) with live dropdown refresh.
+  - Mocked `useUnitRegistry` across all `AdminDashboard` and `ArmyRoster` test suites to maintain clean TDD architecture. Tests successfully passing.
+Follow-ups:
+  - None
+
+Date: 2026-06-01 (Session Continued - Field Manual Update)
+Tasks:
+  - Updated `Briefing.tsx` to include the Campaign Structure & Matchmaking section.
+  - Specified the 400, 800, 1200, and 1600 escalation checkpoints.
+  - Clarified that every Commander must play at least one official game at each checkpoint using the automatching system.
+  - Noted the Final 2000-Point Tournament and the prize categories (Best Painted, Best Converted, Best Sportsmanship, Best General).
+Follow-ups:
+  - None

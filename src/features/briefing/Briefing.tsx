@@ -22,6 +22,21 @@ export default function Briefing() {
 
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h3 style={{ color: 'var(--theme-accent)', marginBottom: '1rem', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>
+          Campaign Structure & Matchmaking
+        </h3>
+        <p style={{ lineHeight: '1.6', marginBottom: '1rem' }}>
+          The campaign is structured around four crucial escalation checkpoints: <strong>400, 800, 1200, and 1600 points</strong>. As your army grows, so does the scale of war.
+        </p>
+        <p style={{ lineHeight: '1.6', marginBottom: '1rem' }}>
+          We utilize an <strong>automated matchmaking system</strong> to ensure fair and diverse pairings. <strong>Every Commander must play at least one official game at each of the 4 checkpoints</strong> to maintain the campaign narrative and progression.
+        </p>
+        <p style={{ lineHeight: '1.6' }}>
+          The league culminates in a <strong>Final 2000-Point Tournament</strong>. At this grand finale, all Commanders will deploy their completed forces, and we will announce the overall campaign prizes for: <strong>Best Painted, Best Converted, Best Sportsmanship, and Best General</strong>.
+        </p>
+      </div>
+
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <h3 style={{ color: 'var(--theme-accent)', marginBottom: '1rem', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>
           Getting Started
         </h3>
         <ol style={{ paddingLeft: '1.5rem', lineHeight: '2' }}>
