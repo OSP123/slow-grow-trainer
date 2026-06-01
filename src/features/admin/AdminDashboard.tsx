@@ -66,6 +66,9 @@ export default function AdminDashboard() {
   // Roster Management
   const [users, setUsers] = useState<any[]>([]);
   const [fetchingUsers, setFetchingUsers] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [userMessage, setUserMessage] = useState('');
 
   // Unit Points management
   const { unitsByFaction, refreshRegistry } = useUnitRegistry();
@@ -141,6 +144,33 @@ export default function AdminDashboard() {
   const handleTogglePayment = async (userId: string, currentStatus: boolean) => {
     const { error } = await supabase.from('profiles').update({ payment_status: !currentStatus }).eq('id', userId);
     if (!error) fetchUsers();
+  };
+
+  const handleEditUser = (u: any) => {
+    setEditingUserId(u.id);
+    setEditingUser({ ...u });
+    setUserMessage('');
+  };
+
+  const handleSaveUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+    const { error } = await supabase.from('profiles').update({
+      commander_name: editingUser.commander_name,
+      army_faction: editingUser.army_faction,
+      location: editingUser.location,
+      experience_level: editingUser.experience_level,
+    }).eq('id', editingUser.id);
+    if (error) {
+      setUserMessage('Error: ' + error.message);
+    } else {
+      setUserMessage('Commander updated successfully.');
+      setTimeout(() => {
+        setEditingUserId(null);
+        setEditingUser(null);
+        fetchUsers();
+      }, 1000);
+    }
   };
 
   const handleGenerateMatches = async () => {
@@ -490,45 +520,86 @@ export default function AdminDashboard() {
                 <th style={{ padding: '0.5rem' }}>Location</th>
                 <th style={{ padding: '0.5rem' }}>Milestones Reached</th>
                 <th style={{ padding: '0.5rem', textAlign: 'center' }}>Payment Status</th>
+                <th style={{ padding: '0.5rem' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {users.map(u => (
-                <tr key={u.id} style={{ borderBottom: '1px solid var(--theme-border)' }}>
-                  <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>{u.commander_name || '—'}</td>
-                  <td style={{ padding: '0.5rem' }}>{u.army_faction || '—'}</td>
-                  <td style={{ padding: '0.5rem', color: 'var(--theme-fg-muted)' }}>{u.location || '—'}</td>
-                  <td style={{ padding: '0.5rem', fontSize: '0.75rem' }}>
-                    {u.hobby_milestones && u.hobby_milestones.length > 0 ? (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                        {u.hobby_milestones.map((hm: any) => (
-                          <span key={hm.milestone_step} style={{ backgroundColor: 'var(--theme-accent)', color: 'white', padding: '2px 6px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
-                            {hm.milestone_step}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <span style={{ color: 'var(--theme-fg-muted)' }}>No progress</span>
-                    )}
-                  </td>
-                  <td style={{ padding: '0.5rem', textAlign: 'center' }}>
-                    <button
-                      onClick={() => handleTogglePayment(u.id, !!u.payment_status)}
-                      style={{
-                        padding: '4px 12px',
-                        borderRadius: '4px',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontWeight: 'bold',
-                        fontSize: '0.75rem',
-                        backgroundColor: u.payment_status ? '#166534' : '#991b1b',
-                        color: 'white',
-                      }}
-                    >
-                      {u.payment_status ? 'PAID' : 'UNPAID'}
-                    </button>
-                  </td>
-                </tr>
+                <React.Fragment key={u.id}>
+                  <tr style={{ borderBottom: '1px solid var(--theme-border)' }}>
+                    <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>{u.commander_name || '—'}</td>
+                    <td style={{ padding: '0.5rem' }}>{u.army_faction || '—'}</td>
+                    <td style={{ padding: '0.5rem', color: 'var(--theme-fg-muted)' }}>{u.location || '—'}</td>
+                    <td style={{ padding: '0.5rem', fontSize: '0.75rem' }}>
+                      {u.hobby_milestones && u.hobby_milestones.length > 0 ? (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                          {u.hobby_milestones.map((hm: any) => (
+                            <span key={hm.milestone_step} style={{ backgroundColor: 'var(--theme-accent)', color: 'white', padding: '2px 6px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
+                              {hm.milestone_step}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span style={{ color: 'var(--theme-fg-muted)' }}>No progress</span>
+                      )}
+                    </td>
+                    <td style={{ padding: '0.5rem', textAlign: 'center' }}>
+                      <button
+                        onClick={() => handleTogglePayment(u.id, !!u.payment_status)}
+                        style={{
+                          padding: '4px 12px',
+                          borderRadius: '4px',
+                          border: 'none',
+                          backgroundColor: u.payment_status ? '#166534' : 'var(--theme-bg)',
+                          color: u.payment_status ? 'white' : 'var(--theme-fg)',
+                          cursor: 'pointer',
+                          fontSize: '0.75rem',
+                        }}
+                      >
+                        {u.payment_status ? 'PAID' : 'UNPAID'}
+                      </button>
+                    </td>
+                    <td style={{ padding: '0.5rem' }}>
+                      <button onClick={() => handleEditUser(u)} className="btn secondary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }}>Edit</button>
+                    </td>
+                  </tr>
+                  {editingUserId === u.id && (
+                    <tr>
+                      <td colSpan={6} style={{ padding: '1rem', backgroundColor: 'var(--theme-bg-alt)' }}>
+                        <form onSubmit={handleSaveUser} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'flex-end' }}>
+                          <div style={{ flex: '1 1 200px' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px' }}>Commander Name</label>
+                            <input type="text" value={editingUser.commander_name || ''} onChange={e => setEditingUser({ ...editingUser, commander_name: e.target.value })} required style={{ width: '100%', padding: '0.5rem' }} />
+                          </div>
+                          <div style={{ flex: '1 1 200px' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px' }}>Army Faction</label>
+                            <select value={editingUser.army_faction || ''} onChange={e => setEditingUser({ ...editingUser, army_faction: e.target.value })} required style={{ width: '100%', padding: '0.5rem' }}>
+                              <option value="">Select Faction...</option>
+                              {Object.keys(unitsByFaction).sort().map(f => <option key={f} value={f}>{f}</option>)}
+                            </select>
+                          </div>
+                          <div style={{ flex: '1 1 150px' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px' }}>Location</label>
+                            <input type="text" value={editingUser.location || ''} onChange={e => setEditingUser({ ...editingUser, location: e.target.value })} style={{ width: '100%', padding: '0.5rem' }} />
+                          </div>
+                          <div style={{ flex: '1 1 150px' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px' }}>Experience</label>
+                            <select value={editingUser.experience_level || ''} onChange={e => setEditingUser({ ...editingUser, experience_level: e.target.value })} style={{ width: '100%', padding: '0.5rem' }}>
+                              <option value="beginner">Beginner</option>
+                              <option value="intermediate">Intermediate</option>
+                              <option value="experienced">Experienced</option>
+                            </select>
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button type="submit" className="btn primary" style={{ padding: '0.5rem 1rem' }}>Save</button>
+                            <button type="button" onClick={() => setEditingUserId(null)} className="btn secondary" style={{ padding: '0.5rem 1rem' }}>Cancel</button>
+                          </div>
+                          {userMessage && <div style={{ width: '100%', color: 'var(--theme-accent)', fontSize: '0.85rem' }}>{userMessage}</div>}
+                        </form>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               ))}
             </tbody>
           </table>

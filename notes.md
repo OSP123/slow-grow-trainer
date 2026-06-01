@@ -216,3 +216,12 @@ Tasks:
   - Refactored `Login.test.tsx` and `App.test.tsx` to mock `useUnitRegistry`. All unit tests verified (12/12 passing).
 Follow-ups:
   - None
+
+Date: 2026-06-01 (Session Continued - Admin Dashboard User Management)
+Tasks:
+  - Added an inline editing form to the "Campaign Roster & Payments" section of the Admin Dashboard.
+  - Admins can now click "Edit" on any user to update their `commander_name`, `army_faction`, `location`, and `experience_level`.
+  - The faction dropdown in the admin edit form uses the database-backed `useUnitRegistry` list of factions, guaranteeing data integrity.
+  - All unit tests verified (12/12 passing).
+Follow-ups:
+  - None
