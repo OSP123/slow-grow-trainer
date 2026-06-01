@@ -136,7 +136,7 @@ export default function AdminDashboard() {
 
   const fetchUsers = async () => {
     setFetchingUsers(true);
-    const { data, error } = await supabase.from('profiles').select('id, location, experience_level, army_faction, commander_name, payment_status, hobby_milestones(milestone_step)').eq('role', 'user').order('commander_name');
+    const { data, error } = await supabase.from('profiles').select('id, location, experience_level, army_faction, commander_name, payment_status, role, hobby_milestones(milestone_step)').order('commander_name');
     if (!error && data) setUsers(data);
     setFetchingUsers(false);
   };
@@ -174,7 +174,7 @@ export default function AdminDashboard() {
   };
 
   const handleGenerateMatches = async () => {
-    const { data } = await supabase.from('profiles').select('id, location, experience_level, army_faction, commander_name').eq('role', 'user');
+    const { data } = await supabase.from('profiles').select('id, location, experience_level, army_faction, commander_name');
     if (data) {
       const pairings = generateMatchups(data);
       setGeneratedMatches(pairings);
@@ -527,7 +527,10 @@ export default function AdminDashboard() {
               {users.map(u => (
                 <React.Fragment key={u.id}>
                   <tr style={{ borderBottom: '1px solid var(--theme-border)' }}>
-                    <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>{u.commander_name || '—'}</td>
+                    <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>
+                      {u.commander_name || '—'}
+                      {u.role === 'admin' && <span style={{ marginLeft: '6px', fontSize: '0.65rem', padding: '2px 4px', backgroundColor: 'var(--theme-accent)', color: 'white', borderRadius: '4px' }}>ADMIN</span>}
+                    </td>
                     <td style={{ padding: '0.5rem' }}>{u.army_faction || '—'}</td>
                     <td style={{ padding: '0.5rem', color: 'var(--theme-fg-muted)' }}>{u.location || '—'}</td>
                     <td style={{ padding: '0.5rem', fontSize: '0.75rem' }}>
