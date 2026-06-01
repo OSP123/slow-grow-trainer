@@ -234,9 +234,6 @@ Tasks:
   - Moved `ImperialFont`, `ZeusBorne`, `NecronCrypt`, `Tau40k`, and `OCRAStd` fonts to the `public/fonts` directory and loaded them globally.
   - Configured CSS themes to inject faction-specific fonts into UI headers.
   - Modified `App.tsx` to automatically configure the UI theme based on the user's `army_faction`.
-  - Created a `<TranslatedHeader>` component that renders dual-font headers with High Gothic translations for alien languages, including a terminal-styled Binary translator for the Adeptus Mechanicus.
-  - All unit tests verified (12/12 passing).
-
 Date: 2026-06-01 (Session Continued - Alien Font Translation Bugfix)
 Tasks:
   - Enhanced the `MutationObserver` in `App.tsx` to include `characterData: true` and `subtree: true`, ensuring that all dynamic text updates (such as async data loading or route modifications) immediately synchronize translations.
@@ -245,5 +242,11 @@ Tasks:
   - Created `AlienTranslation.test.tsx` to thoroughly test dynamic updates and leaf node translation containment.
   - Verified that all 53 unit tests pass perfectly and the production build compiles successfully.
 
+Date: 2026-06-01 (Session Continued - Translation Edge Cases Bugfix)
+Tasks:
+  - Fixed an issue where SVGs inside navigation items were preventing leaf node detection by enforcing `toUpperCase()` matching on element `tagName` properties. Navigation items are now successfully translated.
+  - Removed an inline `var(--font-mono)` override from the "Connection secure" text block in `App.tsx` that was causing it to display in standard English instead of the required alien glyph font before translation.
+
 Follow-ups:
   - None
+

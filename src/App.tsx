@@ -112,10 +112,10 @@ function App() {
     const updateTextElements = () => {
       // Query all common text-bearing elements
       document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, td, th, button, label, a, span, div, dt, dd, caption, summary, figcaption, blockquote').forEach(el => {
-        if (SKIP_TAGS.has(el.tagName)) return;
+        if (SKIP_TAGS.has(el.tagName.toUpperCase())) return;
 
         // Check if it is a leaf element: all of its children are in SKIP_TAGS
-        const isLeaf = Array.from(el.children).every(child => SKIP_TAGS.has(child.tagName));
+        const isLeaf = Array.from(el.children).every(child => SKIP_TAGS.has(child.tagName.toUpperCase()));
         if (!isLeaf) {
           el.removeAttribute('data-text');
           return;
@@ -257,7 +257,7 @@ function App() {
               text={`${FACTIONS.find(f => f.id === activeTheme)?.label} Network`} 
               theme={activeTheme}
             />
-            <p style={{ color: 'var(--theme-fg-muted)', fontFamily: 'var(--font-mono, monospace)', fontSize: '0.9rem' }}>
+            <p style={{ color: 'var(--theme-fg-muted)', fontSize: '0.9rem' }}>
               Connection secure. Welcome Commander.
             </p>
           </div>
