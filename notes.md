@@ -230,7 +230,7 @@ Tasks:
   - Added an FAQ entry to the Field Manual detailing the 5-month timeline, requiring 400 points and 1 game per month.
   - Changed "Rules of Engagement" to "Hobby Spirit & Helpfulness" across the application to avoid dissuading new players.
   - Updated the Global Warzone Board to hide individual honour ratings to prevent public shaming.
-  - Replaced individual ratings with an "Exemplars of the Campaign" leaderboard displaying three separate top-3 categories: Top Generals (by VP), Finest Temperament, and Best Hobby Spirit.
+  - Replaced individual ratings with an "Exemplars of the Campaign" leaderboard displaying three separate top-3 categories: Top Megafactions (by average VP across commanders), Finest Temperament, and Best Hobby Spirit.
   - All unit tests verified (12/12 passing).
 Follow-ups:
   - None
