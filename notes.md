@@ -208,5 +208,11 @@ Tasks:
   - Replaced the free-text `Core Faction` input with a rigorous `<select>` dropdown populated directly from the `useUnitRegistry` hook's official faction list.
   - Mocked `useUnitRegistry` in `CommanderProfile.test.tsx` to restore test viability.
   - All unit tests verified (12/12 passing).
+
+Date: 2026-06-01 (Session Continued - Login Form Core Factions)
+Tasks:
+  - Updated `Login.tsx` (the registration form) to use the database-backed `useUnitRegistry` instead of the static `CORE_FACTIONS` array.
+  - This ensures users signing up can only select official factions that exist in the newly loaded Munitorum Field Manual data, preventing data desynchronization right at account creation.
+  - Refactored `Login.test.tsx` and `App.test.tsx` to mock `useUnitRegistry`. All unit tests verified (12/12 passing).
 Follow-ups:
   - None

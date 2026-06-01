@@ -18,6 +18,19 @@ vi.mock('./supabaseClient', () => ({
   },
 }));
 
+vi.mock('./hooks/useUnitRegistry', () => ({
+  useUnitRegistry: vi.fn().mockReturnValue({
+    unitsByFaction: {
+      'Space Marines': [],
+      'Necrons': [],
+    },
+    rawRegistry: [],
+    loading: false,
+    error: null,
+    refreshRegistry: vi.fn(),
+  }),
+}));
+
 describe('App Routing & Auth', () => {
   it('renders the Login screen by default if no session exists', async () => {
     render(

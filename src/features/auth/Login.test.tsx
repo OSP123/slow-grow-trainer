@@ -19,6 +19,19 @@ vi.mock('../../supabaseClient', () => ({
   },
 }));
 
+vi.mock('../../hooks/useUnitRegistry', () => ({
+  useUnitRegistry: vi.fn().mockReturnValue({
+    unitsByFaction: {
+      'Space Marines': [],
+      'Necrons': [],
+    },
+    rawRegistry: [],
+    loading: false,
+    error: null,
+    refreshRegistry: vi.fn(),
+  }),
+}));
+
 describe('Login Component', () => {
   it('renders login form elements successfully', () => {
     render(<Login />);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
-import { CORE_FACTIONS, SUBFACTIONS_MAP } from '../../data/warhammer40k';
+import { SUBFACTIONS_MAP } from '../../data/warhammer40k';
+import { useUnitRegistry } from '../../hooks/useUnitRegistry';
 
 export interface GameStore {
   id: string;
@@ -8,6 +9,7 @@ export interface GameStore {
 }
 
 export default function Login() {
+  const { unitsByFaction } = useUnitRegistry();
   const [view, setView] = useState<'login' | 'forgot' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -228,7 +230,7 @@ export default function Login() {
               style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }}
             >
               <option value="" disabled>Select Core Faction...</option>
-              {CORE_FACTIONS.map(f => <option key={f} value={f}>{f}</option>)}
+              {Object.keys(unitsByFaction).sort().map(f => <option key={f} value={f}>{f}</option>)}
             </select>
           </div>
           <div>
