@@ -201,20 +201,18 @@ function App() {
             </p>
           </div>
           
-          {!session && (
-            <div className="theme-selector">
-              <label htmlFor="theme-select" style={{ margin: 0 }}>Theme Override:</label>
-              <select 
-                id="theme-select" 
-                value={activeTheme} 
-                onChange={(e) => setActiveTheme(e.target.value)}
-              >
-                {FACTIONS.map(f => (
-                  <option key={f.id} value={f.id}>{f.label}</option>
-                ))}
-              </select>
-            </div>
-          )}
+          <div className="theme-selector">
+            <label htmlFor="theme-select" style={{ margin: 0 }}>Theme Override:</label>
+            <select 
+              id="theme-select" 
+              value={activeTheme} 
+              onChange={(e) => setActiveTheme(e.target.value)}
+            >
+              {FACTIONS.map(f => (
+                <option key={f.id} value={f.id}>{f.label}</option>
+              ))}
+            </select>
+          </div>
         </header>
 
         {/* Dashboard Router */}
