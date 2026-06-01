@@ -75,7 +75,9 @@ function App() {
     return <UpdatePassword setIsRecovering={setIsRecovering} />;
   }
 
-  if (!session) {
+  const isPublicRoute = location.pathname.startsWith('/briefing');
+
+  if (!session && !isPublicRoute) {
     return <Login />;
   }
 
@@ -142,17 +144,26 @@ function App() {
         </div>
 
         <div style={{ marginTop: 'auto' }}>
-          <div 
-            className={`nav-item ${activeView === 'profile' ? 'active' : ''}`}
-            onClick={() => navigateTo('/profile')}
-          >
-            <UserCircle size={20} />
-            Commander Profile
-          </div>
-          <div className="nav-item" onClick={() => supabase.auth.signOut()}>
-            <LogOut size={20} />
-            Disengage
-          </div>
+          {session ? (
+            <>
+              <div 
+                className={`nav-item ${activeView === 'profile' ? 'active' : ''}`}
+                onClick={() => navigateTo('/profile')}
+              >
+                <UserCircle size={20} />
+                Commander Profile
+              </div>
+              <div className="nav-item" onClick={() => supabase.auth.signOut()}>
+                <LogOut size={20} />
+                Disengage
+              </div>
+            </>
+          ) : (
+            <div className="nav-item" onClick={() => navigateTo('/')}>
+              <UserCircle size={20} />
+              Login / Enlist
+            </div>
+          )}
         </div>
       </nav>
 

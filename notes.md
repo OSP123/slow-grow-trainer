@@ -155,3 +155,13 @@ Tasks:
   - Implemented 'payment_status' column migration in Supabase.
 Follow-ups:
   - None
+
+Date: 2026-05-31 (Session Continued)
+Tasks:
+  - Created Supabase `unit_photos` storage bucket and `image_url` column in `army_units`.
+  - Enforced 1-picture-per-unit limit with strict overwrite policies on upload.
+  - Implemented unit validation checks so users can only upload photos for recognized `UNITS_BY_FACTION` entries in the `ArmyRoster`.
+  - Added 'Milestone Progress' column to the Admin Dashboard Roster.
+  - Upgraded `CommanderProfile.tsx` to automatically query all uploaded photos matching the commander's faction and dynamically render them as a tiled background.
+Follow-ups:
+  - None
