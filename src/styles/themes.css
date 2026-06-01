@@ -40,7 +40,8 @@
   --theme-border: #3f3f33;
   --theme-border-accent: #dc2626; /* Red wunz go fasta */
   --theme-shadow: 0 4px 20px rgba(234, 179, 8, 0.1);
-  --font-head: 'Black Ops One', 'Outfit', sans-serif;
+  --font-body: 'OrkGlyphs', 'Inter', sans-serif;
+  --font-head: 'OrkGlyphs', 'Outfit', sans-serif;
   --panel-radius: 0px;
 }
 
@@ -353,7 +354,8 @@ body[data-theme="tau"] :is(input, select, textarea, option) {
 
 /* English translation via ::after — universal selector for any element with data-text */
 body[data-theme="necrons"] [data-text]::after,
-body[data-theme="tau"] [data-text]::after {
+body[data-theme="tau"] [data-text]::after,
+body[data-theme="orks"] [data-text]::after {
   content: attr(data-text);
   display: block !important;
   flex-basis: 100% !important;
@@ -387,8 +389,18 @@ body[data-theme="tau"] :is(h1, h2, h3, h4, h5, h6)[data-text]::after {
   font-size: 0.45em !important;
 }
 
+/* Orks: readable font for translation */
+body[data-theme="orks"] [data-text]::after {
+  font-family: 'Black Ops One', 'Outfit', sans-serif !important;
+  color: var(--theme-fg-muted) !important;
+}
+body[data-theme="orks"] :is(h1, h2, h3, h4, h5, h6)[data-text]::after {
+  font-size: 0.45em !important;
+}
+
 /* Force standard font on input/select so they are actually readable */
 body[data-theme="necrons"] input, body[data-theme="necrons"] select, body[data-theme="necrons"] textarea,
-body[data-theme="tau"] input, body[data-theme="tau"] select, body[data-theme="tau"] textarea {
+body[data-theme="tau"] input, body[data-theme="tau"] select, body[data-theme="tau"] textarea,
+body[data-theme="orks"] input, body[data-theme="orks"] select, body[data-theme="orks"] textarea {
   font-family: 'Inter', sans-serif !important;
 }

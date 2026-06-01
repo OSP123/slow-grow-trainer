@@ -95,7 +95,7 @@ function App() {
 
   // Alien font translation: set data-text on ALL leaf text elements so CSS ::after can show English
   useEffect(() => {
-    const isAlienTheme = activeTheme === 'necrons' || activeTheme === 'tau';
+    const isAlienTheme = activeTheme === 'necrons' || activeTheme === 'tau' || activeTheme === 'orks';
     const SKIP_TAGS = new Set([
       'INPUT','SELECT','TEXTAREA','OPTION','SCRIPT','STYLE','NOSCRIPT','IFRAME','CANVAS','VIDEO','AUDIO','IMG','BR','HR',
       'SVG','PATH','CIRCLE','LINE','RECT','POLYGON','POLYLINE','ELLIPSE','G','DEFS','USE','SYMBOL','CLIPPATH',
