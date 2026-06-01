@@ -192,3 +192,21 @@ Tasks:
   - Noted the Final 2000-Point Tournament and the prize categories (Best Painted, Best Converted, Best Sportsmanship, Best General).
 Follow-ups:
   - None
+
+Date: 2026-06-01 (Session Continued - Munitorum PDF Parser)
+Tasks:
+  - Created `scripts/parse_munitorum.ts` to ingest the official Munitorum Field Manual PDF.
+  - Set up a pipeline to convert the PDF via `pdftotext` into a linear text file, then map regex extractors over 850+ unit profiles.
+  - Generated `seed_units.sql` containing a massive `INSERT` block for all 854 official units and their corresponding base points.
+  - Provided the SQL file to the Admin to bypass Row Level Security restrictions, allowing a complete, 100% accurate database reset to official Games Workshop points.
+Follow-ups:
+  - None
+
+Date: 2026-06-01 (Session Continued - Profile Faction Editing)
+Tasks:
+  - Updated `CommanderProfile.tsx` to allow users to edit their Core Faction.
+  - Replaced the free-text `Core Faction` input with a rigorous `<select>` dropdown populated directly from the `useUnitRegistry` hook's official faction list.
+  - Mocked `useUnitRegistry` in `CommanderProfile.test.tsx` to restore test viability.
+  - All unit tests verified (12/12 passing).
+Follow-ups:
+  - None

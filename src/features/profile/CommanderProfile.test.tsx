@@ -18,6 +18,19 @@ vi.mock('./ArmyRoster', () => ({
   default: () => <div>ArmyRoster Mock</div>,
 }));
 
+vi.mock('../../hooks/useUnitRegistry', () => ({
+  useUnitRegistry: vi.fn().mockReturnValue({
+    unitsByFaction: {
+      'Space Marines': ['Intercessor Squad', 'Dreadnought'],
+      'Necrons': ['Necron Warriors', 'Overlord'],
+    },
+    rawRegistry: [],
+    loading: false,
+    error: null,
+    refreshRegistry: vi.fn(),
+  }),
+}));
+
 const mockProfile = {
   id: 'profile-123',
   commander_name: 'Lord Castellan',

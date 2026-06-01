@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '../../supabaseClient';
 import { compressImage, getTransformUrl } from '../../utils/imageCompression';
 import ArmyRoster from './ArmyRoster';
+import { useUnitRegistry } from '../../hooks/useUnitRegistry';
 
 export interface ProfileData {
   id?: string;
@@ -19,6 +20,7 @@ type Tab = 'specs' | 'roster' | 'lore';
 
 export default function CommanderProfile() {
   const { profileId } = useParams<{ profileId?: string }>();
+  const { unitsByFaction } = useUnitRegistry();
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -241,7 +243,12 @@ export default function CommanderProfile() {
                   </div>
                   <div>
                     <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.85rem' }}>Core Faction</label>
-                    <input type="text" value={faction} onChange={e => setFaction(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} required />
+                    <select value={faction} onChange={e => setFaction(e.target.value)} style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box', backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-fg)', border: '1px solid var(--theme-border)' }} required>
+                      <option value="">Select Faction...</option>
+                      {Object.keys(unitsByFaction).sort().map(f => (
+                        <option key={f} value={f}>{f}</option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.85rem' }}>Subfaction</label>
