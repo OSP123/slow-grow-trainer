@@ -136,8 +136,24 @@ export default function AdminDashboard() {
 
   const fetchUsers = async () => {
     setFetchingUsers(true);
-    const { data, error } = await supabase.from('profiles').select('id, location, experience_level, army_faction, commander_name, payment_status, role, hobby_milestones(milestone_step)').order('commander_name');
-    if (!error && data) setUsers(data);
+    const { data: profilesData, error } = await supabase
+      .from('profiles')
+      .select('id, location, experience_level, army_faction, commander_name, payment_status, role')
+      .order('commander_name');
+
+    if (!error && profilesData) {
+      const { data: milestonesData } = await supabase
+        .from('hobby_milestones')
+        .select('user_id, milestone_step');
+
+      const merged = profilesData.map(p => ({
+        ...p,
+        hobby_milestones: (milestonesData || [])
+          .filter(m => m.user_id === p.id)
+          .map(m => ({ milestone_step: m.milestone_step }))
+      }));
+      setUsers(merged);
+    }
     setFetchingUsers(false);
   };
 

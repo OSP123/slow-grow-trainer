@@ -222,6 +222,7 @@ Tasks:
   - Added an inline editing form to the "Campaign Roster & Payments" section of the Admin Dashboard.
   - Admins can now click "Edit" on any user to update their `commander_name`, `army_faction`, `location`, and `experience_level`.
   - The faction dropdown in the admin edit form uses the database-backed `useUnitRegistry` list of factions, guaranteeing data integrity.
+  - Fixed a critical bug in `fetchUsers` where `profiles` and `hobby_milestones` were being joined via a non-existent foreign key, which caused PostgREST to crash and return an empty user array. Changed to fetching `profiles` and `hobby_milestones` independently and merging them in JS.
   - All unit tests verified (12/12 passing).
 Follow-ups:
   - None
