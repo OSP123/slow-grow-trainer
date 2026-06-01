@@ -204,36 +204,42 @@ export default function CampaignBattles() {
   const isP1Active = activeMatchData?.p1_id === userId;
 
   const getTopCommanders = () => {
-    const scores: Record<string, { name: string, totalTemp: number, countTemp: number, totalSpirit: number, countSpirit: number }> = {};
+    const scores: Record<string, { name: string, totalTemp: number, countTemp: number, totalSpirit: number, countSpirit: number, totalVP: number, games: number }> = {};
     
     allMatchups.forEach(m => {
       if (m.status !== 'completed') return;
       
       if (m.p1_id && m.p1_profile) {
-        if (!scores[m.p1_id]) scores[m.p1_id] = { name: m.p1_profile.commander_name, totalTemp: 0, countTemp: 0, totalSpirit: 0, countSpirit: 0 };
+        if (!scores[m.p1_id]) scores[m.p1_id] = { name: m.p1_profile.commander_name, totalTemp: 0, countTemp: 0, totalSpirit: 0, countSpirit: 0, totalVP: 0, games: 0 };
+        scores[m.p1_id].games++;
         if (m.p1_temperament) { scores[m.p1_id].totalTemp += m.p1_temperament; scores[m.p1_id].countTemp++; }
         if (m.p1_rules_engagement) { scores[m.p1_id].totalSpirit += m.p1_rules_engagement; scores[m.p1_id].countSpirit++; }
+        if (m.p1_score) scores[m.p1_id].totalVP += m.p1_score;
       }
       if (m.p2_id && m.p2_profile) {
-        if (!scores[m.p2_id]) scores[m.p2_id] = { name: m.p2_profile.commander_name, totalTemp: 0, countTemp: 0, totalSpirit: 0, countSpirit: 0 };
+        if (!scores[m.p2_id]) scores[m.p2_id] = { name: m.p2_profile.commander_name, totalTemp: 0, countTemp: 0, totalSpirit: 0, countSpirit: 0, totalVP: 0, games: 0 };
+        scores[m.p2_id].games++;
         if (m.p2_temperament) { scores[m.p2_id].totalTemp += m.p2_temperament; scores[m.p2_id].countTemp++; }
         if (m.p2_rules_engagement) { scores[m.p2_id].totalSpirit += m.p2_rules_engagement; scores[m.p2_id].countSpirit++; }
+        if (m.p2_score) scores[m.p2_id].totalVP += m.p2_score;
       }
     });
 
     const commanders = Object.values(scores).map(s => {
-      const avgTemp = s.countTemp > 0 ? s.totalTemp / s.countTemp : 0;
-      const avgSpirit = s.countSpirit > 0 ? s.totalSpirit / s.countSpirit : 0;
       return {
         name: s.name,
-        totalAvg: avgTemp + avgSpirit,
-        avgTemp,
-        avgSpirit,
-        games: Math.max(s.countTemp, s.countSpirit)
+        avgTemp: s.countTemp > 0 ? s.totalTemp / s.countTemp : 0,
+        avgSpirit: s.countSpirit > 0 ? s.totalSpirit / s.countSpirit : 0,
+        totalVP: s.totalVP,
+        games: s.games
       };
     }).filter(c => c.games > 0);
 
-    return commanders.sort((a, b) => b.totalAvg - a.totalAvg).slice(0, 3);
+    return {
+      topTemp: [...commanders].sort((a, b) => b.avgTemp - a.avgTemp).slice(0, 3),
+      topSpirit: [...commanders].sort((a, b) => b.avgSpirit - a.avgSpirit).slice(0, 3),
+      topGenerals: [...commanders].sort((a, b) => b.totalVP - a.totalVP).slice(0, 3)
+    };
   };
   
   const topCommanders = getTopCommanders();
@@ -248,28 +254,46 @@ export default function CampaignBattles() {
       </p>
 
       {/* ── Top Commanders ── */}
-      {topCommanders.length > 0 && (
+      {topCommanders.topGenerals.length > 0 && (
         <div className="card" style={{ marginBottom: '2rem' }}>
           <h2 style={{ marginBottom: '1rem', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem', color: 'var(--theme-accent)' }}>
-            Exemplars of the Campaign
+            Campaign Leaders
           </h2>
-          <p style={{ color: 'var(--theme-fg-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-            The commanders who have demonstrated the highest levels of sportsmanship and hobby spirit across their engagements.
-          </p>
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            {topCommanders.map((c, idx) => (
-              <div key={idx} style={{ flex: '1 1 200px', padding: '1rem', border: '1px solid var(--theme-accent)', borderRadius: '8px', backgroundColor: 'var(--theme-bg-secondary)' }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                  #{idx + 1} {c.name}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+            
+            {/* Top Generals */}
+            <div style={{ padding: '1rem', border: '1px solid var(--theme-accent)', borderRadius: '8px', backgroundColor: 'var(--theme-bg-secondary)' }}>
+              <h3 style={{ margin: '0 0 1rem 0', color: 'var(--theme-accent)' }}>⚔ Top Generals</h3>
+              {topCommanders.topGenerals.map((c, idx) => (
+                <div key={idx} style={{ marginBottom: '0.5rem' }}>
+                  <div style={{ fontWeight: 'bold' }}>#{idx + 1} {c.name}</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)' }}>{c.totalVP} Total VP</div>
                 </div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--theme-fg-muted)' }}>
-                  Temperament: {c.avgTemp.toFixed(1)} ★
+              ))}
+            </div>
+
+            {/* Top Temperament */}
+            <div style={{ padding: '1rem', border: '1px solid var(--theme-accent)', borderRadius: '8px', backgroundColor: 'var(--theme-bg-secondary)' }}>
+              <h3 style={{ margin: '0 0 1rem 0', color: 'var(--theme-accent)' }}>⚔ Finest Temperament</h3>
+              {topCommanders.topTemp.map((c, idx) => (
+                <div key={idx} style={{ marginBottom: '0.5rem' }}>
+                  <div style={{ fontWeight: 'bold' }}>#{idx + 1} {c.name}</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)' }}>{c.avgTemp.toFixed(1)} ★ Avg</div>
                 </div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--theme-fg-muted)' }}>
-                  Hobby Spirit: {c.avgSpirit.toFixed(1)} ★
+              ))}
+            </div>
+
+            {/* Top Hobby Spirit */}
+            <div style={{ padding: '1rem', border: '1px solid var(--theme-accent)', borderRadius: '8px', backgroundColor: 'var(--theme-bg-secondary)' }}>
+              <h3 style={{ margin: '0 0 1rem 0', color: 'var(--theme-accent)' }}>⚔ Best Hobby Spirit</h3>
+              {topCommanders.topSpirit.map((c, idx) => (
+                <div key={idx} style={{ marginBottom: '0.5rem' }}>
+                  <div style={{ fontWeight: 'bold' }}>#{idx + 1} {c.name}</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)' }}>{c.avgSpirit.toFixed(1)} ★ Avg</div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
           </div>
         </div>
       )}
