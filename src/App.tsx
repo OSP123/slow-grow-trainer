@@ -93,10 +93,11 @@ function App() {
     document.body.setAttribute('data-theme', activeTheme);
   }, [activeTheme]);
 
-  // Alien font translation: set data-text on all text elements so CSS ::after can show English
+  // Alien font translation: set data-text on ALL leaf text elements so CSS ::after can show English
   useEffect(() => {
     const isAlienTheme = activeTheme === 'necrons' || activeTheme === 'tau';
-    const TEXT_SELECTOR = 'h1, h2, h3, h4, h5, h6, p, li, td, th, button, label';
+    const SKIP_TAGS = new Set(['INPUT','SELECT','TEXTAREA','OPTION','SCRIPT','STYLE','NOSCRIPT','IFRAME','CANVAS','VIDEO','AUDIO','IMG','BR','HR','SVG','PATH','CIRCLE','LINE','RECT','POLYGON','POLYLINE','ELLIPSE','G','DEFS','USE','SYMBOL','CLIPPATH']);
+    const BLOCK_TAGS = new Set(['DIV','SECTION','NAV','ARTICLE','ASIDE','HEADER','FOOTER','MAIN','UL','OL','TABLE','TBODY','THEAD','TFOOT','TR','FORM','FIELDSET','DETAILS','FIGURE','BLOCKQUOTE','PRE','ADDRESS','H1','H2','H3','H4','H5','H6','P','LI']);
 
     const clearDataText = () => {
       document.querySelectorAll('[data-text]').forEach(el => {
@@ -110,9 +111,23 @@ function App() {
     }
 
     const updateTextElements = () => {
-      document.querySelectorAll(TEXT_SELECTOR).forEach(el => {
+      // Query all common text-bearing elements
+      document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, td, th, button, label, a, span, div, dt, dd, caption, summary, figcaption, blockquote').forEach(el => {
+        if (SKIP_TAGS.has(el.tagName)) return;
+
         const text = (el.textContent || '').trim();
-        if (text && el.getAttribute('data-text') !== text) {
+        if (!text) return;
+
+        // For generic containers (div, span, a), only target "leaf" elements
+        // that don't contain block-level children — prevents a parent div from
+        // showing a translation of ALL its nested children's text
+        if (['DIV', 'SPAN', 'A'].includes(el.tagName)) {
+          for (let i = 0; i < el.children.length; i++) {
+            if (BLOCK_TAGS.has(el.children[i].tagName)) return;
+          }
+        }
+
+        if (el.getAttribute('data-text') !== text) {
           el.setAttribute('data-text', text);
         }
       });
@@ -120,13 +135,16 @@ function App() {
 
     updateTextElements();
 
+    let rafId: number;
     const observer = new MutationObserver(() => {
-      requestAnimationFrame(updateTextElements);
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(updateTextElements);
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
     return () => {
       observer.disconnect();
+      cancelAnimationFrame(rafId);
       clearDataText();
     };
   }, [activeTheme]);

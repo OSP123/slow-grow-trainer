@@ -334,8 +334,8 @@
 /* ============================================
    Alien Font Translations
    Applies alien script to ALL text and adds
-   English translations beneath block-level
-   text elements. Requires data-text via JS.
+   English translations beneath every text
+   element. JS sets data-text on leaf elements.
    ============================================ */
 
 /* Force lowercase on all text so alien glyphs render */
@@ -344,45 +344,41 @@ body[data-theme="tau"] {
   text-transform: lowercase !important;
 }
 
-/* Restore normal casing for form inputs */
-body[data-theme="necrons"] :is(input, select, textarea),
-body[data-theme="tau"] :is(input, select, textarea) {
+/* Restore normal casing and readable font for form inputs */
+body[data-theme="necrons"] :is(input, select, textarea, option),
+body[data-theme="tau"] :is(input, select, textarea, option) {
   text-transform: none !important;
   font-family: 'Inter', sans-serif !important;
 }
 
-/* English translation via ::after on block-level text elements */
-body[data-theme="necrons"] :is(h1, h2, h3, h4, h5, h6, p, li, td, th, button, label)[data-text]::after,
-body[data-theme="tau"] :is(h1, h2, h3, h4, h5, h6, p, li, td, th, button, label)[data-text]::after {
+/* English translation via ::after — universal selector for any element with data-text */
+body[data-theme="necrons"] [data-text]::after,
+body[data-theme="tau"] [data-text]::after {
   content: attr(data-text);
   display: block;
   text-transform: uppercase !important;
   font-weight: 400;
-  margin-top: 0.15em;
+  margin-top: 0.1em;
   letter-spacing: 1px;
   opacity: 0.7;
+  font-size: 0.65em;
 }
 
-/* Necrons: Outfit for English translations */
+/* Necrons: smaller for headings, Outfit font */
+body[data-theme="necrons"] [data-text]::after {
+  font-family: 'Outfit', sans-serif;
+  color: var(--theme-fg-muted);
+}
 body[data-theme="necrons"] :is(h1, h2, h3, h4, h5, h6)[data-text]::after {
-  font-family: 'Outfit', sans-serif;
   font-size: 0.4em;
-  color: var(--theme-fg-muted);
-}
-body[data-theme="necrons"] :is(p, li, td, th, button, label)[data-text]::after {
-  font-family: 'Outfit', sans-serif;
-  font-size: 0.7em;
-  color: var(--theme-fg-muted);
 }
 
-/* Tau: OCRAStd for English translations */
+/* Tau: smaller for headings, OCRAStd font */
+body[data-theme="tau"] [data-text]::after {
+  font-family: 'OCRAStd', monospace;
+  color: var(--theme-fg-muted);
+}
 body[data-theme="tau"] :is(h1, h2, h3, h4, h5, h6)[data-text]::after {
-  font-family: 'OCRAStd', monospace;
   font-size: 0.4em;
-  color: var(--theme-fg-muted);
 }
-body[data-theme="tau"] :is(p, li, td, th, button, label)[data-text]::after {
-  font-family: 'OCRAStd', monospace;
-  font-size: 0.7em;
-  color: var(--theme-fg-muted);
-}
+
