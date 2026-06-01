@@ -138,7 +138,7 @@ export default function AdminDashboard() {
     setFetchingUsers(true);
     const { data: profilesData, error } = await supabase
       .from('profiles')
-      .select('id, location, experience_level, army_faction, commander_name, payment_status, role')
+      .select('id, location, experience_level, army_faction, commander_name, payment_status, role, discord_name, real_name')
       .order('commander_name');
 
     if (!error && profilesData) {
@@ -532,6 +532,8 @@ export default function AdminDashboard() {
             <thead>
               <tr style={{ borderBottom: '2px solid var(--theme-border)', textAlign: 'left' }}>
                 <th style={{ padding: '0.5rem' }}>Commander</th>
+                <th style={{ padding: '0.5rem' }}>Real Name</th>
+                <th style={{ padding: '0.5rem' }}>Discord</th>
                 <th style={{ padding: '0.5rem' }}>Faction</th>
                 <th style={{ padding: '0.5rem' }}>Location</th>
                 <th style={{ padding: '0.5rem' }}>Milestones Reached</th>
@@ -547,6 +549,8 @@ export default function AdminDashboard() {
                       {u.commander_name || '—'}
                       {u.role === 'admin' && <span style={{ marginLeft: '6px', fontSize: '0.65rem', padding: '2px 4px', backgroundColor: 'var(--theme-accent)', color: 'white', borderRadius: '4px' }}>ADMIN</span>}
                     </td>
+                    <td style={{ padding: '0.5rem', color: 'var(--theme-fg-muted)' }}>{u.real_name || '—'}</td>
+                    <td style={{ padding: '0.5rem', color: 'var(--theme-fg-muted)' }}>{u.discord_name || '—'}</td>
                     <td style={{ padding: '0.5rem' }}>{u.army_faction || '—'}</td>
                     <td style={{ padding: '0.5rem', color: 'var(--theme-fg-muted)' }}>{u.location || '—'}</td>
                     <td style={{ padding: '0.5rem', fontSize: '0.75rem' }}>
@@ -584,7 +588,7 @@ export default function AdminDashboard() {
                   </tr>
                   {editingUserId === u.id && (
                     <tr>
-                      <td colSpan={6} style={{ padding: '1rem', backgroundColor: 'var(--theme-bg-alt)' }}>
+                      <td colSpan={8} style={{ padding: '1rem', backgroundColor: 'var(--theme-bg-alt)' }}>
                         <form onSubmit={handleSaveUser} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'flex-end' }}>
                           <div style={{ flex: '1 1 200px' }}>
                             <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px' }}>Commander Name</label>

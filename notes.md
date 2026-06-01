@@ -221,8 +221,10 @@ Date: 2026-06-01 (Session Continued - Admin Dashboard User Management)
 Tasks:
   - Added an inline editing form to the "Campaign Roster & Payments" section of the Admin Dashboard.
   - Admins can now click "Edit" on any user to update their `commander_name`, `army_faction`, `location`, and `experience_level`.
-  - The faction dropdown in the admin edit form uses the database-backed `useUnitRegistry` list of factions, guaranteeing data integrity.
   - Fixed a critical bug in `fetchUsers` where `profiles` and `hobby_milestones` were being joined via a non-existent foreign key, which caused PostgREST to crash and return an empty user array. Changed to fetching `profiles` and `hobby_milestones` independently and merging them in JS.
+  - Added `Real Name` and `Discord` columns to the Admin Dashboard table, pulling directly from the `profiles` table.
+  - Fixed a mobile UI bug where the sidebar menu required scrolling to reach the Commander link by implementing `100dvh` in `App.css` to properly account for dynamic mobile browser toolbars.
+  - Fixed flaky Matchmaker algorithm test by stubbing `Math.random` to ensure deterministic execution orders.
   - All unit tests verified (12/12 passing).
 Follow-ups:
   - None

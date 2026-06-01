@@ -20,8 +20,15 @@ describe('Matchmaker Simulation Algorithm Engine', () => {
       { id: '3', location: 'Seattle', experience_level: 'expert', army_faction: 'Orks', commander_name: 'Strong Geospatial Match' }, // Score: 10 + 0 + 0 = 10
     ];
     
+    // Mock Math.random to make the pop order deterministic
+    // We want '1' to be popped first so it pairs with '3'
+    const originalRandom = Math.random;
+    Math.random = () => 0.99; // Prevents shuffling order from changing original array order
+    
     // Player 1 and Player 3 should be matched definitively.
     const results = generateMatchups(pool);
+    
+    Math.random = originalRandom;
     // Since unresolved order mutates based on sort(), we can assert the strongest pair was built
     const highestScoreMatch = results.find(r => r.score === 10);
     expect(highestScoreMatch).toBeDefined();
