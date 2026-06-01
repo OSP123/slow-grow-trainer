@@ -93,6 +93,43 @@ function App() {
     document.body.setAttribute('data-theme', activeTheme);
   }, [activeTheme]);
 
+  // Alien font translation: set data-text on all headings so CSS ::after can show English
+  useEffect(() => {
+    const isAlienTheme = activeTheme === 'necrons' || activeTheme === 'tau';
+
+    const clearDataText = () => {
+      document.querySelectorAll('h1[data-text], h2[data-text], h3[data-text], h4[data-text], h5[data-text], h6[data-text]').forEach(el => {
+        el.removeAttribute('data-text');
+      });
+    };
+
+    if (!isAlienTheme) {
+      clearDataText();
+      return;
+    }
+
+    const updateHeadings = () => {
+      document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(el => {
+        const text = (el.textContent || '').trim();
+        if (text && el.getAttribute('data-text') !== text) {
+          el.setAttribute('data-text', text);
+        }
+      });
+    };
+
+    updateHeadings();
+
+    const observer = new MutationObserver(() => {
+      requestAnimationFrame(updateHeadings);
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+      clearDataText();
+    };
+  }, [activeTheme]);
+
   if (isRecovering) {
     return <UpdatePassword setIsRecovering={setIsRecovering} />;
   }

@@ -41,36 +41,8 @@ export default function TranslatedHeader({ text, theme, className, style, as = '
       </div>
     );
   }
-
-  // For Necrons
-  if (theme === 'necrons') {
-    return (
-      <div style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-        <Component className={className} style={{ ...style, fontFamily: 'NecronCrypt, Orbitron, sans-serif', letterSpacing: '2px', marginBottom: '0.1rem', textTransform: 'lowercase' }}>
-          {text.toLowerCase()}
-        </Component>
-        <div style={{ fontSize: '0.75rem', fontFamily: 'Outfit, sans-serif', color: 'var(--theme-fg-muted)', textTransform: 'uppercase', letterSpacing: '2px' }}>
-          {text}
-        </div>
-      </div>
-    );
-  }
-
-  // For Tau
-  if (theme === 'tau') {
-    return (
-      <div style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-        <Component className={className} style={{ ...style, fontFamily: 'Tau40k, Teko, sans-serif', letterSpacing: '2px', marginBottom: '0.1rem', textTransform: 'lowercase' }}>
-          {text.toLowerCase()}
-        </Component>
-        <div style={{ fontSize: '0.75rem', fontFamily: 'OCRAStd, monospace', color: 'var(--theme-fg-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          {text}
-        </div>
-      </div>
-    );
-  }
-
-  // Default rendering (for Imperium, Chaos, etc.) where fonts are handled entirely by CSS variables
+  // Default rendering — alien fonts (Necrons, Tau) are handled globally
+  // via CSS --font-head + ::after translations in themes.css
   return (
     <Component className={className} style={{ ...style, marginBottom: '1rem' }}>
       {text}
