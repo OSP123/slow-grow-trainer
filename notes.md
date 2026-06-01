@@ -236,3 +236,14 @@ Tasks:
   - Modified `App.tsx` to automatically configure the UI theme based on the user's `army_faction`.
   - Created a `<TranslatedHeader>` component that renders dual-font headers with High Gothic translations for alien languages, including a terminal-styled Binary translator for the Adeptus Mechanicus.
   - All unit tests verified (12/12 passing).
+
+Date: 2026-06-01 (Session Continued - Alien Font Translation Bugfix)
+Tasks:
+  - Enhanced the `MutationObserver` in `App.tsx` to include `characterData: true` and `subtree: true`, ensuring that all dynamic text updates (such as async data loading or route modifications) immediately synchronize translations.
+  - Refined the JS selector logic to isolate translations strictly to text-bearing leaf nodes, completely preventing nested translation duplicates.
+  - Upgraded the CSS translation system in `themes.css` by forcing `display: block !important`, `white-space: normal !important`, and other critical overrides on the `::after` pseudo-element to render translations reliably beneath the glyph font irrespective of parent flex/grid/overflow constraints.
+  - Created `AlienTranslation.test.tsx` to thoroughly test dynamic updates and leaf node translation containment.
+  - Verified that all 53 unit tests pass perfectly and the production build compiles successfully.
+
+Follow-ups:
+  - None
