@@ -2,6 +2,7 @@ import React from 'react';
 
 interface TranslatedHeaderProps {
   text: string;
+  theme: string;
   className?: string;
   style?: React.CSSProperties;
   as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'div';
@@ -13,11 +14,8 @@ function toBinary(str: string) {
   }).join(' ');
 }
 
-export default function TranslatedHeader({ text, className, style, as = 'h1' }: TranslatedHeaderProps) {
+export default function TranslatedHeader({ text, theme, className, style, as = 'h1' }: TranslatedHeaderProps) {
   const Component = as;
-  
-  // Get active theme from the body attribute since that's where it's globally set
-  const theme = document.body.getAttribute('data-theme') || 'imperium';
 
   // For Adeptus Mechanicus, render binary in a terminal wrapper
   if (theme === 'adeptus_mechanicus') {
@@ -59,10 +57,10 @@ export default function TranslatedHeader({ text, className, style, as = 'h1' }: 
   }
 
   // For Tau
-  if (theme === 'tau') {
+  if (theme === 'tau_empire') {
     return (
       <div style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-        <Component className={className} style={{ ...style, fontFamily: 'Tau40k, Teko, sans-serif', letterSpacing: '2px', marginBottom: '0.1rem' }}>
+        <Component className={className} style={{ ...style, fontFamily: 'Tau40k, Teko, sans-serif', letterSpacing: '2px', marginBottom: '0.1rem', textTransform: 'lowercase' }}>
           {text.toLowerCase()}
         </Component>
         <div style={{ fontSize: '0.75rem', fontFamily: 'OCRAStd, monospace', color: 'var(--theme-fg-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
