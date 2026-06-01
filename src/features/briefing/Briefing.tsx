@@ -48,7 +48,7 @@ export default function Briefing() {
             {
               icon: '■',
               title: 'Logistics & Clearance',
-              desc: 'Submit hobby milestone updates (assembling, painting, basing) with photographic evidence. Each submission contributes to your faction\'s war score and keeps the campaign moving forward.',
+              desc: 'Upload pictures of your finalized units to your Army Roster. For work-in-progress (WIP) updates like assembling, painting, and basing, please submit photos to the #wip channel under the slow-grow-2026 category in the Los Angeles Warhammer 40k Discord (https://discord.gg/RPKfeJMPN).',
             },
             {
               icon: '■',

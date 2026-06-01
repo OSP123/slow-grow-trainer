@@ -97,7 +97,7 @@ export default function Logistics() {
       <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Deployment Clearance</h2>
       <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '2rem' }}>
         Log your hobby progress to earn points for your megafaction. 
-        Submission requires photographic evidence for officer review.
+        Update your current campaign point thresholds. Upload finalized unit photos in your Army Roster. Post WIP updates in the LA Warhammer 40k Discord #wip channel (https://discord.gg/RPKfeJMPN).
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
