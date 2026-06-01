@@ -138,6 +138,12 @@ export default function Briefing() {
               <strong>A:</strong> Absolutely. Our goal is to help commanders reduce their grey piles of shame and make progress on their armies. Bring your WIP, primed, or partially painted models to the table—what matters most is that you're getting games in and making progress over the course of the campaign!
             </p>
           </div>
+          <div>
+            <h4 style={{ margin: '0 0 0.5rem 0' }}>Q: What is the overall timeline for the slow grow campaign?</h4>
+            <p style={{ margin: 0, lineHeight: '1.6', fontSize: '0.9rem' }}>
+              <strong>A:</strong> The campaign runs for a total of 5 months. Each month, commanders are required to post an additional 400 points of units (built or painted) and play at least 1 recorded game. This structure scales smoothly from 400 points in Month 1 up to a full 2000-point army in Month 5!
+            </p>
+          </div>
         </div>
       </div>
 
