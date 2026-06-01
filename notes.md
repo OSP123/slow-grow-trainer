@@ -188,6 +188,7 @@ Tasks:
   - Updated `Briefing.tsx` to include the Campaign Structure & Matchmaking section.
   - Specified the 400, 800, 1200, and 1600 escalation checkpoints.
   - Clarified that every Commander must play at least one official game at each checkpoint using the automatching system.
+  - Added details about the $15 entry fee and its allocation toward venue and prizes.
   - Noted the Final 2000-Point Tournament and the prize categories (Best Painted, Best Converted, Best Sportsmanship, Best General).
 Follow-ups:
   - None
