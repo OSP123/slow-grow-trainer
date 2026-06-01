@@ -193,35 +193,35 @@ function App() {
             onClick={() => navigateTo('/dashboard')}
           >
             <Map size={20} />
-            War Effort Map
+            <span>War Effort Map</span>
           </div>
           <div 
             className={`nav-item ${activeView === 'briefing' ? 'active' : ''}`}
             onClick={() => navigateTo('/briefing')}
           >
             <BookOpen size={20} />
-            Field Manual
+            <span>Field Manual</span>
           </div>
           <div 
             className={`nav-item ${activeView === 'logistics' ? 'active' : ''}`}
             onClick={() => navigateTo('/logistics')}
           >
             <Shield size={20} />
-            Logistics & Clearance
+            <span>Logistics & Clearance</span>
           </div>
           <div 
             className={`nav-item ${activeView === 'assessments' ? 'active' : ''}`}
             onClick={() => navigateTo('/assessments')}
           >
             <Activity size={20} />
-            Officer Assessment
+            <span>Officer Assessment</span>
           </div>
           <div 
             className={`nav-item ${activeView === 'battles' ? 'active' : ''}`}
             onClick={() => navigateTo('/battles')}
           >
             <Shield size={20} />
-            Matchups & Lore
+            <span>Matchups & Lore</span>
           </div>
         </div>
 
@@ -233,17 +233,17 @@ function App() {
                 onClick={() => navigateTo('/profile')}
               >
                 <UserCircle size={20} />
-                Commander Profile
+                <span>Commander Profile</span>
               </div>
               <div className="nav-item" onClick={() => supabase.auth.signOut()}>
                 <LogOut size={20} />
-                Disengage
+                <span>Disengage</span>
               </div>
             </>
           ) : (
             <div className="nav-item" onClick={() => navigateTo('/')}>
               <UserCircle size={20} />
-              Login / Enlist
+              <span>Login / Enlist</span>
             </div>
           )}
         </div>
