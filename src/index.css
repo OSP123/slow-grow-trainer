@@ -42,6 +42,13 @@
   font-weight: normal;
   font-style: normal;
 }
+
+@font-face {
+  font-family: 'ZarathustraBleeds';
+  src: url('/fonts/ZarathustraBleeds.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
 :root {
   /* Default typography if not overridden by theme */
   --font-head: 'Outfit', sans-serif;

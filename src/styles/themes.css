@@ -253,6 +253,7 @@
   --theme-border: #404040;
   --theme-border-accent: #dc2626; /* Chaos star glow */
   --theme-shadow: 0 4px 20px rgba(250, 204, 21, 0.1);
+  --font-body: 'ZarathustraBleeds', 'Inter', sans-serif;
   --font-head: 'ZeusBorne', 'Creepster', 'Outfit', sans-serif;
   --panel-radius: 0px;
 }
@@ -268,6 +269,7 @@
   --theme-border: #3f6212;
   --theme-border-accent: #d97706;
   --theme-shadow: 0 4px 20px rgba(163, 230, 53, 0.1);
+  --font-body: 'ZarathustraBleeds', 'Inter', sans-serif;
   --font-head: 'ZeusBorne', 'Creepster', 'Outfit', sans-serif;
   --panel-radius: 12px;
 }
@@ -283,6 +285,7 @@
   --theme-border: #0284c7; /* Tzeentch Magic Blue */
   --theme-border-accent: #38bdf8;
   --theme-shadow: 0 4px 20px rgba(56, 189, 248, 0.2);
+  --font-body: 'ZarathustraBleeds', 'Inter', sans-serif;
   --font-head: 'ZeusBorne', 'Cinzel Decorative', 'Outfit', sans-serif;
   --panel-radius: 4px;
 }
@@ -298,6 +301,7 @@
   --theme-border: #713f12; /* Brass */
   --theme-border-accent: #ef4444;
   --theme-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+  --font-body: 'ZarathustraBleeds', 'Inter', sans-serif;
   --font-head: 'ZeusBorne', 'Black Ops One', 'Outfit', sans-serif;
   --panel-radius: 0px;
 }
@@ -313,6 +317,7 @@
   --theme-border: #581c87;
   --theme-border-accent: #f43f5e; /* Pink Horror/Bloodletter glow */
   --theme-shadow: 0 4px 30px rgba(192, 132, 252, 0.2);
+  --font-body: 'ZarathustraBleeds', 'Inter', sans-serif;
   --font-head: 'ZeusBorne', 'Creepster', 'Outfit', sans-serif;
   --panel-radius: 12px;
 }
@@ -328,6 +333,7 @@
   --theme-border: #525252; /* Corrupted Steel */
   --theme-border-accent: #d97706; /* Rust glow */
   --theme-shadow: 0 4px 20px rgba(153, 27, 27, 0.2);
+  --font-body: 'ZarathustraBleeds', 'Inter', sans-serif;
   --font-head: 'ZeusBorne', 'Cinzel Decorative', 'Outfit', sans-serif;
   --panel-radius: 0px;
 }
