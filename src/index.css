@@ -58,8 +58,8 @@
 }
 
 @font-face {
-  font-family: 'Eldar';
-  src: url('/fonts/Eldar.ttf') format('truetype');
+  font-family: 'EldarRunes';
+  src: url('/fonts/EldarRunes.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }

@@ -56,8 +56,8 @@
   --theme-border: #064e3b;
   --theme-border-accent: #22c55e;
   --theme-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
-  --font-body: 'Eldar', 'Inter', sans-serif;
-  --font-head: 'Eldar', 'Cinzel Decorative', 'Outfit', sans-serif;
+  --font-body: 'EldarRunes', 'Inter', sans-serif;
+  --font-head: 'EldarRunes', 'Cinzel Decorative', 'Outfit', sans-serif;
   --panel-radius: 0px;
 }
 
@@ -72,8 +72,8 @@
   --theme-border: #e2e8f0;
   --theme-border-accent: #0ea5e9;
   --theme-shadow: 0 8px 30px rgba(14, 165, 233, 0.15);
-  --font-body: 'Eldar', 'Inter', sans-serif;
-  --font-head: 'Eldar', 'Cinzel Decorative', 'Outfit', sans-serif;
+  --font-body: 'EldarRunes', 'Inter', sans-serif;
+  --font-head: 'EldarRunes', 'Cinzel Decorative', 'Outfit', sans-serif;
   --panel-radius: 20px;
 }
 
@@ -88,8 +88,8 @@
   --theme-border: #3b0764;
   --theme-border-accent: #22c55e; /* Toxic green secondary */
   --theme-shadow: 0 4px 20px rgba(168, 85, 247, 0.2);
-  --font-body: 'Eldar', 'Inter', sans-serif;
-  --font-head: 'Eldar', 'Cinzel Decorative', 'Outfit', sans-serif;
+  --font-body: 'EldarRunes', 'Inter', sans-serif;
+  --font-head: 'EldarRunes', 'Cinzel Decorative', 'Outfit', sans-serif;
   --panel-radius: 0px;
 }
 
