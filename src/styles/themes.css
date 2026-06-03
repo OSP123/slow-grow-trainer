@@ -9,8 +9,8 @@
   --theme-border: #1e293b;
   --theme-border-accent: #d4af37;
   --theme-shadow: 0 4px 20px rgba(212, 175, 55, 0.1);
-  --font-head: 'Cinzel', 'Outfit', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-body: 'CaslonAntique', 'Inter', sans-serif;
+  --font-head: 'CaslonAntique', 'Outfit', sans-serif;
   --panel-radius: 4px;
 }
 
@@ -163,7 +163,8 @@
   --theme-border: #1e40af;
   --theme-border-accent: #facc15;
   --theme-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
-  --font-head: 'Cinzel', 'Outfit', sans-serif;
+  --font-body: 'CaslonAntique', 'Inter', sans-serif;
+  --font-head: 'CaslonAntique', 'Outfit', sans-serif;
   --panel-radius: 6px;
 }
 
@@ -208,7 +209,8 @@
   --theme-border: #d4af37; /* Relic Gold */
   --theme-border-accent: #f87171;
   --theme-shadow: 0 4px 20px rgba(185, 28, 28, 0.2);
-  --font-head: 'Cinzel Decorative', 'Outfit', sans-serif;
+  --font-body: 'CaslonAntique', 'Inter', sans-serif;
+  --font-head: 'CaslonAntique', 'Outfit', sans-serif;
   --panel-radius: 4px;
 }
 
@@ -223,7 +225,8 @@
   --theme-border: #b45309;
   --theme-border-accent: #ef4444; /* Crimson Plume */
   --theme-shadow: 0 8px 30px rgba(251, 191, 36, 0.2);
-  --font-head: 'Cinzel', 'Outfit', sans-serif;
+  --font-body: 'CaslonAntique', 'Inter', sans-serif;
+  --font-head: 'CaslonAntique', 'Outfit', sans-serif;
   --panel-radius: 8px;
 }
 
@@ -238,7 +241,8 @@
   --theme-border: #94a3b8; /* Steel/Silver */
   --theme-border-accent: #fbbf24; /* Gold trim */
   --theme-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
-  --font-head: 'Cinzel', 'Outfit', sans-serif;
+  --font-body: 'CaslonAntique', 'Inter', sans-serif;
+  --font-head: 'CaslonAntique', 'Outfit', sans-serif;
   --panel-radius: 0px;
 }
 
