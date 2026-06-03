@@ -56,8 +56,8 @@
   --theme-border: #064e3b;
   --theme-border-accent: #22c55e;
   --theme-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
-  --font-head: 'NecronCrypt', 'Orbitron', 'Outfit', sans-serif;
-  --font-body: 'NecronCrypt', 'Orbitron', 'Inter', sans-serif;
+  --font-body: 'Eldar', 'Inter', sans-serif;
+  --font-head: 'Eldar', 'Cinzel Decorative', 'Outfit', sans-serif;
   --panel-radius: 0px;
 }
 
@@ -72,7 +72,8 @@
   --theme-border: #e2e8f0;
   --theme-border-accent: #0ea5e9;
   --theme-shadow: 0 8px 30px rgba(14, 165, 233, 0.15);
-  --font-head: 'Cinzel Decorative', 'Outfit', sans-serif;
+  --font-body: 'Eldar', 'Inter', sans-serif;
+  --font-head: 'Eldar', 'Cinzel Decorative', 'Outfit', sans-serif;
   --panel-radius: 20px;
 }
 
@@ -87,7 +88,8 @@
   --theme-border: #3b0764;
   --theme-border-accent: #22c55e; /* Toxic green secondary */
   --theme-shadow: 0 4px 20px rgba(168, 85, 247, 0.2);
-  --font-head: 'Cinzel Decorative', 'Outfit', sans-serif;
+  --font-body: 'Eldar', 'Inter', sans-serif;
+  --font-head: 'Eldar', 'Cinzel Decorative', 'Outfit', sans-serif;
   --panel-radius: 0px;
 }
 
@@ -351,13 +353,17 @@
 
 /* Force lowercase on all text so alien glyphs render */
 body[data-theme="necrons"],
-body[data-theme="tau"] {
+body[data-theme="tau"],
+body[data-theme="aeldari"],
+body[data-theme="drukhari"] {
   text-transform: lowercase !important;
 }
 
 /* Restore normal casing and readable font for form inputs */
 body[data-theme="necrons"] :is(input, select, textarea, option),
-body[data-theme="tau"] :is(input, select, textarea, option) {
+body[data-theme="tau"] :is(input, select, textarea, option),
+body[data-theme="aeldari"] :is(input, select, textarea, option),
+body[data-theme="drukhari"] :is(input, select, textarea, option) {
   text-transform: none !important;
   font-family: 'Inter', sans-serif !important;
 }
@@ -365,7 +371,9 @@ body[data-theme="tau"] :is(input, select, textarea, option) {
 /* English translation via ::after — universal selector for any element with data-text */
 body[data-theme="necrons"] [data-text]::after,
 body[data-theme="tau"] [data-text]::after,
-body[data-theme="orks"] [data-text]::after {
+body[data-theme="orks"] [data-text]::after,
+body[data-theme="aeldari"] [data-text]::after,
+body[data-theme="drukhari"] [data-text]::after {
   content: attr(data-text);
   display: block !important;
   flex-basis: 100% !important;
@@ -408,9 +416,22 @@ body[data-theme="orks"] :is(h1, h2, h3, h4, h5, h6)[data-text]::after {
   font-size: 0.45em !important;
 }
 
+/* Aeldari/Drukhari: readable font for translation */
+body[data-theme="aeldari"] [data-text]::after,
+body[data-theme="drukhari"] [data-text]::after {
+  font-family: 'Cinzel Decorative', 'Outfit', sans-serif !important;
+  color: var(--theme-fg-muted) !important;
+}
+body[data-theme="aeldari"] :is(h1, h2, h3, h4, h5, h6)[data-text]::after,
+body[data-theme="drukhari"] :is(h1, h2, h3, h4, h5, h6)[data-text]::after {
+  font-size: 0.45em !important;
+}
+
 /* Force standard font on input/select so they are actually readable */
 body[data-theme="necrons"] input, body[data-theme="necrons"] select, body[data-theme="necrons"] textarea,
 body[data-theme="tau"] input, body[data-theme="tau"] select, body[data-theme="tau"] textarea,
-body[data-theme="orks"] input, body[data-theme="orks"] select, body[data-theme="orks"] textarea {
+body[data-theme="orks"] input, body[data-theme="orks"] select, body[data-theme="orks"] textarea,
+body[data-theme="aeldari"] input, body[data-theme="aeldari"] select, body[data-theme="aeldari"] textarea,
+body[data-theme="drukhari"] input, body[data-theme="drukhari"] select, body[data-theme="drukhari"] textarea {
   font-family: 'Inter', sans-serif !important;
 }
