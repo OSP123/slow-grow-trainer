@@ -355,3 +355,13 @@ Tasks:
 - Updated matchmaking engine to only include active players
 Follow-ups:
 - None
+
+
+Date: 2026-06-04
+Tasks:
+- Researched Crucible of Champions actual Maelstrom rules
+- Refactored Warlord Headquarters UI to act as a custom character datasheet builder
+- Replaced XP/Leveling system with Archetype, Specialism, Abilities, and Wargear inputs
+- Created database migration for warlord_datasheet JSONB column
+Follow-ups:
+- None

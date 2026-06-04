@@ -5,6 +5,45 @@ import { compressImage, getTransformUrl } from '../../utils/imageCompression';
 import ArmyRoster from './ArmyRoster';
 import { useUnitRegistry } from '../../hooks/useUnitRegistry';
 import { useCommanderCampaignData } from '../../hooks/useCommanderCampaignData';
+import DatasheetBuilder from './DatasheetBuilder';
+import DatasheetViewer from './DatasheetViewer';
+
+export interface CrucibleRangedWeapon {
+  id: string;
+  name: string;
+  range: string;
+  a: string;
+  bs: string;
+  s: string;
+  ap: string;
+  d: string;
+  keywords: string;
+}
+
+export interface CrucibleMeleeWeapon {
+  id: string;
+  name: string;
+  range: string;
+  a: string;
+  ws: string;
+  s: string;
+  ap: string;
+  d: string;
+  keywords: string;
+}
+
+export interface CrucibleDatasheet {
+  id: string;
+  name: string;
+  archetype?: string;
+  specialism?: string;
+  abilities?: string;
+  stats?: {
+    m: string; t: string; sv: string; invuln: string; w: string; ld: string; oc: string;
+  };
+  rangedWeapons?: CrucibleRangedWeapon[];
+  meleeWeapons?: CrucibleMeleeWeapon[];
+}
 
 export interface ProfileData {
   id?: string;
@@ -17,12 +56,7 @@ export interface ProfileData {
   preferred_store_id?: string;
   warlord_name?: string;
   warlord_traits?: string[];
-  warlord_datasheet?: {
-    archetype?: string;
-    specialism?: string;
-    abilities?: string;
-    weapons?: string;
-  };
+  crucible_datasheets?: CrucibleDatasheet[];
 }
 
 type Tab = 'specs' | 'roster' | 'lore' | 'warlord';
@@ -347,111 +381,70 @@ export default function CommanderProfile() {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h3 style={{ margin: 0, color: 'var(--theme-accent)' }}>Crucible of Champions</h3>
+              {isOwner && (profile.crucible_datasheets?.length || 0) < 3 && (
+                <button 
+                  onClick={() => setProfile({
+                    ...profile, 
+                    crucible_datasheets: [...(profile.crucible_datasheets || []), { id: Math.random().toString(36).substr(2, 9), name: `Champion ${(profile.crucible_datasheets?.length || 0) + 1}` }]
+                  })} 
+                  className="btn secondary"
+                >
+                  + Add Champion
+                </button>
+              )}
             </div>
             
             <div style={{ padding: '1.5rem', backgroundColor: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)', borderRadius: '6px' }}>
               {isOwner ? (
                 <form onSubmit={async (e) => {
                   e.preventDefault();
-                  setMessage('Updating Datasheet...');
+                  setMessage('Updating Champions...');
                   try {
                     const { error } = await supabase.from('profiles').update({ 
-                      warlord_name: profile.warlord_name,
-                      warlord_datasheet: profile.warlord_datasheet
+                      crucible_datasheets: profile.crucible_datasheets || []
                     }).eq('id', profile.id);
                     if (error) setMessage('Error: ' + error.message);
-                    else setMessage('Datasheet updated successfully.');
+                    else setMessage('Champions updated successfully.');
                   } catch (err: any) {
                     setMessage('Database schema update pending for Datasheet features.');
                   }
                 }}>
-                  <div style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)', fontWeight: 'bold' }}>Warlord Name</label>
-                    <input 
-                      type="text" 
-                      value={profile.warlord_name || ''} 
-                      onChange={e => setProfile({...profile, warlord_name: e.target.value})}
-                      placeholder="e.g. Captain Titus"
-                      style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }}
+                  {(profile.crucible_datasheets || []).map((ds, idx) => (
+                    <DatasheetBuilder 
+                      key={ds.id || idx} 
+                      profile={profile} 
+                      setProfile={setProfile} 
+                      datasheetIndex={idx}
+                      onRemove={() => setProfile({
+                        ...profile, 
+                        crucible_datasheets: profile.crucible_datasheets!.filter((_, i) => i !== idx)
+                      })}
                     />
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-                    <div>
-                      <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)', fontWeight: 'bold' }}>Archetype</label>
-                      <input 
-                        type="text" 
-                        value={profile.warlord_datasheet?.archetype || ''} 
-                        onChange={e => setProfile({...profile, warlord_datasheet: {...profile.warlord_datasheet, archetype: e.target.value}})}
-                        placeholder="e.g. Librarius Adept"
-                        style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }}
-                      />
+                  ))}
+                  
+                  {(!profile.crucible_datasheets || profile.crucible_datasheets.length === 0) && (
+                    <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--theme-fg-muted)' }}>
+                      No champions forged. Add one to begin.
                     </div>
-                    <div>
-                      <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)', fontWeight: 'bold' }}>Specialism</label>
-                      <input 
-                        type="text" 
-                        value={profile.warlord_datasheet?.specialism || ''} 
-                        onChange={e => setProfile({...profile, warlord_datasheet: {...profile.warlord_datasheet, specialism: e.target.value}})}
-                        placeholder="e.g. Conversion Field"
-                        style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }}
-                      />
-                    </div>
-                  </div>
+                  )}
 
-                  <div style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)', fontWeight: 'bold' }}>Abilities</label>
-                    <textarea 
-                      value={profile.warlord_datasheet?.abilities || ''} 
-                      onChange={e => setProfile({...profile, warlord_datasheet: {...profile.warlord_datasheet, abilities: e.target.value}})}
-                      placeholder="e.g. Litany of Hate"
-                      style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box', minHeight: '80px', resize: 'vertical' }}
-                    />
-                  </div>
-
-                  <div style={{ marginBottom: '2rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)', fontWeight: 'bold' }}>Weapons / Wargear</label>
-                    <textarea 
-                      value={profile.warlord_datasheet?.weapons || ''} 
-                      onChange={e => setProfile({...profile, warlord_datasheet: {...profile.warlord_datasheet, weapons: e.target.value}})}
-                      placeholder="e.g. Storm Bolter, Thunder Hammer"
-                      style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box', minHeight: '80px', resize: 'vertical' }}
-                    />
-                  </div>
-
-                  <button type="submit" className="btn primary" style={{ width: '100%' }}>Save Custom Datasheet</button>
+                  {profile.crucible_datasheets && profile.crucible_datasheets.length > 0 && (
+                    <button type="submit" className="btn primary" style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}>
+                      Save All Champions
+                    </button>
+                  )}
                 </form>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                  <div style={{ borderBottom: '2px solid var(--theme-border)', paddingBottom: '1rem' }}>
-                    <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-fg-muted)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>Commanding Officer</h4>
-                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--theme-fg)' }}>{profile.warlord_name || 'Classified'}</div>
-                  </div>
+                  {(profile.crucible_datasheets || []).map((ds, idx) => (
+                    <DatasheetViewer key={ds.id || idx} datasheet={ds} />
+                  ))}
                   
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-                    <div style={{ backgroundColor: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '4px', borderLeft: '3px solid var(--theme-accent)' }}>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Archetype</div>
-                      <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{profile.warlord_datasheet?.archetype || 'None'}</div>
+                  {(!profile.crucible_datasheets || profile.crucible_datasheets.length === 0) && (
+                    <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--theme-fg-muted)' }}>
+                      This commander has not forged any custom champions.
                     </div>
-                    <div style={{ backgroundColor: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '4px', borderLeft: '3px solid var(--theme-accent)' }}>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Specialism</div>
-                      <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{profile.warlord_datasheet?.specialism || 'None'}</div>
-                    </div>
-                  </div>
-
-                  <div style={{ backgroundColor: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '4px', borderLeft: '3px solid var(--theme-accent)' }}>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Abilities</div>
-                    <div style={{ fontSize: '1.1rem', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
-                      {profile.warlord_datasheet?.abilities || <span style={{ fontStyle: 'italic', color: 'var(--theme-fg-muted)' }}>No special abilities</span>}
-                    </div>
-                  </div>
-
-                  <div style={{ backgroundColor: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '4px', borderLeft: '3px solid var(--theme-accent)' }}>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Weapons & Wargear</div>
-                    <div style={{ fontSize: '1.1rem', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
-                      {profile.warlord_datasheet?.weapons || <span style={{ fontStyle: 'italic', color: 'var(--theme-fg-muted)' }}>Standard loadout</span>}
-                    </div>
-                  </div>
+                  )}
                 </div>
               )}
             </div>
