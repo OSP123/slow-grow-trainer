@@ -345,3 +345,13 @@ Tasks:
 - Created Pict-Captures Gallery routing and layout
 Follow-ups:
 - None
+
+
+Date: 2026-06-04
+Tasks:
+- Added player campaign_status to profiles
+- Created React modal for confirmation dialogs in AdminDashboard
+- Implemented Pause, Resume, and Remove player functionality
+- Updated matchmaking engine to only include active players
+Follow-ups:
+- None

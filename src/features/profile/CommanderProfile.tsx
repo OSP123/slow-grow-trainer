@@ -17,6 +17,12 @@ export interface ProfileData {
   preferred_store_id?: string;
   warlord_name?: string;
   warlord_traits?: string[];
+  warlord_datasheet?: {
+    archetype?: string;
+    specialism?: string;
+    abilities?: string;
+    weapons?: string;
+  };
 }
 
 type Tab = 'specs' | 'roster' | 'lore' | 'warlord';
@@ -24,7 +30,7 @@ type Tab = 'specs' | 'roster' | 'lore' | 'warlord';
 export default function CommanderProfile() {
   const { profileId } = useParams<{ profileId?: string }>();
   const { unitsByFaction } = useUnitRegistry();
-  const { badges, warlordXp } = useCommanderCampaignData(profileId);
+  const { badges } = useCommanderCampaignData(profileId);
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -347,75 +353,107 @@ export default function CommanderProfile() {
               {isOwner ? (
                 <form onSubmit={async (e) => {
                   e.preventDefault();
-                  setMessage('Updating Warlord...');
+                  setMessage('Updating Datasheet...');
                   try {
-                    const { error } = await supabase.from('profiles').update({ warlord_name: profile.warlord_name }).eq('id', profile.id);
+                    const { error } = await supabase.from('profiles').update({ 
+                      warlord_name: profile.warlord_name,
+                      warlord_datasheet: profile.warlord_datasheet
+                    }).eq('id', profile.id);
                     if (error) setMessage('Error: ' + error.message);
-                    else setMessage('Warlord updated successfully.');
+                    else setMessage('Datasheet updated successfully.');
                   } catch (err: any) {
-                    setMessage('Database schema update pending for Warlord features.');
+                    setMessage('Database schema update pending for Datasheet features.');
                   }
-                }} style={{ marginBottom: '2rem' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)' }}>Warlord Name</label>
-                  <div style={{ display: 'flex', gap: '1rem' }}>
+                }}>
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)', fontWeight: 'bold' }}>Warlord Name</label>
                     <input 
                       type="text" 
                       value={profile.warlord_name || ''} 
                       onChange={e => setProfile({...profile, warlord_name: e.target.value})}
                       placeholder="e.g. Captain Titus"
-                      style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box' }}
+                      style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }}
                     />
-                    <button type="submit" className="btn primary">Save Name</button>
                   </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)', fontWeight: 'bold' }}>Archetype</label>
+                      <input 
+                        type="text" 
+                        value={profile.warlord_datasheet?.archetype || ''} 
+                        onChange={e => setProfile({...profile, warlord_datasheet: {...profile.warlord_datasheet, archetype: e.target.value}})}
+                        placeholder="e.g. Librarius Adept"
+                        style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)', fontWeight: 'bold' }}>Specialism</label>
+                      <input 
+                        type="text" 
+                        value={profile.warlord_datasheet?.specialism || ''} 
+                        onChange={e => setProfile({...profile, warlord_datasheet: {...profile.warlord_datasheet, specialism: e.target.value}})}
+                        placeholder="e.g. Conversion Field"
+                        style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)', fontWeight: 'bold' }}>Abilities</label>
+                    <textarea 
+                      value={profile.warlord_datasheet?.abilities || ''} 
+                      onChange={e => setProfile({...profile, warlord_datasheet: {...profile.warlord_datasheet, abilities: e.target.value}})}
+                      placeholder="e.g. Litany of Hate"
+                      style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box', minHeight: '80px', resize: 'vertical' }}
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: '2rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)', fontWeight: 'bold' }}>Weapons / Wargear</label>
+                    <textarea 
+                      value={profile.warlord_datasheet?.weapons || ''} 
+                      onChange={e => setProfile({...profile, warlord_datasheet: {...profile.warlord_datasheet, weapons: e.target.value}})}
+                      placeholder="e.g. Storm Bolter, Thunder Hammer"
+                      style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box', minHeight: '80px', resize: 'vertical' }}
+                    />
+                  </div>
+
+                  <button type="submit" className="btn primary" style={{ width: '100%' }}>Save Custom Datasheet</button>
                 </form>
               ) : (
-                <div style={{ marginBottom: '2rem' }}>
-                  <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-fg-muted)' }}>Commanding Officer</h4>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{profile.warlord_name || 'Unknown Commander'}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <div style={{ borderBottom: '2px solid var(--theme-border)', paddingBottom: '1rem' }}>
+                    <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-fg-muted)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.8rem' }}>Commanding Officer</h4>
+                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--theme-fg)' }}>{profile.warlord_name || 'Classified'}</div>
+                  </div>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+                    <div style={{ backgroundColor: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '4px', borderLeft: '3px solid var(--theme-accent)' }}>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Archetype</div>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{profile.warlord_datasheet?.archetype || 'None'}</div>
+                    </div>
+                    <div style={{ backgroundColor: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '4px', borderLeft: '3px solid var(--theme-accent)' }}>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Specialism</div>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{profile.warlord_datasheet?.specialism || 'None'}</div>
+                    </div>
+                  </div>
+
+                  <div style={{ backgroundColor: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '4px', borderLeft: '3px solid var(--theme-accent)' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Abilities</div>
+                    <div style={{ fontSize: '1.1rem', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
+                      {profile.warlord_datasheet?.abilities || <span style={{ fontStyle: 'italic', color: 'var(--theme-fg-muted)' }}>No special abilities</span>}
+                    </div>
+                  </div>
+
+                  <div style={{ backgroundColor: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '4px', borderLeft: '3px solid var(--theme-accent)' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Weapons & Wargear</div>
+                    <div style={{ fontSize: '1.1rem', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
+                      {profile.warlord_datasheet?.weapons || <span style={{ fontStyle: 'italic', color: 'var(--theme-fg-muted)' }}>Standard loadout</span>}
+                    </div>
+                  </div>
                 </div>
               )}
-
-              <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
-                <div style={{ flex: 1, minWidth: '250px' }}>
-                  <h4 style={{ margin: '0 0 1rem 0', color: 'var(--theme-accent)', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>Combat Experience</h4>
-                  <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>{Math.floor(warlordXp / 50) + 1} <span style={{ fontSize: '1rem', color: 'var(--theme-fg-muted)', fontWeight: 'normal' }}>Level</span></div>
-                  <div style={{ color: 'var(--theme-fg-muted)' }}>{warlordXp} Total VP Scored</div>
-                  <div style={{ marginTop: '1rem', height: '6px', backgroundColor: 'var(--theme-bg)', borderRadius: '3px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${(warlordXp % 50) * 2}%`, backgroundColor: 'var(--theme-accent)', transition: 'width 0.3s' }} />
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginTop: '0.5rem', textAlign: 'right' }}>
-                    {50 - (warlordXp % 50)} VP to next level
-                  </div>
-                </div>
-
-                <div style={{ flex: 1, minWidth: '250px' }}>
-                  <h4 style={{ margin: '0 0 1rem 0', color: 'var(--theme-accent)', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>Battle Traits & Scars</h4>
-                  {profile.warlord_traits && profile.warlord_traits.length > 0 ? (
-                    <ul style={{ listStyleType: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      {profile.warlord_traits.map((trait, i) => (
-                        <li key={i} style={{ padding: '0.5rem', backgroundColor: 'rgba(0,0,0,0.2)', borderLeft: '2px solid var(--theme-accent)' }}>
-                          {trait}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <div style={{ color: 'var(--theme-fg-muted)', fontStyle: 'italic' }}>No traits or scars acquired yet.</div>
-                  )}
-                  {isOwner && Math.floor(warlordXp / 50) + 1 > (profile.warlord_traits?.length || 0) + 1 && (
-                     <div style={{ marginTop: '1rem' }}>
-                       <button onClick={async () => {
-                         try {
-                           const traits = [...(profile.warlord_traits || []), 'Hardened Veteran'];
-                           setProfile({...profile, warlord_traits: traits});
-                           await supabase.from('profiles').update({ warlord_traits: traits }).eq('id', profile.id);
-                         } catch (err: any) {
-                           setMessage('Database schema update pending.');
-                         }
-                       }} className="btn secondary" style={{ width: '100%' }}>Acquire New Trait</button>
-                     </div>
-                  )}
-                </div>
-              </div>
             </div>
           </div>
         )}
