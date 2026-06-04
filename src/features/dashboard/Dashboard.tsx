@@ -39,6 +39,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [theatres, setTheatres] = useState<any[]>([]);
   const [windowSize, setWindowSize] = useState({ width: 800, height: 600 });
+  const [selectedTheatre, setSelectedTheatre] = useState<any>(null);
   const globeEl = useRef<any>(null);
 
   useEffect(() => {
@@ -176,9 +177,7 @@ export default function Dashboard() {
             bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
             backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
             onGlobeClick={({ lat, lng }) => {
-              const msg = `Clicked Coordinates:\nLat: ${lat.toFixed(2)}\nLng: ${lng.toFixed(2)}`;
-              console.log(msg);
-              alert(msg);
+              console.log(`Clicked Coordinates:\nLat: ${lat.toFixed(2)}\nLng: ${lng.toFixed(2)}`);
             }}
             htmlElementsData={theatres}
             htmlLat="lat"
@@ -243,6 +242,10 @@ export default function Dashboard() {
                       const tooltip = tgt.nextElementSibling as HTMLElement;
                       if (tooltip) tooltip.style.display = 'none';
                     }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedTheatre(d);
+                    }}
                   >
                     <div style={{ position: 'absolute', width: lineSize, height: '2px', background: d.color, top: '50%', left: '-5px', transform: 'translateY(-50%)', opacity: 0.7 }}></div>
                     <div style={{ position: 'absolute', height: lineSize, width: '2px', background: d.color, left: '50%', top: '-5px', transform: 'translateX(-50%)', opacity: 0.7 }}></div>
@@ -281,6 +284,69 @@ export default function Dashboard() {
           />
         )}
       </div>
+
+      {/* Theatre Detail Modal */}
+      {selectedTheatre && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem', backdropFilter: 'blur(5px)' }} onClick={() => setSelectedTheatre(null)}>
+          <div style={{ background: 'var(--theme-bg-secondary)', border: `1px solid ${selectedTheatre.color}`, borderRadius: '8px', maxWidth: '600px', width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }} onClick={e => e.stopPropagation()}>
+            <button onClick={() => setSelectedTheatre(null)} style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.5)', border: 'none', color: '#fff', fontSize: '1.5rem', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', zIndex: 10, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>×</button>
+            
+            {/* Image header */}
+            <div style={{ height: '220px', width: '100%', background: `linear-gradient(to bottom, transparent, var(--theme-bg-secondary)), url(/images/theatres/${selectedTheatre.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}.png) center/cover, #222`, borderBottom: `2px solid ${selectedTheatre.color}` }}>
+              <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'flex-end', padding: '1.5rem', background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }}>
+                <h3 style={{ margin: 0, fontSize: '2rem', color: selectedTheatre.color, textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>{selectedTheatre.name}</h3>
+              </div>
+            </div>
+
+            <div style={{ padding: '1.5rem' }}>
+              <i style={{ color: '#aaa', fontSize: '1rem', display: 'block', marginBottom: '1.5rem' }}>"{selectedTheatre.narrative}"</i>
+              
+              {selectedTheatre.warlord ? (
+                <>
+                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem', padding: '1rem', background: 'rgba(0,0,0,0.3)', borderRadius: '6px' }}>
+                    {selectedTheatre.avatar && <img src={selectedTheatre.avatar} alt="Warlord" style={{ width: '64px', height: '64px', borderRadius: '4px', border: `1px solid ${selectedTheatre.color}`, objectFit: 'cover' }} />}
+                    <div>
+                      <span style={{ color: '#ccc', display: 'block', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Controlling Warlord</span>
+                      <strong style={{ color: '#fff', display: 'block', fontSize: '1.25rem' }}>{selectedTheatre.warlord}</strong>
+                      <span style={{ color: selectedTheatre.color, display: 'block', fontSize: '1rem', fontWeight: 'bold' }}>{selectedTheatre.controllingFaction}</span>
+                    </div>
+                  </div>
+                  
+                  {selectedTheatre.lore && (
+                    <div style={{ marginBottom: '1.5rem', fontStyle: 'italic', color: '#ccc', lineHeight: 1.6, paddingLeft: '1rem', borderLeft: `2px solid ${selectedTheatre.color}` }}>
+                      "{selectedTheatre.lore}"
+                    </div>
+                  )}
+
+                  {(selectedTheatre.p1Lore || selectedTheatre.p2Lore) && (
+                    <div>
+                      <h4 style={{ color: '#fff', textTransform: 'uppercase', letterSpacing: '1px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>Battle Reports</h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {selectedTheatre.p1Lore && (
+                          <div style={{ padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '6px' }}>
+                            <strong style={{ color: selectedTheatre.winnerId === selectedTheatre.p1Id ? selectedTheatre.color : '#999', display: 'block', marginBottom: '0.5rem' }}>{selectedTheatre.p1Name}</strong>
+                            <div style={{ color: '#ccc', lineHeight: 1.6 }}>"{selectedTheatre.p1Lore}"</div>
+                          </div>
+                        )}
+                        {selectedTheatre.p2Lore && (
+                          <div style={{ padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '6px' }}>
+                            <strong style={{ color: selectedTheatre.winnerId === selectedTheatre.p2Id ? selectedTheatre.color : '#999', display: 'block', marginBottom: '0.5rem' }}>{selectedTheatre.p2Name}</strong>
+                            <div style={{ color: '#ccc', lineHeight: 1.6 }}>"{selectedTheatre.p2Lore}"</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div style={{ color: '#ccc', fontStyle: 'italic', textAlign: 'center', padding: '2rem' }}>
+                  Core staging area. No direct warlord control established.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
