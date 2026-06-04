@@ -158,7 +158,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="card" id="globe-container" style={{ padding: 0, overflow: 'hidden', position: 'relative' }}>
+      <div className="card" id="globe-container" style={{ padding: 0, overflow: 'hidden', position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <div style={{ position: 'absolute', top: '1rem', left: '1rem', zIndex: 10, background: 'rgba(0,0,0,0.7)', padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--theme-border)' }}>
           <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--theme-accent)' }}>Planetary Theater Display</h3>
           <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--theme-fg-muted)' }}>Interactive Command Globe</p>
@@ -172,20 +172,65 @@ export default function Dashboard() {
             globeImageUrl="/images/planet-texture.png"
             bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
             backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
-            pointsData={theatres}
-            pointLat="lat"
-            pointLng="lng"
-            pointColor="color"
-            pointAltitude={0.01}
-            pointRadius={1.5}
-            pointsMerge={false}
-            pointLabel={(d: any) => `
-              <div style="background: rgba(0, 0, 0, 0.8); padding: 10px; border-radius: 4px; border: 1px solid ${d.color}; font-family: sans-serif;">
-                <strong style="color: ${d.color}; display: block; margin-bottom: 4px; font-size: 1.1em;">${d.name}</strong>
-                <span style="color: #ccc; display: block; margin-bottom: 4px;">Controlled by: <span style="text-transform: capitalize; color: #fff;">${d.controllingFaction}</span></span>
-                <i style="color: #999; font-size: 0.9em; max-width: 200px; display: block; white-space: normal;">"${d.narrative}"</i>
-              </div>
-            `}
+            htmlElementsData={theatres}
+            htmlLat="lat"
+            htmlLng="lng"
+            htmlElement={(d: any) => {
+              const el = document.createElement('div');
+              el.innerHTML = `
+                <div style="
+                  width: 24px;
+                  height: 24px;
+                  border: 2px solid #ef4444;
+                  border-radius: 50%;
+                  position: relative;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  cursor: pointer;
+                  pointer-events: auto;
+                  box-shadow: 0 0 8px #ef4444, inset 0 0 8px #ef4444;
+                  transition: transform 0.2s ease-in-out;
+                ">
+                  <div style="position: absolute; width: 34px; height: 2px; background: #ef4444; top: 50%; left: -5px; transform: translateY(-50%); opacity: 0.7;"></div>
+                  <div style="position: absolute; height: 34px; width: 2px; background: #ef4444; left: 50%; top: -5px; transform: translateX(-50%); opacity: 0.7;"></div>
+                  <div style="width: 6px; height: 6px; background: ${d.color}; border-radius: 50%; box-shadow: 0 0 10px ${d.color}; z-index: 2;"></div>
+                  
+                  <div class="reticle-tooltip" style="
+                    display: none;
+                    position: absolute;
+                    bottom: 35px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(0, 0, 0, 0.9);
+                    padding: 10px;
+                    border-radius: 4px;
+                    border: 1px solid ${d.color};
+                    font-family: sans-serif;
+                    white-space: nowrap;
+                    z-index: 100;
+                    pointer-events: none;
+                  ">
+                    <strong style="color: ${d.color}; display: block; margin-bottom: 4px; font-size: 1.1em;">${d.name}</strong>
+                    <span style="color: #ccc; display: block; margin-bottom: 4px;">Controlled by: <span style="text-transform: capitalize; color: #fff;">${d.controllingFaction}</span></span>
+                    <i style="color: #999; font-size: 0.9em; max-width: 200px; display: block; white-space: normal;">"${d.narrative}"</i>
+                  </div>
+                </div>
+              `;
+              
+              el.onmouseenter = () => {
+                const tooltip = el.querySelector('.reticle-tooltip') as HTMLElement;
+                if (tooltip) tooltip.style.display = 'block';
+                (el.firstElementChild as HTMLElement).style.transform = 'scale(1.2)';
+              };
+              el.onmouseleave = () => {
+                const tooltip = el.querySelector('.reticle-tooltip') as HTMLElement;
+                if (tooltip) tooltip.style.display = 'none';
+                (el.firstElementChild as HTMLElement).style.transform = 'scale(1)';
+              };
+              
+              return el;
+            }}
           />
         )}
       </div>
