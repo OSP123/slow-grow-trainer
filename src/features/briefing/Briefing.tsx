@@ -25,7 +25,7 @@ export default function Briefing() {
           Campaign Structure & Matchmaking
         </h3>
         <p style={{ lineHeight: '1.6', marginBottom: '1rem' }}>
-          The campaign is structured around four crucial escalation checkpoints: <strong>400, 800, 1200, and 1600 points</strong>. As your army grows, so does the scale of war.
+          The campaign is structured around four crucial escalation checkpoints: <strong>400, 800, 1200, and 1600 points</strong>. As your army grows, so does the scale of war. The Slow Grow campaign officially begins on <strong>July 1</strong>.
         </p>
         <p style={{ lineHeight: '1.6', marginBottom: '1rem' }}>
           We utilize an <strong>automated matchmaking system</strong> to ensure fair and diverse pairings. <strong>Every Commander must play at least one official game at each of the 4 checkpoints</strong> to maintain the campaign narrative and progression.
@@ -159,7 +159,7 @@ export default function Briefing() {
           <div>
             <h4 style={{ margin: '0 0 0.5rem 0' }}>Q: Is narrative allowed?</h4>
             <p style={{ margin: 0, lineHeight: '1.6', fontSize: '0.9rem' }}>
-              <strong>A:</strong> Not only is it allowed, but encouraged! We have a section in your commander profile to fill in your lore and a section in the battle report for your game to add the story for your game. There will be a prize for best narrative at the final game. Plus, the plan is to have the training module transition into a crusade...
+              <strong>A:</strong> Not only is it allowed, but encouraged! We have a section in your commander profile to fill in your lore and a section in the battle report for your game to add the story for your game. There will be a prize for best narrative at the final game. Plus, the plan is to have the training module transition into a crusade... To emphasize narrative, we are also allowing leaders to be created using the Crucible of Champions rules. If you can find those rules, you are free to create up to 3 leaders using them.
             </p>
           </div>
         </div>
