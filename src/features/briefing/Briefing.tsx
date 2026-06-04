@@ -165,6 +165,12 @@ export default function Briefing() {
               <strong>A:</strong> Not only is it allowed, but encouraged! We have a section in your commander profile to fill in your lore and a section in the battle report for your game to add the story for your game. There will be a prize for best narrative at the final game. Plus, the plan is to have the training module transition into a crusade...
             </p>
           </div>
+          <div>
+            <h4 style={{ margin: '0 0 0.5rem 0' }}>Q: Does a narrative campaign mean that we can't play normal 40k games?</h4>
+            <p style={{ margin: 0, lineHeight: '1.6', fontSize: '0.9rem' }}>
+              <strong>A:</strong> No! Feel free to play either competitive or narrative games with your opponent. It's up to you and your opponent what type of game you want to play. The only restriction is the number of points you'll be playing with at each interval.
+            </p>
+          </div>
         </div>
       </div>
 
