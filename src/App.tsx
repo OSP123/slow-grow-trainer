@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Session } from '@supabase/supabase-js';
 
 import { Route, Routes, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, Map, Activity, UserCircle, LogOut, BookOpen, Menu, X } from 'lucide-react';
+import { Shield, Map, Activity, UserCircle, LogOut, BookOpen, Menu, X, Camera } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import Login from './features/auth/Login';
 import UpdatePassword from './features/auth/UpdatePassword';
@@ -13,6 +13,7 @@ import AdminDashboard from './features/admin/AdminDashboard';
 import CommanderProfile from './features/profile/CommanderProfile';
 import CampaignBattles from './features/battles/CampaignBattles';
 import Briefing from './features/briefing/Briefing';
+import Gallery from './features/gallery/Gallery';
 import TranslatedHeader from './components/TranslatedHeader';
 import './App.css';
 
@@ -227,6 +228,13 @@ function App() {
             <Shield size={20} />
             <span>Matchups & Lore</span>
           </div>
+          <div 
+            className={`nav-item ${activeView === 'gallery' ? 'active' : ''}`}
+            onClick={() => navigateTo('/gallery')}
+          >
+            <Camera size={20} />
+            <span>Pict-Captures Gallery</span>
+          </div>
         </div>
 
         <div style={{ marginTop: 'auto' }}>
@@ -288,6 +296,7 @@ function App() {
           <Route path="/logistics" element={<Logistics />} />
           <Route path="/assessments" element={<Assessments />} />
           <Route path="/battles" element={<CampaignBattles />} />
+          <Route path="/gallery" element={<Gallery />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/profile" element={<CommanderProfile />} />
           <Route path="/profile/:profileId" element={<CommanderProfile />} />

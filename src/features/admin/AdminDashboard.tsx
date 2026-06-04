@@ -12,6 +12,14 @@ export interface UnitPoint {
   updated_at: string;
 }
 
+export interface GlobalEvent {
+  id: string;
+  title: string;
+  description: string;
+  is_active: boolean;
+  created_at: string;
+}
+
 export interface CampaignVote {
   id: string;
   category: string;
@@ -58,6 +66,12 @@ export default function AdminDashboard() {
   const [newStoreName, setNewStoreName] = useState('');
   const [newStoreLoc, setNewStoreLoc] = useState('');
 
+  // Global Events
+  const [globalEvents, setGlobalEvents] = useState<GlobalEvent[]>([]);
+  const [newEventTitle, setNewEventTitle] = useState('');
+  const [newEventDesc, setNewEventDesc] = useState('');
+  const [eventMessage, setEventMessage] = useState('');
+
   // Matchup management
   const [allMatchups, setAllMatchups] = useState<EditableMatchup[]>([]);
   const [editingMatchup, setEditingMatchup] = useState<EditableMatchup | null>(null);
@@ -99,6 +113,7 @@ export default function AdminDashboard() {
       fetchAllMatchups();
       fetchUnitPoints();
       fetchUsers();
+      fetchGlobalEvents();
     } else {
       alert('Access Denied. Incorrect Phase Code.');
     }
@@ -107,6 +122,15 @@ export default function AdminDashboard() {
   const fetchStores = async () => {
     const { data } = await supabase.from('game_stores').select('*').order('name');
     if (data) setStores(data);
+  };
+
+  const fetchGlobalEvents = async () => {
+    try {
+      const { data, error } = await supabase.from('global_events').select('*').order('created_at', { ascending: false });
+      if (data && !error) setGlobalEvents(data);
+    } catch (e) {
+      // Table might not exist yet
+    }
   };
 
   const fetchVotes = async () => {
@@ -228,6 +252,43 @@ export default function AdminDashboard() {
   const handleDeleteStore = async (storeId: string) => {
     await supabase.from('game_stores').delete().eq('id', storeId);
     fetchStores();
+  };
+
+  const handleAddEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEventTitle || !newEventDesc) return;
+    try {
+      const { error } = await supabase.from('global_events').insert({ title: newEventTitle, description: newEventDesc, is_active: false });
+      if (error) setEventMessage('Error: ' + error.message);
+      else {
+        setEventMessage('Global Event queued.');
+        setNewEventTitle('');
+        setNewEventDesc('');
+        fetchGlobalEvents();
+      }
+    } catch (err) {
+      setEventMessage('Database schema update pending for Global Events.');
+    }
+  };
+
+  const handleToggleEvent = async (eventId: string, currentActive: boolean) => {
+    try {
+      if (!currentActive) {
+        // Deactivate all others
+        await supabase.from('global_events').update({ is_active: false }).neq('id', eventId);
+      }
+      await supabase.from('global_events').update({ is_active: !currentActive }).eq('id', eventId);
+      fetchGlobalEvents();
+    } catch (err) {
+      setEventMessage('Database schema update pending.');
+    }
+  };
+  
+  const handleDeleteEvent = async (eventId: string) => {
+    try {
+      await supabase.from('global_events').delete().eq('id', eventId);
+      fetchGlobalEvents();
+    } catch (err) {}
   };
 
   const handleEditMatchup = (m: EditableMatchup) => {
@@ -774,6 +835,51 @@ export default function AdminDashboard() {
             </table>
           </div>
         )}
+      </div>
+
+      {/* ── GLOBAL EVENTS ENGINE ── */}
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <h2>Global Events Override</h2>
+        <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1rem' }}>
+          Trigger sector-wide narrative conditions. Only one event can be active at a time.
+        </p>
+        
+        {eventMessage && (
+          <div style={{ marginBottom: '1rem', padding: '0.75rem', border: '1px solid var(--theme-accent)', color: 'var(--theme-accent)', fontSize: '0.85rem' }}>
+            {eventMessage}
+          </div>
+        )}
+
+        <form onSubmit={handleAddEvent} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+          <input type="text" placeholder="Event Title (e.g. Warp Storm)" value={newEventTitle}
+            onChange={e => setNewEventTitle(e.target.value)} required style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box' }} />
+          <input type="text" placeholder="Narrative Description / Rules" value={newEventDesc}
+            onChange={e => setNewEventDesc(e.target.value)} required style={{ flex: 2, padding: '0.75rem', boxSizing: 'border-box' }} />
+          <button type="submit" className="btn primary">Stage Event</button>
+        </form>
+
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {globalEvents.length === 0 && <span style={{ color: 'var(--theme-fg-muted)' }}>No narrative events in the ledger.</span>}
+          {globalEvents.map(event => (
+            <li key={event.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '1rem', borderBottom: '1px solid var(--theme-border)', backgroundColor: event.is_active ? 'rgba(168, 85, 247, 0.1)' : 'transparent', borderLeft: event.is_active ? '4px solid #a855f7' : '4px solid transparent' }}>
+              <div style={{ flex: 1 }}>
+                <strong style={{ color: event.is_active ? '#a855f7' : 'var(--theme-fg)', fontSize: '1.1rem' }}>{event.title}</strong>
+                {event.is_active && <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', padding: '2px 6px', backgroundColor: '#a855f7', color: 'white', borderRadius: '4px', textTransform: 'uppercase' }}>Active</span>}
+                <div style={{ color: 'var(--theme-fg-muted)', marginTop: '0.25rem', fontSize: '0.9rem' }}>{event.description}</div>
+              </div>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <button onClick={() => handleToggleEvent(event.id, event.is_active)}
+                  style={{ backgroundColor: event.is_active ? 'transparent' : '#a855f7', color: event.is_active ? '#a855f7' : 'white', border: `1px solid ${event.is_active ? '#a855f7' : 'transparent'}`, padding: '4px 12px', borderRadius: '4px', cursor: 'pointer' }}>
+                  {event.is_active ? 'Deactivate' : 'Trigger'}
+                </button>
+                <button onClick={() => handleDeleteEvent(event.id)}
+                  style={{ backgroundColor: 'transparent', color: 'red', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* ── CAMPAIGN VOTES ── */}

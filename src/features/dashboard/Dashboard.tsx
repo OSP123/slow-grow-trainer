@@ -6,12 +6,12 @@ import { Castle, Factory, Satellite, Skull, Biohazard, Mountain, Target } from '
 import { FACTIONS } from '../../data/warhammer40k';
 
 const THEATRES_OF_WAR = [
-  { name: 'Hive Primus', lat: 15, lng: 20, narrative: 'The planetary capital and primary stronghold.', Icon: Castle }, // Africa
-  { name: 'The Ash Wastes', lat: 25, lng: 10, narrative: 'Scorched deserts holding vital Promethium pipelines.', Icon: Mountain }, // Sahara, Africa
-  { name: 'Magma Forges', lat: 45, lng: 60, narrative: 'Heavy industrial sector controlled by the Mechanicus.', Icon: Factory }, // Kazakhstan/Russia
-  { name: 'Orbital Tether', lat: -10, lng: -55, narrative: 'The only reliable way off this rock.', Icon: Satellite }, // Brazil, South America
-  { name: 'The Sump', lat: -25, lng: 135, narrative: 'Deep underhive slums infested with mutants.', Icon: Skull }, // Central Australia
-  { name: 'Rad-Zone Gamma', lat: 60, lng: -110, narrative: 'Irradiated badlands where ancient weapons sleep.', Icon: Biohazard } // Northern Canada
+  { name: 'Hive Primus', lat: 15, lng: 20, narrative: 'The planetary capital and primary stronghold.', Icon: Castle, image: 'hive_primus.png' }, // Africa
+  { name: 'The Ash Wastes', lat: 25, lng: 10, narrative: 'Scorched deserts holding vital Promethium pipelines.', Icon: Mountain, image: 'the_ash_wastes.png' }, // Sahara, Africa
+  { name: 'Magma Forges', lat: 45, lng: 60, narrative: 'Heavy industrial sector controlled by the Mechanicus.', Icon: Factory, image: 'magma_forges.png' }, // Kazakhstan/Russia
+  { name: 'Orbital Tether', lat: -10, lng: -55, narrative: 'The only reliable way off this rock.', Icon: Satellite, image: 'orbital_tether.png' }, // Brazil, South America
+  { name: 'The Sump', lat: -25, lng: 135, narrative: 'Deep underhive slums infested with mutants.', Icon: Skull, image: 'the_sump.jpg' }, // Central Australia
+  { name: 'Rad-Zone Gamma', lat: 60, lng: -110, narrative: 'Irradiated badlands where ancient weapons sleep.', Icon: Biohazard, image: 'rad_zone_gamma.png' } // Northern Canada
 ];
 
 const FACTION_COLORS = {
@@ -40,6 +40,7 @@ export default function Dashboard() {
   const [theatres, setTheatres] = useState<any[]>([]);
   const [windowSize, setWindowSize] = useState({ width: 800, height: 600 });
   const [selectedTheatre, setSelectedTheatre] = useState<any>(null);
+  const [activeEvent, setActiveEvent] = useState<any>(null);
   const globeEl = useRef<any>(null);
 
   useEffect(() => {
@@ -117,6 +118,7 @@ export default function Dashboard() {
                 Icon: Target, // Use a distinct 'Target' icon for sub-sectors to differentiate from the Base
                 isBase: false,
                 color,
+                image: baseTheatre.image,
                 controllingFaction: winnerProfile.army_faction,
                 warlord: winnerProfile.commander_name,
                 avatar: winnerProfile.avatar_url,
@@ -134,6 +136,11 @@ export default function Dashboard() {
 
           setTheatres(allElements);
         }
+
+        try {
+          const { data: eventData } = await supabase.from('global_events').select('*').eq('is_active', true).maybeSingle();
+          if (eventData) setActiveEvent(eventData);
+        } catch (err) {}
       } finally {
         setLoading(false);
       }
@@ -155,6 +162,18 @@ export default function Dashboard() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      {activeEvent && (
+        <div style={{ padding: '1.5rem', background: 'linear-gradient(to right, rgba(168, 85, 247, 0.2), transparent)', borderLeft: '4px solid #a855f7', borderRadius: '4px', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <span style={{ color: '#a855f7', fontSize: '1.5rem' }}>⚠️</span>
+            <h3 style={{ margin: 0, color: '#a855f7', textTransform: 'uppercase', letterSpacing: '2px' }}>Sector-Wide Alert: {activeEvent.title}</h3>
+          </div>
+          <p style={{ color: '#fff', fontSize: '1.1rem', margin: 0, lineHeight: 1.5 }}>
+            {activeEvent.description}
+          </p>
+        </div>
+      )}
+
       <div className="card">
         <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Global Command Interface</h2>
         <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1rem' }}>
@@ -292,7 +311,7 @@ export default function Dashboard() {
             <button onClick={() => setSelectedTheatre(null)} style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.5)', border: 'none', color: '#fff', fontSize: '1.5rem', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', zIndex: 10, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>×</button>
             
             {/* Image header */}
-            <div style={{ height: '220px', width: '100%', background: `linear-gradient(to bottom, transparent, var(--theme-bg-secondary)), url(/images/theatres/${selectedTheatre.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}.png) center/cover, #222`, borderBottom: `2px solid ${selectedTheatre.color}` }}>
+            <div style={{ height: '220px', width: '100%', background: `linear-gradient(to bottom, transparent, var(--theme-bg-secondary)), url(/images/theatres/${selectedTheatre.image || selectedTheatre.name.toLowerCase().replace(/[^a-z0-9]/g, '_') + '.png'}) center/cover, #222`, borderBottom: `2px solid ${selectedTheatre.color}` }}>
               <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'flex-end', padding: '1.5rem', background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }}>
                 <h3 style={{ margin: 0, fontSize: '2rem', color: selectedTheatre.color, textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>{selectedTheatre.name}</h3>
               </div>

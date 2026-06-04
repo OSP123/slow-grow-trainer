@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  @font-face {
+    font-family: 'Tau40k';
+    src: url('/fonts/tau-40k.otf') format('opentype');
+  }
+  @font-face {
+    font-family: 'NecronCrypt';
+    src: url('/fonts/Necron-Crypt.otf') format('opentype');
+  }
+  @font-face {
+    font-family: 'OCRAStd';
+    src: url('/fonts/OCRAStd.otf') format('opentype');
+  }
+
+  body {
+    font-family: 'Tau40k', 'Teko', sans-serif;
+    text-transform: lowercase;
+    background: #1e293b;
+    color: #f1f5f9;
+    padding: 2rem;
+  }
+
+  /* Translation via ::after */
+  [data-text]::after {
+    content: attr(data-text);
+    display: block;
+    text-transform: uppercase;
+    font-family: 'OCRAStd', monospace;
+    font-size: 0.65em;
+    font-weight: 400;
+    margin-top: 0.1em;
+    letter-spacing: 1px;
+    opacity: 0.7;
+    color: #64748b;
+  }
+
+  h1 { font-size: 2rem; margin-bottom: 1rem; }
+  p { font-size: 1rem; margin-bottom: 1rem; }
+  button { font-family: inherit; font-size: 1rem; padding: 0.5rem 1rem; }
+</style>
+</head>
+<body>
+  <h1 data-text="Imperium Network">Imperium Network</h1>
+  <p data-text="Connection secure. Welcome Commander.">Connection secure. Welcome Commander.</p>
+  <p data-text="This is a paragraph of body text that should be in alien font with English translation below.">This is a paragraph of body text that should be in alien font with English translation below.</p>
+  <button data-text="War Room">War Room</button>
+  <div style="margin-top:1rem">
+    <span data-text="Status: Active">Status: Active</span>
+  </div>
+  <h2 data-text="Campaign Warzones">Campaign Warzones</h2>
+  <p>This paragraph has NO data-text — should have no translation.</p>
+</body>
+</html>

@@ -4,6 +4,7 @@ import { supabase } from '../../supabaseClient';
 import { compressImage, getTransformUrl } from '../../utils/imageCompression';
 import ArmyRoster from './ArmyRoster';
 import { useUnitRegistry } from '../../hooks/useUnitRegistry';
+import { useCommanderCampaignData } from '../../hooks/useCommanderCampaignData';
 
 export interface ProfileData {
   id?: string;
@@ -14,13 +15,16 @@ export interface ProfileData {
   army_faction?: string;
   army_subfaction?: string;
   preferred_store_id?: string;
+  warlord_name?: string;
+  warlord_traits?: string[];
 }
 
-type Tab = 'specs' | 'roster' | 'lore';
+type Tab = 'specs' | 'roster' | 'lore' | 'warlord';
 
 export default function CommanderProfile() {
   const { profileId } = useParams<{ profileId?: string }>();
   const { unitsByFaction } = useUnitRegistry();
+  const { badges, warlordXp } = useCommanderCampaignData(profileId);
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -136,6 +140,7 @@ export default function CommanderProfile() {
   const TABS: { key: Tab; label: string }[] = [
     { key: 'specs', label: 'Commander Specs' },
     { key: 'roster', label: 'Army Roster' },
+    { key: 'warlord', label: 'Warlord Headquarters' },
     { key: 'lore', label: 'Army Chronicles' },
   ];
 
@@ -189,6 +194,24 @@ export default function CommanderProfile() {
             </div>
           )}
           {profile.location && <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)' }}>📍 {profile.location}</div>}
+          
+          {/* Badges Display */}
+          {badges.length > 0 && (
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+              {badges.map(b => (
+                <div key={b.id} title={b.description} style={{ 
+                  display: 'flex', alignItems: 'center', gap: '4px', 
+                  padding: '4px 8px', borderRadius: '12px', 
+                  backgroundColor: 'var(--theme-bg-secondary)', 
+                  border: `1px solid ${b.color}`,
+                  fontSize: '0.75rem', cursor: 'help'
+                }}>
+                  <span>{b.icon}</span>
+                  <span style={{ color: b.color, fontWeight: 'bold' }}>{b.name}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         {isOwner && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-end' }}>
@@ -310,6 +333,90 @@ export default function CommanderProfile() {
                 {profile.army_lore || <span style={{ color: 'var(--theme-fg-muted)', fontStyle: 'italic' }}>No chronicles scribed yet.</span>}
               </div>
             )}
+          </div>
+        )}
+
+        {/* ── WARLORD TAB ── */}
+        {activeTab === 'warlord' && profile.id && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ margin: 0, color: 'var(--theme-accent)' }}>Crucible of Champions</h3>
+            </div>
+            
+            <div style={{ padding: '1.5rem', backgroundColor: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)', borderRadius: '6px' }}>
+              {isOwner ? (
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  setMessage('Updating Warlord...');
+                  try {
+                    const { error } = await supabase.from('profiles').update({ warlord_name: profile.warlord_name }).eq('id', profile.id);
+                    if (error) setMessage('Error: ' + error.message);
+                    else setMessage('Warlord updated successfully.');
+                  } catch (err: any) {
+                    setMessage('Database schema update pending for Warlord features.');
+                  }
+                }} style={{ marginBottom: '2rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)' }}>Warlord Name</label>
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <input 
+                      type="text" 
+                      value={profile.warlord_name || ''} 
+                      onChange={e => setProfile({...profile, warlord_name: e.target.value})}
+                      placeholder="e.g. Captain Titus"
+                      style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box' }}
+                    />
+                    <button type="submit" className="btn primary">Save Name</button>
+                  </div>
+                </form>
+              ) : (
+                <div style={{ marginBottom: '2rem' }}>
+                  <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-fg-muted)' }}>Commanding Officer</h4>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{profile.warlord_name || 'Unknown Commander'}</div>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: '250px' }}>
+                  <h4 style={{ margin: '0 0 1rem 0', color: 'var(--theme-accent)', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>Combat Experience</h4>
+                  <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>{Math.floor(warlordXp / 50) + 1} <span style={{ fontSize: '1rem', color: 'var(--theme-fg-muted)', fontWeight: 'normal' }}>Level</span></div>
+                  <div style={{ color: 'var(--theme-fg-muted)' }}>{warlordXp} Total VP Scored</div>
+                  <div style={{ marginTop: '1rem', height: '6px', backgroundColor: 'var(--theme-bg)', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${(warlordXp % 50) * 2}%`, backgroundColor: 'var(--theme-accent)', transition: 'width 0.3s' }} />
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginTop: '0.5rem', textAlign: 'right' }}>
+                    {50 - (warlordXp % 50)} VP to next level
+                  </div>
+                </div>
+
+                <div style={{ flex: 1, minWidth: '250px' }}>
+                  <h4 style={{ margin: '0 0 1rem 0', color: 'var(--theme-accent)', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>Battle Traits & Scars</h4>
+                  {profile.warlord_traits && profile.warlord_traits.length > 0 ? (
+                    <ul style={{ listStyleType: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      {profile.warlord_traits.map((trait, i) => (
+                        <li key={i} style={{ padding: '0.5rem', backgroundColor: 'rgba(0,0,0,0.2)', borderLeft: '2px solid var(--theme-accent)' }}>
+                          {trait}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div style={{ color: 'var(--theme-fg-muted)', fontStyle: 'italic' }}>No traits or scars acquired yet.</div>
+                  )}
+                  {isOwner && Math.floor(warlordXp / 50) + 1 > (profile.warlord_traits?.length || 0) + 1 && (
+                     <div style={{ marginTop: '1rem' }}>
+                       <button onClick={async () => {
+                         try {
+                           const traits = [...(profile.warlord_traits || []), 'Hardened Veteran'];
+                           setProfile({...profile, warlord_traits: traits});
+                           await supabase.from('profiles').update({ warlord_traits: traits }).eq('id', profile.id);
+                         } catch (err: any) {
+                           setMessage('Database schema update pending.');
+                         }
+                       }} className="btn secondary" style={{ width: '100%' }}>Acquire New Trait</button>
+                     </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

@@ -250,3 +250,98 @@ Tasks:
 Follow-ups:
   - None
 
+
+Date: 2026-06-03
+Tasks:
+  - Replaced the generic Earth texture with a generated custom 2:1 equirectangular grimdark planet texture.
+  - Adjusted coordinates of the Theatres of War to match topographical features on the custom texture (e.g., Magma Forges placed on a volcanic crater).
+  - Upgraded globe markers from generic spikes to red tactical reticles rendered as HTML overlays.
+  - Adjusted globe container layout with flexbox to center the planet properly on desktop layouts.
+  - Named the fictional planet 'Vespera Prime' on the globe dashboard.
+Follow-ups:
+  - None
+
+Date: 2026-06-03 (Session Continued)
+Tasks:
+  - Relocated 'The Sump' to land coordinates (lat: -50, lng: 100) on Vespera Prime.
+  - Imported Three.js to generate and map stylized, low-poly primitive 3D structures directly to the globe interface.
+  - Added a Hive Spire for Hive Primus, Brutalist Cubes for Magma Forges, a Space Elevator cylinder for the Orbital Tether, Domes for The Sump, jagged Spikes for the Ash Wastes, and an inverted pyramid for Rad-Zone Gamma.
+Follow-ups:
+  - None
+
+Date: 2026-06-03 (Session Continued)
+Tasks:
+  - Fixed an issue where the 3D structures were rendering tangentially to the globe surface due to internal Three.js orientation differences. All primitives have been correctly aligned with their Z-axis pointing radially outward.
+  - Scaled up the 3D structures globally by 2.5x to ensure they are visible on standard zoom levels without feeling like 'funky blocks'.
+  - Adjusted coordinates for The Sump and Orbital Tether to align precisely with solid landmass terrain instead of open ocean.
+Follow-ups:
+  - Pending user decision on overhauling war_efforts into individual player-owned theatre control.
+
+Date: 2026-06-03 (Warlords of Vespera Update)
+Tasks:
+  - Overhauled Dashboard to use individual player profiles and matchups instead of global war effort points
+  - Replaced 3D primitives with scalable SVG icons from lucide-react (Castle, Factory, Satellite, Skull, Biohazard, Mountain)
+  - Updated Matchmaker.ts to assign a random theatre of war to matches
+  - Updated CampaignBattles.tsx to display active theatre for matchups
+Follow-ups:
+  - User must run ALTER TABLE matchups ADD COLUMN theatre_name text; in Supabase
+
+Date: 2026-06-03 (Clustered Sub-Sectors Update)
+Tasks:
+  - Updated Matchmaker.ts to generate random sub-sectors (e.g. Hive Primus - Sector Alpha)
+  - Updated Dashboard.tsx to parse theatre strings and dynamically cluster victorious matchup pins around the 6 core theatres using deterministic hashing
+Follow-ups:
+  - None
+
+Date: 2026-06-03 (Battle Lore added to Map)
+Tasks:
+  - Updated Dashboard.tsx to fetch p1_lore and p2_lore from matchups.
+  - Injected winner's battle report lore directly into the map hover tooltips.
+Follow-ups:
+  - None
+
+Date: 2026-06-03 (Dual Battle Lore added to Map)
+Tasks:
+  - Updated Dashboard.tsx to display BOTH the winner's and the loser's battle reports on the globe tooltips.
+  - Color-coded the winner's name in their faction color, and the loser's name in gray.
+Follow-ups:
+  - None
+
+Date: 2026-06-03 (Player Flow Lockout Fix)
+Tasks:
+  - Fixed match finalization to require both players to submit their reports.
+  - UI now locks individually and displays an 'Awaiting opponent' message.
+  - Map updates are gated behind full match completion.
+Follow-ups:
+  - None
+
+Date: 2026-06-03 (Field Manual Update)
+Tasks:
+  - Updated Briefing.tsx to explicitly clarify that BOTH players must submit their reports and honour ratings to finalize a match on the globe.
+Follow-ups:
+  - None
+
+Date: 2026-06-04 (Map Marker Modals)
+Tasks:
+  - Removed the coordinate alert when clicking the globe.
+  - Implemented an interactive modal for map markers that displays location lore, the controlling warlord, and battle reports.
+  - Added a graceful fallback gradient for theatre art until images are provided.
+Follow-ups:
+  - User will upload theatre art to public/images/theatres/
+
+Date: 2026-06-04 (Generated Theatre Art)
+Tasks:
+  - Generated AI concept art for all 6 campaign theatres (Hive Primus, Ash Wastes, Magma Forges, Orbital Tether, The Sump, Rad-Zone Gamma).
+  - Added them to public/images/theatres/ to display in the map modals.
+Follow-ups:
+  - None
+
+
+Date: 2026-06-04
+Tasks:
+- Implemented Warlord Headquarters with XP progression and Battle Traits
+- Implemented automated Campaign Badges logic and UI
+- Added Global Events admin panel and dashboard banner
+- Created Pict-Captures Gallery routing and layout
+Follow-ups:
+- None

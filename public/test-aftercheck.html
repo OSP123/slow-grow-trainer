@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { font-family: sans-serif; background: #111; color: #eee; padding: 2rem; }
+  [data-text]::after {
+    content: attr(data-text);
+    display: block;
+    font-family: Arial, sans-serif;
+    font-size: 0.7em;
+    color: #888;
+    text-transform: uppercase;
+    margin-top: 4px;
+    border: 1px dashed red;
+  }
+</style>
+</head>
+<body>
+  <h1 data-text="THIS IS THE ENGLISH TRANSLATION">alien heading text</h1>
+  <p data-text="THIS IS BODY TRANSLATION">alien body text</p>
+  <div data-text="THIS IS A DIV TRANSLATION">alien div text</div>
+  <span data-text="SPAN TRANSLATION">alien span</span>
+  <hr>
+  <p>element WITHOUT data-text — should have NO red-bordered translation below</p>
+  <hr>
+  <h2>RESULT: If you see red-bordered text below the first 4 elements, ::after works.</h2>
+  <h2>If you DON'T see red borders, your browser has a CSS issue.</h2>
+</body>
+</html>
