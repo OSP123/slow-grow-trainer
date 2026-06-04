@@ -70,6 +70,7 @@ export default function CommanderProfile() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [lore, setLore] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [commanderName, setCommanderName] = useState('');
   const [location, setLocation] = useState('');
   const [faction, setFaction] = useState('');
   const [subfaction, setSubfaction] = useState('');
@@ -105,6 +106,7 @@ export default function CommanderProfile() {
       setProfile(data);
       setLore(data.army_lore || '');
       setAvatarUrl(data.avatar_url || '');
+      setCommanderName(data.commander_name || '');
       setLocation(data.location || '');
       setFaction(data.army_faction || '');
       setSubfaction(data.army_subfaction || '');
@@ -168,11 +170,15 @@ export default function CommanderProfile() {
     e.preventDefault();
     if (!profile) return;
     const { error } = await supabase.from('profiles').update({
-      location, army_faction: faction, army_subfaction: subfaction,
+      commander_name: commanderName, location, army_faction: faction, army_subfaction: subfaction,
       preferred_store_id: storeId || null
     }).eq('id', profile.id);
     if (error) setMessage('Failed to lock taxonomy updates.');
-    else { setMessage('Commander metadata archived.'); setEditMode(false); }
+    else { 
+      setMessage('Commander metadata archived.'); 
+      setProfile({ ...profile, commander_name: commanderName, location, army_faction: faction, army_subfaction: subfaction, preferred_store_id: storeId });
+      setEditMode(false); 
+    }
   };
 
   if (!profile) return <div style={{ textAlign: 'center', marginTop: '4rem' }}>Downloading Profile...</div>;
@@ -300,6 +306,10 @@ export default function CommanderProfile() {
             {isOwner && editMode ? (
               <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.85rem' }}>Commander Name</label>
+                    <input type="text" value={commanderName} onChange={e => setCommanderName(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} required />
+                  </div>
                   <div>
                     <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.85rem' }}>Location</label>
                     <input type="text" value={location} onChange={e => setLocation(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} required />

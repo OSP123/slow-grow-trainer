@@ -365,3 +365,13 @@ Tasks:
 - Created database migration for warlord_datasheet JSONB column
 Follow-ups:
 - None
+
+
+Date: 2026-06-04
+Tasks:
+- Created DatasheetBuilder and DatasheetViewer components for full 40k Datasheet UI.
+- Expanded Crucible of Champions to support up to 3 custom characters via crucible_datasheets array.
+- Added Core Stats (M, T, SV, W, etc.), Ranged Weapons, and Melee Weapons inputs.
+- Created new database migration for crucible_datasheets.
+Follow-ups:
+- None
