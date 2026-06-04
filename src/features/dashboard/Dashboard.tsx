@@ -7,14 +7,14 @@ interface WarEffort {
   score: number;
 }
 
-// Predefined Theatres of War
+// Predefined Theatres of War mapped to visual features on the generated texture
 const THEATRES_OF_WAR = [
-  { name: 'Hive Primus', lat: 0, lng: 0, narrative: 'The planetary capital and primary stronghold.' },
-  { name: 'The Ash Wastes', lat: 20, lng: 45, narrative: 'Scorched deserts holding vital Promethium pipelines.' },
-  { name: 'Magma Forges', lat: -15, lng: -60, narrative: 'Heavy industrial sector controlled by the Mechanicus.' },
-  { name: 'Orbital Tether', lat: 45, lng: -120, narrative: 'The only reliable way off this rock.' },
-  { name: 'The Sump', lat: -40, lng: 90, narrative: 'Deep underhive slums infested with mutants.' },
-  { name: 'Rad-Zone Gamma', lat: 60, lng: 140, narrative: 'Irradiated badlands where ancient weapons sleep.' }
+  { name: 'Hive Primus', lat: 15, lng: 10, narrative: 'The planetary capital and primary stronghold.' },
+  { name: 'The Ash Wastes', lat: 0, lng: -120, narrative: 'Scorched deserts holding vital Promethium pipelines.' },
+  { name: 'Magma Forges', lat: 45, lng: 40, narrative: 'Heavy industrial sector controlled by the Mechanicus.' },
+  { name: 'Orbital Tether', lat: -10, lng: 140, narrative: 'The only reliable way off this rock.' },
+  { name: 'The Sump', lat: -70, lng: -20, narrative: 'Deep underhive slums infested with mutants.' },
+  { name: 'Rad-Zone Gamma', lat: 60, lng: -140, narrative: 'Irradiated badlands where ancient weapons sleep.' }
 ];
 
 const FACTION_COLORS = {
@@ -176,8 +176,8 @@ export default function Dashboard() {
             pointLat="lat"
             pointLng="lng"
             pointColor="color"
-            pointAltitude="size"
-            pointRadius={0.5}
+            pointAltitude={0.01}
+            pointRadius={1.5}
             pointsMerge={false}
             pointLabel={(d: any) => `
               <div style="background: rgba(0, 0, 0, 0.8); padding: 10px; border-radius: 4px; border: 1px solid ${d.color}; font-family: sans-serif;">
