@@ -14,9 +14,12 @@ export default function Briefing() {
           The <strong>Slow Grow Trainer</strong> is an interactive narrative campaign platform for Warhammer 40,000. 
           Its purpose is to organise your slow-grow league from start to finish — tracking hobby progress on your army, scheduling fair pairings at your local game store, logging battle outcomes, and recording the honour and conduct of every Commander through the campaign.
         </p>
-        <p style={{ lineHeight: '1.6' }}>
+        <p style={{ lineHeight: '1.6', marginBottom: '1rem' }}>
           <strong style={{ color: 'var(--theme-accent)' }}>Honour comes first.</strong> Command Temperament and Hobby Spirit ratings matter more than kill counts or Victory Points. 
           Be a sporting opponent and know your rules — that is how you earn renown in this campaign.
+        </p>
+        <p style={{ lineHeight: '1.6' }}>
+          To further emphasize the narrative, we are allowing commanders to forge their own heroes using the <strong>Crucible of Champions</strong> rules. If you can find these rules, you are free to create up to 3 custom leaders for your force.
         </p>
       </div>
 
@@ -159,7 +162,7 @@ export default function Briefing() {
           <div>
             <h4 style={{ margin: '0 0 0.5rem 0' }}>Q: Is narrative allowed?</h4>
             <p style={{ margin: 0, lineHeight: '1.6', fontSize: '0.9rem' }}>
-              <strong>A:</strong> Not only is it allowed, but encouraged! We have a section in your commander profile to fill in your lore and a section in the battle report for your game to add the story for your game. There will be a prize for best narrative at the final game. Plus, the plan is to have the training module transition into a crusade... To emphasize narrative, we are also allowing leaders to be created using the Crucible of Champions rules. If you can find those rules, you are free to create up to 3 leaders using them.
+              <strong>A:</strong> Not only is it allowed, but encouraged! We have a section in your commander profile to fill in your lore and a section in the battle report for your game to add the story for your game. There will be a prize for best narrative at the final game. Plus, the plan is to have the training module transition into a crusade...
             </p>
           </div>
         </div>
