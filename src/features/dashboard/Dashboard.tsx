@@ -32,6 +32,7 @@ export default function Dashboard() {
   useEffect(() => {
     // Handle resize
     const handleResize = () => {
+      if (typeof document === 'undefined') return;
       // Find the container width
       const container = document.getElementById('globe-container');
       if (container) {
@@ -41,9 +42,12 @@ export default function Dashboard() {
 
     window.addEventListener('resize', handleResize);
     // Initial size
-    setTimeout(handleResize, 100);
+    const timeoutId = setTimeout(handleResize, 100);
 
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   useEffect(() => {
@@ -160,7 +164,7 @@ export default function Dashboard() {
 
       <div className="card" id="globe-container" style={{ padding: 0, overflow: 'hidden', position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <div style={{ position: 'absolute', top: '1rem', left: '1rem', zIndex: 10, background: 'rgba(0,0,0,0.7)', padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--theme-border)' }}>
-          <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--theme-accent)' }}>Planetary Theater Display</h3>
+          <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--theme-accent)' }}>Vespera Prime Theater Display</h3>
           <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--theme-fg-muted)' }}>Interactive Command Globe</p>
         </div>
         
