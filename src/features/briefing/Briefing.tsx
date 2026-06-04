@@ -150,6 +150,18 @@ export default function Briefing() {
               <strong>A:</strong> The campaign runs for a total of 5 months. Each month, commanders are required to post an additional 400 points of units (built or painted) and play at least 1 recorded game. This structure scales smoothly from 400 points in Month 1 up to a full 2000-point army in Month 5!
             </p>
           </div>
+          <div>
+            <h4 style={{ margin: '0 0 0.5rem 0' }}>Q: Are Legends units allowed?</h4>
+            <p style={{ margin: 0, lineHeight: '1.6', fontSize: '0.9rem' }}>
+              <strong>A:</strong> Yes.
+            </p>
+          </div>
+          <div>
+            <h4 style={{ margin: '0 0 0.5rem 0' }}>Q: Is narrative allowed?</h4>
+            <p style={{ margin: 0, lineHeight: '1.6', fontSize: '0.9rem' }}>
+              <strong>A:</strong> Not only is it allowed, but encouraged! We have a section in your commander profile to fill in your lore and a section in the battle report for your game to add the story for your game. There will be a prize for best narrative at the final game. Plus, the plan is to have the training module transition into a crusade...
+            </p>
+          </div>
         </div>
       </div>
 
