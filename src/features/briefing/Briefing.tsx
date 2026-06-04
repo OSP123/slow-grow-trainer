@@ -50,7 +50,7 @@ export default function Briefing() {
           <li><strong>Complete your profile</strong> — navigate to Commander Profile, finish your specs (subfaction, location), and write your Army Chronicles lore.</li>
           <li><strong>Build your Roster</strong> — head to the Army Roster tab in your profile and start adding units from the 40k 10th Edition datasheet library. Mark each unit as Built, Painted, and Played as you make progress.</li>
           <li><strong>Await pairings</strong> — the Admin will schedule your first matchup using the algorithmic matchmaker. You will see it appear in Matchups & Lore.</li>
-          <li><strong>Play your game</strong> — use the Live VP Tracker in-app during the game to record scores. When done, submit your final report including your opponent's Honour ratings.</li>
+          <li><strong>Play your game</strong> — use the Live VP Tracker in-app during the game to record scores. When done, <strong>BOTH players</strong> must submit their final report, complete with their perspective of the battle (lore) and their opponent's Honour ratings. <strong>The match will not conclude, and the globe will not update, until both reports are sealed.</strong></li>
         </ol>
       </div>
 
@@ -74,7 +74,7 @@ export default function Briefing() {
             {
               icon: '■',
               title: 'Matchups & Lore (Campaign Warzones)',
-              desc: 'View the Global Warzone Board showing all ongoing and completed battles across the campaign. Select one of your Assigned Frontlines to update live VP scores or submit a final battle report with Honour ratings.',
+              desc: 'View the Global Warzone Board showing all ongoing and completed battles across the campaign. Select one of your Assigned Frontlines to update live VP scores, draft your narrative perspective of the engagement, and submit your final battle report with Honour ratings. Remember: both players must submit their report to finalize the match!',
             },
             {
               icon: '■',
@@ -126,7 +126,7 @@ export default function Briefing() {
           </div>
         </div>
         <p style={{ lineHeight: '1.6', marginTop: '1rem', color: 'var(--theme-fg-muted)', fontSize: '0.85rem' }}>
-          Ratings are on a 1–5 star scale. These ratings are private and will not be displayed publicly on the Global Warzone Board. They are used purely for end-of-campaign celebratory awards and to ensure everyone is having a positive experience.
+          Ratings are on a 1–5 star scale. These honour ratings are used purely for end-of-campaign celebratory awards and to ensure everyone is having a positive experience. <strong>Your match will remain active and will not appear on the War Effort Map until both you and your opponent have securely logged these ratings.</strong>
         </p>
       </div>
 
