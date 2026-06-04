@@ -375,3 +375,11 @@ Tasks:
 - Created new database migration for crucible_datasheets.
 Follow-ups:
 - None
+
+
+Date: 2026-06-04
+Tasks:
+- Added ability for users to edit their Commander Name from the Commander Specs tab.
+- Updated state, form, and save logic in CommanderProfile.tsx to handle commander_name updates directly to the database.
+Follow-ups:
+- None
