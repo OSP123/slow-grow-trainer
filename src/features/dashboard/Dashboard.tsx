@@ -10,12 +10,12 @@ import { FACTIONS } from '../../data/warhammer40k';
 
 
 const THEATRES_OF_WAR = [
-  { name: 'Hive Primus', lat: 15, lng: 10, narrative: 'The planetary capital and primary stronghold.', Icon: Castle },
-  { name: 'The Ash Wastes', lat: 0, lng: -120, narrative: 'Scorched deserts holding vital Promethium pipelines.', Icon: Mountain },
-  { name: 'Magma Forges', lat: 45, lng: 40, narrative: 'Heavy industrial sector controlled by the Mechanicus.', Icon: Factory },
-  { name: 'Orbital Tether', lat: 10, lng: 90, narrative: 'The only reliable way off this rock.', Icon: Satellite },
-  { name: 'The Sump', lat: -20, lng: 110, narrative: 'Deep underhive slums infested with mutants.', Icon: Skull },
-  { name: 'Rad-Zone Gamma', lat: 60, lng: -140, narrative: 'Irradiated badlands where ancient weapons sleep.', Icon: Biohazard }
+  { name: 'Hive Primus', lat: 15, lng: 20, narrative: 'The planetary capital and primary stronghold.', Icon: Castle }, // Africa
+  { name: 'The Ash Wastes', lat: 25, lng: 10, narrative: 'Scorched deserts holding vital Promethium pipelines.', Icon: Mountain }, // Sahara, Africa
+  { name: 'Magma Forges', lat: 45, lng: 60, narrative: 'Heavy industrial sector controlled by the Mechanicus.', Icon: Factory }, // Kazakhstan/Russia
+  { name: 'Orbital Tether', lat: -10, lng: -55, narrative: 'The only reliable way off this rock.', Icon: Satellite }, // Brazil, South America
+  { name: 'The Sump', lat: -25, lng: 135, narrative: 'Deep underhive slums infested with mutants.', Icon: Skull }, // Central Australia
+  { name: 'Rad-Zone Gamma', lat: 60, lng: -110, narrative: 'Irradiated badlands where ancient weapons sleep.', Icon: Biohazard } // Northern Canada
 ];
 
 const FACTION_COLORS = {
