@@ -100,9 +100,11 @@ export default function Dashboard() {
               const factionData = FACTIONS.find(f => f.name === winnerProfile.army_faction);
               const color = factionData ? FACTION_COLORS[factionData.grandAlliance as keyof typeof FACTION_COLORS] : '#aaaaaa';
 
-              let battleLore = null;
-              if (isP1Win) battleLore = match.p1_lore || match.p2_lore;
-              else if (isP2Win) battleLore = match.p2_lore || match.p1_lore;
+              let p1Profile: any = match.p1_profile;
+              if (Array.isArray(p1Profile)) p1Profile = p1Profile[0];
+              
+              let p2Profile: any = match.p2_profile;
+              if (Array.isArray(p2Profile)) p2Profile = p2Profile[0];
 
               const { latOffset, lngOffset } = getDeterministicOffset(match.theatre_name || match.p1_id);
 
@@ -118,7 +120,13 @@ export default function Dashboard() {
                 warlord: winnerProfile.commander_name,
                 avatar: winnerProfile.avatar_url,
                 lore: winnerProfile.army_lore,
-                battleLore: battleLore
+                p1Lore: match.p1_lore,
+                p2Lore: match.p2_lore,
+                p1Name: p1Profile?.commander_name || 'Commander',
+                p2Name: p2Profile?.commander_name || 'Commander',
+                winnerId: isP1Win ? match.p1_id : (isP2Win ? match.p2_id : null),
+                p1Id: match.p1_id,
+                p2Id: match.p2_id
               });
             });
           });
@@ -189,7 +197,11 @@ export default function Dashboard() {
                   </div>
                 </div>
                 ${d.lore ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); color: #999; font-size: 0.85em; font-style: italic; max-width: 250px; white-space: normal;">"${d.lore.substring(0, 100)}${d.lore.length > 100 ? '...' : ''}"</div>` : ''}
-                ${d.battleLore ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 0.9em; max-width: 250px; white-space: normal;"><strong>Battle Report:</strong> <i style="color: #ccc;">"${d.battleLore.substring(0, 150)}${d.battleLore.length > 150 ? '...' : ''}"</i></div>` : ''}
+                ${(d.p1Lore || d.p2Lore) ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2); max-width: 280px; white-space: normal; display: flex; flex-direction: column; gap: 8px;">
+                  <strong style="color: #fff; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px;">Battle Reports</strong>
+                  ${d.p1Lore ? `<div style="font-size: 0.85em;"><strong style="color: ${d.winnerId === d.p1Id ? d.color : '#999'};">${d.p1Name}:</strong> <i style="color: #ccc;">"${d.p1Lore.substring(0, 120)}${d.p1Lore.length > 120 ? '...' : ''}"</i></div>` : ''}
+                  ${d.p2Lore ? `<div style="font-size: 0.85em;"><strong style="color: ${d.winnerId === d.p2Id ? d.color : '#999'};">${d.p2Name}:</strong> <i style="color: #ccc;">"${d.p2Lore.substring(0, 120)}${d.p2Lore.length > 120 ? '...' : ''}"</i></div>` : ''}
+                </div>` : ''}
               ` : `
                 <span style="color: #ccc; display: block; font-style: italic;">Core staging area. No direct warlord control.</span>
               `;
