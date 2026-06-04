@@ -12,8 +12,8 @@ const THEATRES_OF_WAR = [
   { name: 'Hive Primus', lat: 15, lng: 10, narrative: 'The planetary capital and primary stronghold.' },
   { name: 'The Ash Wastes', lat: 0, lng: -120, narrative: 'Scorched deserts holding vital Promethium pipelines.' },
   { name: 'Magma Forges', lat: 45, lng: 40, narrative: 'Heavy industrial sector controlled by the Mechanicus.' },
-  { name: 'Orbital Tether', lat: -10, lng: 140, narrative: 'The only reliable way off this rock.' },
-  { name: 'The Sump', lat: -50, lng: 100, narrative: 'Deep underhive slums infested with mutants.' },
+  { name: 'Orbital Tether', lat: 10, lng: 90, narrative: 'The only reliable way off this rock.' },
+  { name: 'The Sump', lat: -20, lng: 110, narrative: 'Deep underhive slums infested with mutants.' },
   { name: 'Rad-Zone Gamma', lat: 60, lng: -140, narrative: 'Irradiated badlands where ancient weapons sleep.' }
 ];
 
@@ -243,43 +243,63 @@ export default function Dashboard() {
               const group = new THREE.Group();
               const baseColor = d.color;
               
-              const glowingMaterial = new THREE.MeshBasicMaterial({ color: baseColor, transparent: true, opacity: 0.8 });
-              const darkMaterial = new THREE.MeshLambertMaterial({ color: '#222222' });
+              const glowingMaterial = new THREE.MeshBasicMaterial({ color: baseColor, transparent: true, opacity: 0.9 });
+              const darkMaterial = new THREE.MeshLambertMaterial({ color: '#444444' });
               
+              const SCALE = 2.5;
+
               if (d.name === 'Hive Primus') {
-                const spire = new THREE.Mesh(new THREE.ConeGeometry(0.6, 4, 8), glowingMaterial);
-                spire.position.y = 2;
-                const base = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 2, 1, 8), darkMaterial);
-                base.position.y = 0.5;
+                const spire = new THREE.Mesh(new THREE.ConeGeometry(0.8 * SCALE, 5 * SCALE, 8), glowingMaterial);
+                spire.rotation.x = Math.PI / 2;
+                spire.position.z = (5 * SCALE) / 2;
+                
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(2 * SCALE, 2.5 * SCALE, 1.5 * SCALE, 8), darkMaterial);
+                base.rotation.x = Math.PI / 2;
+                base.position.z = (1.5 * SCALE) / 2;
+                
                 group.add(spire, base);
               } else if (d.name === 'Orbital Tether') {
-                const tether = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 15, 8), glowingMaterial);
-                tether.position.y = 7.5;
-                const platform = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.5, 8), darkMaterial);
-                platform.position.y = 0.25;
+                const tether = new THREE.Mesh(new THREE.CylinderGeometry(0.3 * SCALE, 0.3 * SCALE, 20 * SCALE, 8), glowingMaterial);
+                tether.rotation.x = Math.PI / 2;
+                tether.position.z = (20 * SCALE) / 2;
+                
+                const platform = new THREE.Mesh(new THREE.CylinderGeometry(2 * SCALE, 2 * SCALE, 0.5 * SCALE, 8), darkMaterial);
+                platform.rotation.x = Math.PI / 2;
+                platform.position.z = (0.5 * SCALE) / 2;
+                
                 group.add(tether, platform);
               } else if (d.name === 'Magma Forges') {
-                const factory1 = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 1.5), darkMaterial);
-                factory1.position.set(0, 0.75, 0);
-                const factory2 = new THREE.Mesh(new THREE.BoxGeometry(1, 2.5, 1), glowingMaterial);
-                factory2.position.set(1, 1.25, 0.5);
+                const factory1 = new THREE.Mesh(new THREE.BoxGeometry(2 * SCALE, 2 * SCALE, 2 * SCALE), darkMaterial);
+                factory1.position.z = (2 * SCALE) / 2;
+                
+                const factory2 = new THREE.Mesh(new THREE.BoxGeometry(1.5 * SCALE, 1.5 * SCALE, 3 * SCALE), glowingMaterial);
+                factory2.position.set(1 * SCALE, 1 * SCALE, (3 * SCALE) / 2);
+                
                 group.add(factory1, factory2);
               } else if (d.name === 'The Sump') {
-                const dome = new THREE.Mesh(new THREE.SphereGeometry(1.5, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2), darkMaterial);
-                dome.position.y = 0;
-                const vent = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 2, 8), glowingMaterial);
-                vent.position.set(0.5, 1, 0.5);
+                const dome = new THREE.Mesh(new THREE.SphereGeometry(2 * SCALE, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2), darkMaterial);
+                dome.rotation.x = Math.PI / 2;
+                dome.position.z = 0;
+                
+                const vent = new THREE.Mesh(new THREE.CylinderGeometry(0.4 * SCALE, 0.4 * SCALE, 2 * SCALE, 8), glowingMaterial);
+                vent.rotation.x = Math.PI / 2;
+                vent.position.set(0.5 * SCALE, 0, (2 * SCALE) / 2);
+                
                 group.add(dome, vent);
               } else if (d.name === 'The Ash Wastes') {
-                const spike1 = new THREE.Mesh(new THREE.ConeGeometry(0.5, 2.5, 4), glowingMaterial);
-                spike1.position.set(-0.5, 1.25, -0.5);
-                const spike2 = new THREE.Mesh(new THREE.ConeGeometry(0.4, 1.5, 4), darkMaterial);
-                spike2.position.set(0.5, 0.75, 0.5);
+                const spike1 = new THREE.Mesh(new THREE.ConeGeometry(0.6 * SCALE, 3 * SCALE, 4), glowingMaterial);
+                spike1.rotation.x = Math.PI / 2;
+                spike1.position.set(-0.5 * SCALE, 0, (3 * SCALE) / 2);
+                
+                const spike2 = new THREE.Mesh(new THREE.ConeGeometry(0.5 * SCALE, 2 * SCALE, 4), darkMaterial);
+                spike2.rotation.x = Math.PI / 2;
+                spike2.position.set(1 * SCALE, 0.5 * SCALE, (2 * SCALE) / 2);
+                
                 group.add(spike1, spike2);
               } else if (d.name === 'Rad-Zone Gamma') {
-                const ruin = new THREE.Mesh(new THREE.ConeGeometry(1.2, 2.5, 4), glowingMaterial);
-                ruin.rotation.x = Math.PI; 
-                ruin.position.y = 1.25;
+                const ruin = new THREE.Mesh(new THREE.ConeGeometry(1.5 * SCALE, 3 * SCALE, 4), glowingMaterial);
+                ruin.rotation.x = -Math.PI / 2; 
+                ruin.position.z = (3 * SCALE) / 2;
                 group.add(ruin);
               }
               
