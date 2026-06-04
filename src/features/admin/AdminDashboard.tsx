@@ -200,7 +200,12 @@ export default function AdminDashboard() {
   const commitMatches = async () => {
     if (generatedMatches.length === 0) return;
     setCommittingMatches(true);
-    const payload = generatedMatches.map(m => ({ p1_id: m.p1.id, p2_id: m.p2.id, status: 'scheduled' }));
+    const payload = generatedMatches.map(m => ({ 
+      p1_id: m.p1.id, 
+      p2_id: m.p2.id, 
+      status: 'scheduled',
+      theatre_name: m.theatre_name 
+    }));
     const { error } = await supabase.from('matchups').insert(payload);
     if (!error) {
       alert('Matchups actively committed to the Ledger!');

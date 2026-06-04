@@ -12,6 +12,7 @@ export interface MatchupData {
   p2_lore?: string;
   game_result?: string;
   status?: string;
+  theatre_name?: string;
   p1_temperament?: number;
   p2_temperament?: number;
   p1_rules_engagement?: number;
@@ -490,6 +491,13 @@ export default function CampaignBattles() {
                 <span style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', letterSpacing: '1px' }}>SEALED</span>
               )}
             </div>
+            
+            {activeMatchData.theatre_name && (
+              <div style={{ marginBottom: '1.5rem', fontSize: '0.85rem', color: 'var(--theme-accent)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--theme-accent)' }}></span>
+                <strong>Location:</strong> {activeMatchData.theatre_name}
+              </div>
+            )}
 
             {/* Completed match: show honour ratings as the primary display */}
             {activeMatchData.status === 'completed' && (

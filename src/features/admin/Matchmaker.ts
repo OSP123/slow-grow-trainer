@@ -19,7 +19,17 @@ export interface MatchPair {
   p1: CommanderProfile;
   p2: CommanderProfile;
   score: number;
+  theatre_name: string;
 }
+
+const THEATRES = [
+  'Hive Primus',
+  'The Ash Wastes',
+  'Magma Forges',
+  'Orbital Tether',
+  'The Sump',
+  'Rad-Zone Gamma'
+];
 
 export function generateMatchups(pool: CommanderProfile[]): MatchPair[] {
   const unresolved = [...pool];
@@ -61,7 +71,8 @@ export function generateMatchups(pool: CommanderProfile[]): MatchPair[] {
 
     if (bestMatchIndex !== -1) {
       const p2 = unresolved.splice(bestMatchIndex, 1)[0];
-      matchups.push({ p1, p2, score: highestScore });
+      const randomTheatre = THEATRES[Math.floor(Math.random() * THEATRES.length)];
+      matchups.push({ p1, p2, score: highestScore, theatre_name: randomTheatre });
     }
   }
 

@@ -1,20 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
+import { createRoot } from 'react-dom/client';
 import { supabase } from '../../supabaseClient';
 import Globe from 'react-globe.gl';
-import * as THREE from 'three';
-interface WarEffort {
-  mega_faction: 'imperium' | 'chaos' | 'xenos';
-  score: number;
-}
+import { Castle, Factory, Satellite, Skull, Biohazard, Mountain } from 'lucide-react';
+import { FACTIONS } from '../../data/warhammer40k';
 
-// Predefined Theatres of War mapped to visual features on the generated texture
+
+
+
+
 const THEATRES_OF_WAR = [
-  { name: 'Hive Primus', lat: 15, lng: 10, narrative: 'The planetary capital and primary stronghold.' },
-  { name: 'The Ash Wastes', lat: 0, lng: -120, narrative: 'Scorched deserts holding vital Promethium pipelines.' },
-  { name: 'Magma Forges', lat: 45, lng: 40, narrative: 'Heavy industrial sector controlled by the Mechanicus.' },
-  { name: 'Orbital Tether', lat: 10, lng: 90, narrative: 'The only reliable way off this rock.' },
-  { name: 'The Sump', lat: -20, lng: 110, narrative: 'Deep underhive slums infested with mutants.' },
-  { name: 'Rad-Zone Gamma', lat: 60, lng: -140, narrative: 'Irradiated badlands where ancient weapons sleep.' }
+  { name: 'Hive Primus', lat: 15, lng: 10, narrative: 'The planetary capital and primary stronghold.', Icon: Castle },
+  { name: 'The Ash Wastes', lat: 0, lng: -120, narrative: 'Scorched deserts holding vital Promethium pipelines.', Icon: Mountain },
+  { name: 'Magma Forges', lat: 45, lng: 40, narrative: 'Heavy industrial sector controlled by the Mechanicus.', Icon: Factory },
+  { name: 'Orbital Tether', lat: 10, lng: 90, narrative: 'The only reliable way off this rock.', Icon: Satellite },
+  { name: 'The Sump', lat: -20, lng: 110, narrative: 'Deep underhive slums infested with mutants.', Icon: Skull },
+  { name: 'Rad-Zone Gamma', lat: 60, lng: -140, narrative: 'Irradiated badlands where ancient weapons sleep.', Icon: Biohazard }
 ];
 
 const FACTION_COLORS = {
@@ -25,15 +26,13 @@ const FACTION_COLORS = {
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<WarEffort[]>([]);
+  const [theatres, setTheatres] = useState<any[]>(THEATRES_OF_WAR);
   const [windowSize, setWindowSize] = useState({ width: 800, height: 600 });
   const globeEl = useRef<any>(null);
 
   useEffect(() => {
-    // Handle resize
     const handleResize = () => {
       if (typeof document === 'undefined') return;
-      // Find the container width
       const container = document.getElementById('globe-container');
       if (container) {
         setWindowSize({ width: container.clientWidth, height: Math.min(600, window.innerHeight * 0.6) });
@@ -41,7 +40,6 @@ export default function Dashboard() {
     };
 
     window.addEventListener('resize', handleResize);
-    // Initial size
     const timeoutId = setTimeout(handleResize, 100);
 
     return () => {
@@ -53,14 +51,58 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchEffort() {
       try {
-        const { data: scores, error } = await supabase
-          .from('war_efforts')
-          .select('*');
+        const { data: matchups, error } = await supabase
+          .from('matchups')
+          .select('theatre_name, game_result, p1_id, p2_id, p1_profile:profiles!p1_id(commander_name, army_faction, avatar_url, army_lore), p2_profile:profiles!p2_id(commander_name, army_faction, avatar_url, army_lore)')
+          .eq('status', 'completed')
+          .order('created_at', { ascending: false });
 
         if (error) {
-          console.error('Error fetching war efforts', error);
-        } else if (scores) {
-          setData(scores);
+          console.error('Error fetching matchups', error);
+        } else if (matchups) {
+          const updatedTheatres = THEATRES_OF_WAR.map(theatre => {
+            const latestMatch = matchups.find(m => m.theatre_name === theatre.name);
+            
+            let controllingFaction = 'Unknown';
+            let color = '#aaaaaa'; // Neutral gray
+            let warlord = null;
+            let avatar = null;
+            let lore = null;
+
+            if (latestMatch) {
+              const isP1Win = latestMatch.game_result === 'p1_win';
+              const isP2Win = latestMatch.game_result === 'p2_win';
+              const isDraw = latestMatch.game_result === 'draw';
+              
+              if (!isDraw && (isP1Win || isP2Win)) {
+                let winnerProfile: any = isP1Win ? latestMatch.p1_profile : latestMatch.p2_profile;
+                if (Array.isArray(winnerProfile)) winnerProfile = winnerProfile[0];
+                
+                if (winnerProfile) {
+                  warlord = winnerProfile.commander_name;
+                  avatar = winnerProfile.avatar_url;
+                  lore = winnerProfile.army_lore;
+                  
+                  const factionData = FACTIONS.find(f => f.name === winnerProfile.army_faction);
+                  if (factionData) {
+                    controllingFaction = winnerProfile.army_faction;
+                    color = FACTION_COLORS[factionData.grandAlliance as keyof typeof FACTION_COLORS] || color;
+                  }
+                }
+              }
+            }
+
+            return {
+              ...theatre,
+              controllingFaction,
+              color,
+              warlord,
+              avatar,
+              lore
+            };
+          });
+          
+          setTheatres(updatedTheatres);
         }
       } finally {
         setLoading(false);
@@ -71,7 +113,6 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    // Set auto-rotate
     if (globeEl.current) {
       globeEl.current.controls().autoRotate = true;
       globeEl.current.controls().autoRotateSpeed = 0.5;
@@ -82,90 +123,19 @@ export default function Dashboard() {
     return <div style={{ color: 'var(--theme-fg-muted)' }}>Synchronizing Telemetry...</div>;
   }
 
-  if (!data || data.length === 0) {
-    return (
-      <div className="card">
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Sector Status</h2>
-        <p style={{ color: 'var(--theme-fg-muted)' }}>
-          No telemetry data available.
-        </p>
-      </div>
-    );
-  }
-
-  // Calculate total scores to distribute control
-  const totalImperium = data.find(d => d.mega_faction === 'imperium')?.score || 0;
-  const totalChaos = data.find(d => d.mega_faction === 'chaos')?.score || 0;
-  const totalXenos = data.find(d => d.mega_faction === 'xenos')?.score || 0;
-  
-  const totalScore = totalImperium + totalChaos + totalXenos;
-
-  // Determine control of theatres (Mock logic: assign theatres based on score percentage)
-  const theatres = THEATRES_OF_WAR.map((theatre, index) => {
-    let controllingFaction = 'imperium'; // default
-    let color = FACTION_COLORS.imperium;
-
-    if (totalScore > 0) {
-      const impShare = totalImperium / totalScore;
-      const chaosShare = totalChaos / totalScore;
-      
-      const threshold = index / THEATRES_OF_WAR.length;
-      
-      if (threshold < impShare) {
-        controllingFaction = 'imperium';
-        color = FACTION_COLORS.imperium;
-      } else if (threshold < impShare + chaosShare) {
-        controllingFaction = 'chaos';
-        color = FACTION_COLORS.chaos;
-      } else {
-        controllingFaction = 'xenos';
-        color = FACTION_COLORS.xenos;
-      }
-    }
-
-    // Add some random size to the marker
-    const size = Math.random() * 0.5 + 0.5;
-
-    return {
-      ...theatre,
-      controllingFaction,
-      color,
-      size
-    };
-  });
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <div className="card">
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>War Effort Results</h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
-          {data.map((effort, index) => (
-            <div 
-              key={index} 
-              style={{ 
-                flex: '1 1 200px',
-                display: 'flex', 
-                justifyContent: 'space-between',
-                padding: '1rem',
-                backgroundColor: 'var(--theme-bg)',
-                border: `1px solid var(--theme-border)`,
-                borderLeft: `4px solid ${FACTION_COLORS[effort.mega_faction]}`,
-                textTransform: 'capitalize',
-                letterSpacing: '1px',
-                fontFamily: 'var(--font-head)'
-              }}
-            >
-              <span style={{ color: 'var(--theme-fg)' }}>{effort.mega_faction}</span>
-              <span style={{ color: 'var(--theme-accent)', fontWeight: 'bold' }}>{effort.score}</span>
-            </div>
-          ))}
-        </div>
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Global Command Interface</h2>
+        <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1rem' }}>
+          Vespera Prime is divided into 6 critical Theatres of War. Win battles at these locations to claim them as your Warlord domain!
+        </p>
       </div>
 
       <div className="card" id="globe-container" style={{ padding: 0, overflow: 'hidden', position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <div style={{ position: 'absolute', top: '1rem', left: '1rem', zIndex: 10, background: 'rgba(0,0,0,0.7)', padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--theme-border)' }}>
-          <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--theme-accent)' }}>Vespera Prime Theater Display</h3>
-          <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--theme-fg-muted)' }}>Interactive Command Globe</p>
+        <div style={{ position: 'absolute', top: '1rem', left: '1rem', zIndex: 10, background: 'rgba(0,0,0,0.85)', padding: '0.75rem 1.25rem', borderRadius: '6px', border: '1px solid var(--theme-border)', backdropFilter: 'blur(4px)' }}>
+          <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--theme-accent)' }}>Vespera Prime</h3>
+          <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--theme-fg-muted)' }}>Tactical Hologlobe (Hover over reticles)</p>
         </div>
         
         {windowSize.width > 0 && (
@@ -181,129 +151,89 @@ export default function Dashboard() {
             htmlLng="lng"
             htmlElement={(d: any) => {
               const el = document.createElement('div');
-              el.innerHTML = `
-                <div style="
-                  width: 24px;
-                  height: 24px;
-                  border: 2px solid #ef4444;
-                  border-radius: 50%;
-                  position: relative;
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                  cursor: pointer;
-                  pointer-events: auto;
-                  box-shadow: 0 0 8px #ef4444, inset 0 0 8px #ef4444;
-                  transition: transform 0.2s ease-in-out;
-                ">
-                  <div style="position: absolute; width: 34px; height: 2px; background: #ef4444; top: 50%; left: -5px; transform: translateY(-50%); opacity: 0.7;"></div>
-                  <div style="position: absolute; height: 34px; width: 2px; background: #ef4444; left: 50%; top: -5px; transform: translateX(-50%); opacity: 0.7;"></div>
-                  <div style="width: 6px; height: 6px; background: ${d.color}; border-radius: 50%; box-shadow: 0 0 10px ${d.color}; z-index: 2;"></div>
-                  
-                  <div class="reticle-tooltip" style="
-                    display: none;
-                    position: absolute;
-                    bottom: 35px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    background: rgba(0, 0, 0, 0.9);
-                    padding: 10px;
-                    border-radius: 4px;
-                    border: 1px solid ${d.color};
-                    font-family: sans-serif;
-                    white-space: nowrap;
-                    z-index: 100;
-                    pointer-events: none;
-                  ">
-                    <strong style="color: ${d.color}; display: block; margin-bottom: 4px; font-size: 1.1em;">${d.name}</strong>
-                    <span style="color: #ccc; display: block; margin-bottom: 4px;">Controlled by: <span style="text-transform: capitalize; color: #fff;">${d.controllingFaction}</span></span>
-                    <i style="color: #999; font-size: 0.9em; max-width: 200px; display: block; white-space: normal;">"${d.narrative}"</i>
+              const root = createRoot(el);
+              
+              const tooltipContent = d.warlord ? `
+                <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                  ${d.avatar ? `<img src="${d.avatar}" style="width: 50px; height: 50px; border-radius: 4px; border: 1px solid ${d.color}; object-fit: cover;" />` : ''}
+                  <div>
+                    <span style="color: #ccc; display: block; margin-bottom: 2px; font-size: 0.8em; text-transform: uppercase; letter-spacing: 1px;">Warlord</span>
+                    <strong style="color: #fff; display: block; margin-bottom: 4px; font-size: 1.1em;">${d.warlord}</strong>
+                    <span style="color: ${d.color}; display: block; margin-bottom: 4px; font-size: 0.9em; font-weight: bold;">${d.controllingFaction}</span>
                   </div>
                 </div>
+                ${d.lore ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); color: #999; font-size: 0.85em; font-style: italic; max-width: 250px; white-space: normal;">"${d.lore.substring(0, 100)}${d.lore.length > 100 ? '...' : ''}"</div>` : ''}
+              ` : `
+                <span style="color: #ccc; display: block; font-style: italic;">No Commander has claimed this territory.</span>
               `;
-              
-              el.onmouseenter = () => {
-                const tooltip = el.querySelector('.reticle-tooltip') as HTMLElement;
-                if (tooltip) tooltip.style.display = 'block';
-                (el.firstElementChild as HTMLElement).style.transform = 'scale(1.2)';
-              };
-              el.onmouseleave = () => {
-                const tooltip = el.querySelector('.reticle-tooltip') as HTMLElement;
-                if (tooltip) tooltip.style.display = 'none';
-                (el.firstElementChild as HTMLElement).style.transform = 'scale(1)';
-              };
+
+              const Icon = d.Icon;
+
+              root.render(
+                <div style={{ position: 'relative' }}>
+                  <div
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      border: '2px solid #ef4444',
+                      borderRadius: '50%',
+                      position: 'relative',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                      pointerEvents: 'auto',
+                      boxShadow: '0 0 12px #ef4444, inset 0 0 8px #ef4444',
+                      transition: 'transform 0.2s ease-in-out',
+                      background: 'rgba(0,0,0,0.5)',
+                      backdropFilter: 'blur(2px)'
+                    }}
+                    onMouseEnter={(e) => {
+                      const tgt = e.currentTarget;
+                      tgt.style.transform = 'scale(1.25)';
+                      const tooltip = tgt.nextElementSibling as HTMLElement;
+                      if (tooltip) tooltip.style.display = 'block';
+                    }}
+                    onMouseLeave={(e) => {
+                      const tgt = e.currentTarget;
+                      tgt.style.transform = 'scale(1)';
+                      const tooltip = tgt.nextElementSibling as HTMLElement;
+                      if (tooltip) tooltip.style.display = 'none';
+                    }}
+                  >
+                    <div style={{ position: 'absolute', width: '42px', height: '2px', background: '#ef4444', top: '50%', left: '-5px', transform: 'translateY(-50%)', opacity: 0.7 }}></div>
+                    <div style={{ position: 'absolute', height: '42px', width: '2px', background: '#ef4444', left: '50%', top: '-5px', transform: 'translateX(-50%)', opacity: 0.7 }}></div>
+                    <Icon size={16} color={d.color} style={{ zIndex: 2, filter: `drop-shadow(0 0 5px ${d.color})` }} />
+                  </div>
+                  
+                  <div className="reticle-tooltip" style={{
+                    display: 'none',
+                    position: 'absolute',
+                    bottom: '45px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: 'rgba(10, 10, 15, 0.95)',
+                    padding: '12px',
+                    borderRadius: '6px',
+                    border: `1px solid ${d.color}`,
+                    fontFamily: 'sans-serif',
+                    whiteSpace: 'nowrap',
+                    zIndex: 100,
+                    pointerEvents: 'none',
+                    boxShadow: `0 4px 15px rgba(0,0,0,0.5), 0 0 10px ${d.color}40`
+                  }}>
+                    <strong style={{ color: d.color, display: 'block', marginBottom: '8px', fontSize: '1.2em', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '4px' }}>
+                      {d.name}
+                    </strong>
+                    <i style={{ color: '#aaa', fontSize: '0.85em', maxWidth: '250px', display: 'block', whiteSpace: 'normal', marginBottom: '12px' }}>
+                      "{d.narrative}"
+                    </i>
+                    <div dangerouslySetInnerHTML={{ __html: tooltipContent }} />
+                  </div>
+                </div>
+              );
               
               return el;
-            }}
-            objectsData={theatres}
-            objectLat="lat"
-            objectLng="lng"
-            objectAltitude={0}
-            objectThreeObject={(d: any) => {
-              const group = new THREE.Group();
-              const baseColor = d.color;
-              
-              const glowingMaterial = new THREE.MeshBasicMaterial({ color: baseColor, transparent: true, opacity: 0.9 });
-              const darkMaterial = new THREE.MeshLambertMaterial({ color: '#444444' });
-              
-              const SCALE = 2.5;
-
-              if (d.name === 'Hive Primus') {
-                const spire = new THREE.Mesh(new THREE.ConeGeometry(0.8 * SCALE, 5 * SCALE, 8), glowingMaterial);
-                spire.rotation.x = Math.PI / 2;
-                spire.position.z = (5 * SCALE) / 2;
-                
-                const base = new THREE.Mesh(new THREE.CylinderGeometry(2 * SCALE, 2.5 * SCALE, 1.5 * SCALE, 8), darkMaterial);
-                base.rotation.x = Math.PI / 2;
-                base.position.z = (1.5 * SCALE) / 2;
-                
-                group.add(spire, base);
-              } else if (d.name === 'Orbital Tether') {
-                const tether = new THREE.Mesh(new THREE.CylinderGeometry(0.3 * SCALE, 0.3 * SCALE, 20 * SCALE, 8), glowingMaterial);
-                tether.rotation.x = Math.PI / 2;
-                tether.position.z = (20 * SCALE) / 2;
-                
-                const platform = new THREE.Mesh(new THREE.CylinderGeometry(2 * SCALE, 2 * SCALE, 0.5 * SCALE, 8), darkMaterial);
-                platform.rotation.x = Math.PI / 2;
-                platform.position.z = (0.5 * SCALE) / 2;
-                
-                group.add(tether, platform);
-              } else if (d.name === 'Magma Forges') {
-                const factory1 = new THREE.Mesh(new THREE.BoxGeometry(2 * SCALE, 2 * SCALE, 2 * SCALE), darkMaterial);
-                factory1.position.z = (2 * SCALE) / 2;
-                
-                const factory2 = new THREE.Mesh(new THREE.BoxGeometry(1.5 * SCALE, 1.5 * SCALE, 3 * SCALE), glowingMaterial);
-                factory2.position.set(1 * SCALE, 1 * SCALE, (3 * SCALE) / 2);
-                
-                group.add(factory1, factory2);
-              } else if (d.name === 'The Sump') {
-                const dome = new THREE.Mesh(new THREE.SphereGeometry(2 * SCALE, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2), darkMaterial);
-                dome.rotation.x = Math.PI / 2;
-                dome.position.z = 0;
-                
-                const vent = new THREE.Mesh(new THREE.CylinderGeometry(0.4 * SCALE, 0.4 * SCALE, 2 * SCALE, 8), glowingMaterial);
-                vent.rotation.x = Math.PI / 2;
-                vent.position.set(0.5 * SCALE, 0, (2 * SCALE) / 2);
-                
-                group.add(dome, vent);
-              } else if (d.name === 'The Ash Wastes') {
-                const spike1 = new THREE.Mesh(new THREE.ConeGeometry(0.6 * SCALE, 3 * SCALE, 4), glowingMaterial);
-                spike1.rotation.x = Math.PI / 2;
-                spike1.position.set(-0.5 * SCALE, 0, (3 * SCALE) / 2);
-                
-                const spike2 = new THREE.Mesh(new THREE.ConeGeometry(0.5 * SCALE, 2 * SCALE, 4), darkMaterial);
-                spike2.rotation.x = Math.PI / 2;
-                spike2.position.set(1 * SCALE, 0.5 * SCALE, (2 * SCALE) / 2);
-                
-                group.add(spike1, spike2);
-              } else if (d.name === 'Rad-Zone Gamma') {
-                const ruin = new THREE.Mesh(new THREE.ConeGeometry(1.5 * SCALE, 3 * SCALE, 4), glowingMaterial);
-                ruin.rotation.x = -Math.PI / 2; 
-                ruin.position.z = (3 * SCALE) / 2;
-                group.add(ruin);
-              }
-              
-              return group;
             }}
           />
         )}
