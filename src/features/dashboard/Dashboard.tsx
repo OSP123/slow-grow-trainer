@@ -2,12 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { supabase } from '../../supabaseClient';
 import Globe from 'react-globe.gl';
-import { Castle, Factory, Satellite, Skull, Biohazard, Mountain } from 'lucide-react';
+import { Castle, Factory, Satellite, Skull, Biohazard, Mountain, Target } from 'lucide-react';
 import { FACTIONS } from '../../data/warhammer40k';
-
-
-
-
 
 const THEATRES_OF_WAR = [
   { name: 'Hive Primus', lat: 15, lng: 20, narrative: 'The planetary capital and primary stronghold.', Icon: Castle }, // Africa
@@ -24,9 +20,24 @@ const FACTION_COLORS = {
   xenos: '#22c55e'     // Green
 };
 
+// Deterministic scatter offsets
+function getDeterministicOffset(seedStr: string) {
+  let hash = 0;
+  for (let i = 0; i < seedStr.length; i++) {
+    hash = (hash << 5) - hash + seedStr.charCodeAt(i);
+    hash |= 0;
+  }
+  const latR = Math.sin(hash) * 10000;
+  const lngR = Math.cos(hash) * 10000;
+  return {
+    latOffset: (latR - Math.floor(latR)) * 12 - 6, // [-6, +6] degrees spread
+    lngOffset: (lngR - Math.floor(lngR)) * 12 - 6
+  };
+}
+
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
-  const [theatres, setTheatres] = useState<any[]>(THEATRES_OF_WAR);
+  const [theatres, setTheatres] = useState<any[]>([]);
   const [windowSize, setWindowSize] = useState({ width: 800, height: 600 });
   const globeEl = useRef<any>(null);
 
@@ -59,50 +70,55 @@ export default function Dashboard() {
 
         if (error) {
           console.error('Error fetching matchups', error);
+          setTheatres(THEATRES_OF_WAR.map(t => ({ ...t, isBase: true, color: '#ef4444' })));
         } else if (matchups) {
-          const updatedTheatres = THEATRES_OF_WAR.map(theatre => {
-            const latestMatch = matchups.find(m => m.theatre_name === theatre.name);
-            
-            let controllingFaction = 'Unknown';
-            let color = '#aaaaaa'; // Neutral gray
-            let warlord = null;
-            let avatar = null;
-            let lore = null;
+          const allElements: any[] = [];
 
-            if (latestMatch) {
-              const isP1Win = latestMatch.game_result === 'p1_win';
-              const isP2Win = latestMatch.game_result === 'p2_win';
-              const isDraw = latestMatch.game_result === 'draw';
-              
-              if (!isDraw && (isP1Win || isP2Win)) {
-                let winnerProfile: any = isP1Win ? latestMatch.p1_profile : latestMatch.p2_profile;
-                if (Array.isArray(winnerProfile)) winnerProfile = winnerProfile[0];
-                
-                if (winnerProfile) {
-                  warlord = winnerProfile.commander_name;
-                  avatar = winnerProfile.avatar_url;
-                  lore = winnerProfile.army_lore;
-                  
-                  const factionData = FACTIONS.find(f => f.name === winnerProfile.army_faction);
-                  if (factionData) {
-                    controllingFaction = winnerProfile.army_faction;
-                    color = FACTION_COLORS[factionData.grandAlliance as keyof typeof FACTION_COLORS] || color;
-                  }
-                }
-              }
-            }
+          THEATRES_OF_WAR.forEach(baseTheatre => {
+            // 1. Add the Base Theatre anchor point
+            allElements.push({
+              ...baseTheatre,
+              isBase: true,
+              color: '#64748b', // Slate gray for the unaligned base anchor
+              controllingFaction: 'Contested War Zone',
+              warlord: null
+            });
 
-            return {
-              ...theatre,
-              controllingFaction,
-              color,
-              warlord,
-              avatar,
-              lore
-            };
+            // 2. Find all matches fought in this parent theatre
+            const matchesInTheatre = matchups.filter(m => m.theatre_name && m.theatre_name.startsWith(baseTheatre.name));
+
+            // 3. Add victorious sub-sectors
+            matchesInTheatre.forEach((match) => {
+              const isP1Win = match.game_result === 'p1_win';
+              const isP2Win = match.game_result === 'p2_win';
+              if (match.game_result === 'draw' || (!isP1Win && !isP2Win)) return;
+
+              let winnerProfile: any = isP1Win ? match.p1_profile : match.p2_profile;
+              if (Array.isArray(winnerProfile)) winnerProfile = winnerProfile[0];
+              if (!winnerProfile) return;
+
+              const factionData = FACTIONS.find(f => f.name === winnerProfile.army_faction);
+              const color = factionData ? FACTION_COLORS[factionData.grandAlliance as keyof typeof FACTION_COLORS] : '#aaaaaa';
+
+              const { latOffset, lngOffset } = getDeterministicOffset(match.theatre_name || match.p1_id);
+
+              allElements.push({
+                name: match.theatre_name || `${baseTheatre.name} - Sector Unknown`,
+                lat: baseTheatre.lat + latOffset,
+                lng: baseTheatre.lng + lngOffset,
+                narrative: `Sub-sector conquered by ${winnerProfile.commander_name}.`,
+                Icon: Target, // Use a distinct 'Target' icon for sub-sectors to differentiate from the Base
+                isBase: false,
+                color,
+                controllingFaction: winnerProfile.army_faction,
+                warlord: winnerProfile.commander_name,
+                avatar: winnerProfile.avatar_url,
+                lore: winnerProfile.army_lore
+              });
+            });
           });
-          
-          setTheatres(updatedTheatres);
+
+          setTheatres(allElements);
         }
       } finally {
         setLoading(false);
@@ -128,7 +144,7 @@ export default function Dashboard() {
       <div className="card">
         <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Global Command Interface</h2>
         <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1rem' }}>
-          Vespera Prime is divided into 6 critical Theatres of War. Win battles at these locations to claim them as your Warlord domain!
+          Vespera Prime is divided into 6 critical Theatres of War. As Commanders claim victories, new Sub-Sectors will visually expand around the core Theatres!
         </p>
       </div>
 
@@ -164,18 +180,22 @@ export default function Dashboard() {
                 </div>
                 ${d.lore ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); color: #999; font-size: 0.85em; font-style: italic; max-width: 250px; white-space: normal;">"${d.lore.substring(0, 100)}${d.lore.length > 100 ? '...' : ''}"</div>` : ''}
               ` : `
-                <span style="color: #ccc; display: block; font-style: italic;">No Commander has claimed this territory.</span>
+                <span style="color: #ccc; display: block; font-style: italic;">Core staging area. No direct warlord control.</span>
               `;
 
               const Icon = d.Icon;
+              // Sub-sectors are smaller and use Target icon
+              const boxSize = d.isBase ? '32px' : '20px';
+              const lineSize = d.isBase ? '42px' : '28px';
+              const iconSize = d.isBase ? 16 : 10;
 
               root.render(
                 <div style={{ position: 'relative' }}>
                   <div
                     style={{
-                      width: '32px',
-                      height: '32px',
-                      border: '2px solid #ef4444',
+                      width: boxSize,
+                      height: boxSize,
+                      border: `2px solid ${d.color}`,
                       borderRadius: '50%',
                       position: 'relative',
                       display: 'flex',
@@ -183,7 +203,7 @@ export default function Dashboard() {
                       alignItems: 'center',
                       cursor: 'pointer',
                       pointerEvents: 'auto',
-                      boxShadow: '0 0 12px #ef4444, inset 0 0 8px #ef4444',
+                      boxShadow: `0 0 ${d.isBase ? 12 : 6}px ${d.color}, inset 0 0 4px ${d.color}`,
                       transition: 'transform 0.2s ease-in-out',
                       background: 'rgba(0,0,0,0.5)',
                       backdropFilter: 'blur(2px)'
@@ -201,15 +221,15 @@ export default function Dashboard() {
                       if (tooltip) tooltip.style.display = 'none';
                     }}
                   >
-                    <div style={{ position: 'absolute', width: '42px', height: '2px', background: '#ef4444', top: '50%', left: '-5px', transform: 'translateY(-50%)', opacity: 0.7 }}></div>
-                    <div style={{ position: 'absolute', height: '42px', width: '2px', background: '#ef4444', left: '50%', top: '-5px', transform: 'translateX(-50%)', opacity: 0.7 }}></div>
-                    <Icon size={16} color={d.color} style={{ zIndex: 2, filter: `drop-shadow(0 0 5px ${d.color})` }} />
+                    <div style={{ position: 'absolute', width: lineSize, height: '2px', background: d.color, top: '50%', left: '-5px', transform: 'translateY(-50%)', opacity: 0.7 }}></div>
+                    <div style={{ position: 'absolute', height: lineSize, width: '2px', background: d.color, left: '50%', top: '-5px', transform: 'translateX(-50%)', opacity: 0.7 }}></div>
+                    <Icon size={iconSize} color={d.color} style={{ zIndex: 2, filter: `drop-shadow(0 0 5px ${d.color})` }} />
                   </div>
                   
                   <div className="reticle-tooltip" style={{
                     display: 'none',
                     position: 'absolute',
-                    bottom: '45px',
+                    bottom: d.isBase ? '45px' : '35px',
                     left: '50%',
                     transform: 'translateX(-50%)',
                     background: 'rgba(10, 10, 15, 0.95)',

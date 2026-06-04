@@ -72,7 +72,12 @@ export function generateMatchups(pool: CommanderProfile[]): MatchPair[] {
     if (bestMatchIndex !== -1) {
       const p2 = unresolved.splice(bestMatchIndex, 1)[0];
       const randomTheatre = THEATRES[Math.floor(Math.random() * THEATRES.length)];
-      matchups.push({ p1, p2, score: highestScore, theatre_name: randomTheatre });
+      
+      const prefixes = ['Sector', 'Outpost', 'Trench', 'Zone', 'Point'];
+      const suffixes = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Omega', 'Prime'];
+      const subSector = `${prefixes[Math.floor(Math.random() * prefixes.length)]} ${suffixes[Math.floor(Math.random() * suffixes.length)]}`;
+      
+      matchups.push({ p1, p2, score: highestScore, theatre_name: `${randomTheatre} - ${subSector}` });
     }
   }
 
