@@ -10,6 +10,11 @@ vi.mock('../../supabaseClient', () => ({
   },
 }));
 
+// Mock react-globe.gl to avoid WebGL context errors in JSDOM
+vi.mock('react-globe.gl', () => ({
+  default: () => <div data-testid="mock-globe">Globe</div>
+}));
+
 describe('Dashboard (Megafactions War Effort Map)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -44,11 +49,11 @@ describe('Dashboard (Megafactions War Effort Map)', () => {
 
     // Assert it eventually loads the real data and displays it
     await waitFor(() => {
-      expect(screen.getByText(/imperium:/i)).toBeInTheDocument();
+      expect(screen.getByText(/imperium/i, { selector: 'span' })).toBeInTheDocument();
       expect(screen.getByText(/154/i)).toBeInTheDocument();
-      expect(screen.getByText(/chaos:/i)).toBeInTheDocument();
+      expect(screen.getByText(/chaos/i, { selector: 'span' })).toBeInTheDocument();
       expect(screen.getByText(/120/i)).toBeInTheDocument();
-      expect(screen.getByText(/xenos:/i)).toBeInTheDocument();
+      expect(screen.getByText(/xenos/i, { selector: 'span' })).toBeInTheDocument();
       expect(screen.getByText(/198/i)).toBeInTheDocument();
     });
   });
