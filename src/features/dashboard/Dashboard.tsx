@@ -64,7 +64,7 @@ export default function Dashboard() {
       try {
         const { data: matchups, error } = await supabase
           .from('matchups')
-          .select('theatre_name, game_result, p1_id, p2_id, p1_profile:profiles!p1_id(commander_name, army_faction, avatar_url, army_lore), p2_profile:profiles!p2_id(commander_name, army_faction, avatar_url, army_lore)')
+          .select('theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, army_faction, avatar_url, army_lore), p2_profile:profiles!p2_id(commander_name, army_faction, avatar_url, army_lore)')
           .eq('status', 'completed')
           .order('created_at', { ascending: false });
 
@@ -100,6 +100,10 @@ export default function Dashboard() {
               const factionData = FACTIONS.find(f => f.name === winnerProfile.army_faction);
               const color = factionData ? FACTION_COLORS[factionData.grandAlliance as keyof typeof FACTION_COLORS] : '#aaaaaa';
 
+              let battleLore = null;
+              if (isP1Win) battleLore = match.p1_lore || match.p2_lore;
+              else if (isP2Win) battleLore = match.p2_lore || match.p1_lore;
+
               const { latOffset, lngOffset } = getDeterministicOffset(match.theatre_name || match.p1_id);
 
               allElements.push({
@@ -113,7 +117,8 @@ export default function Dashboard() {
                 controllingFaction: winnerProfile.army_faction,
                 warlord: winnerProfile.commander_name,
                 avatar: winnerProfile.avatar_url,
-                lore: winnerProfile.army_lore
+                lore: winnerProfile.army_lore,
+                battleLore: battleLore
               });
             });
           });
@@ -162,6 +167,11 @@ export default function Dashboard() {
             globeImageUrl="/images/planet-texture.png"
             bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
             backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
+            onGlobeClick={({ lat, lng }) => {
+              const msg = `Clicked Coordinates:\nLat: ${lat.toFixed(2)}\nLng: ${lng.toFixed(2)}`;
+              console.log(msg);
+              alert(msg);
+            }}
             htmlElementsData={theatres}
             htmlLat="lat"
             htmlLng="lng"
@@ -179,6 +189,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 ${d.lore ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); color: #999; font-size: 0.85em; font-style: italic; max-width: 250px; white-space: normal;">"${d.lore.substring(0, 100)}${d.lore.length > 100 ? '...' : ''}"</div>` : ''}
+                ${d.battleLore ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 0.9em; max-width: 250px; white-space: normal;"><strong>Battle Report:</strong> <i style="color: #ccc;">"${d.battleLore.substring(0, 150)}${d.battleLore.length > 150 ? '...' : ''}"</i></div>` : ''}
               ` : `
                 <span style="color: #ccc; display: block; font-style: italic;">Core staging area. No direct warlord control.</span>
               `;
