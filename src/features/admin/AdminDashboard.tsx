@@ -83,6 +83,7 @@ export default function AdminDashboard() {
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [userMessage, setUserMessage] = useState('');
+  const [confirmAction, setConfirmAction] = useState<{ type: 'pause' | 'resume' | 'remove', userId: string, userName: string } | null>(null);
 
   // Unit Points management
   const { unitsByFaction, refreshRegistry } = useUnitRegistry();
@@ -162,7 +163,7 @@ export default function AdminDashboard() {
     setFetchingUsers(true);
     const { data: profilesData, error } = await supabase
       .from('profiles')
-      .select('id, location, experience_level, army_faction, commander_name, payment_status, role, discord_name, real_name')
+      .select('id, location, experience_level, army_faction, commander_name, payment_status, role, discord_name, real_name, campaign_status')
       .order('commander_name');
 
     if (!error && profilesData) {
@@ -213,8 +214,21 @@ export default function AdminDashboard() {
     }
   };
 
+  const executeConfirmAction = async () => {
+    if (!confirmAction) return;
+    const newStatus = confirmAction.type === 'remove' ? 'removed' : confirmAction.type === 'pause' ? 'paused' : 'active';
+    const { error } = await supabase.from('profiles').update({ campaign_status: newStatus }).eq('id', confirmAction.userId);
+    
+    if (error) {
+      alert('Error updating user status. Ensure the SQL migration for campaign_status has been run.');
+    } else {
+      fetchUsers();
+    }
+    setConfirmAction(null);
+  };
+
   const handleGenerateMatches = async () => {
-    const { data } = await supabase.from('profiles').select('id, location, experience_level, army_faction, commander_name');
+    const { data } = await supabase.from('profiles').select('id, location, experience_level, army_faction, commander_name').eq('campaign_status', 'active');
     if (data) {
       const pairings = generateMatchups(data);
       setGeneratedMatches(pairings);
@@ -436,7 +450,32 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div style={{ padding: '2rem' }}>
+    <div style={{ padding: '2rem', position: 'relative' }}>
+      {confirmAction && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <div className="card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center', border: `1px solid ${confirmAction.type === 'remove' ? '#ef4444' : 'var(--theme-accent)'}` }}>
+            <h3 style={{ marginBottom: '1rem', color: confirmAction.type === 'remove' ? '#ef4444' : 'var(--theme-accent)' }}>
+              {confirmAction.type === 'remove' ? 'Remove Player?' : confirmAction.type === 'pause' ? 'Pause Player?' : 'Resume Player?'}
+            </h3>
+            <p style={{ marginBottom: '2rem' }}>
+              Are you sure you want to {confirmAction.type} <strong>{confirmAction.userName}</strong>?
+              {confirmAction.type === 'remove' && " This marks them as removed, excluding them from future matchmaking and active roster views."}
+              {confirmAction.type === 'pause' && " This pauses their participation in automated matchmaking until resumed."}
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+              <button onClick={() => setConfirmAction(null)} className="btn secondary">Cancel</button>
+              <button 
+                onClick={executeConfirmAction} 
+                className="btn primary" 
+                style={confirmAction.type === 'remove' ? { backgroundColor: '#ef4444', color: 'white' } : {}}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <h1 style={{ marginBottom: '1rem' }}>Administration Override Station</h1>
 
       {/* ── MATCHUP MANAGEMENT ── */}
@@ -610,10 +649,12 @@ export default function AdminDashboard() {
             <tbody>
               {users.map(u => (
                 <React.Fragment key={u.id}>
-                  <tr style={{ borderBottom: '1px solid var(--theme-border)' }}>
+                  <tr style={{ borderBottom: '1px solid var(--theme-border)', opacity: u.campaign_status === 'removed' ? 0.5 : 1 }}>
                     <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>
                       {u.commander_name || '—'}
                       {u.role === 'admin' && <span style={{ marginLeft: '6px', fontSize: '0.65rem', padding: '2px 4px', backgroundColor: 'var(--theme-accent)', color: 'white', borderRadius: '4px' }}>ADMIN</span>}
+                      {u.campaign_status === 'paused' && <span style={{ marginLeft: '6px', fontSize: '0.65rem', padding: '2px 4px', backgroundColor: '#eab308', color: '#000', borderRadius: '4px' }}>PAUSED</span>}
+                      {u.campaign_status === 'removed' && <span style={{ marginLeft: '6px', fontSize: '0.65rem', padding: '2px 4px', backgroundColor: '#ef4444', color: 'white', borderRadius: '4px' }}>REMOVED</span>}
                     </td>
                     <td style={{ padding: '0.5rem', color: 'var(--theme-fg-muted)' }}>{u.real_name || '—'}</td>
                     <td style={{ padding: '0.5rem', color: 'var(--theme-fg-muted)' }}>{u.discord_name || '—'}</td>
@@ -648,8 +689,28 @@ export default function AdminDashboard() {
                         {u.payment_status ? 'PAID' : 'UNPAID'}
                       </button>
                     </td>
-                    <td style={{ padding: '0.5rem' }}>
+                    <td style={{ padding: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       <button onClick={() => handleEditUser(u)} className="btn secondary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }}>Edit</button>
+                      
+                      {u.campaign_status !== 'removed' && (
+                        <>
+                          <button 
+                            onClick={() => setConfirmAction({ type: u.campaign_status === 'paused' ? 'resume' : 'pause', userId: u.id, userName: u.commander_name || 'Unknown' })} 
+                            className="btn secondary" 
+                            style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', borderColor: u.campaign_status === 'paused' ? '#22c55e' : '#eab308', color: u.campaign_status === 'paused' ? '#22c55e' : '#eab308' }}
+                          >
+                            {u.campaign_status === 'paused' ? 'Resume' : 'Pause'}
+                          </button>
+                          
+                          <button 
+                            onClick={() => setConfirmAction({ type: 'remove', userId: u.id, userName: u.commander_name || 'Unknown' })} 
+                            className="btn secondary" 
+                            style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', borderColor: '#ef4444', color: '#ef4444' }}
+                          >
+                            Remove
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                   {editingUserId === u.id && (
