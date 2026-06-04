@@ -161,33 +161,43 @@ export default function CampaignBattles() {
     }
 
     type FinalPayload = {
-      status: string; game_result?: string;
+      status?: string; game_result?: string;
       p1_score?: number; p2_score?: number;
       p1_lore?: string; p2_lore?: string;
       p1_temperament?: number; p2_temperament?: number;
       p1_rules_engagement?: number; p2_rules_engagement?: number;
     };
 
-    const payload: FinalPayload = { status: 'completed', game_result: gameResult };
+    const payload: FinalPayload = {};
     if (isP1) {
       if (myScore !== '') payload.p1_score = myScore as number;
       if (oppScore !== '') payload.p2_score = oppScore as number;
       payload.p1_lore = myLore;
       payload.p2_temperament = oppTemperament as number;
       payload.p2_rules_engagement = oppRulesEngagement as number;
+      
+      if (match.p1_temperament !== null && match.p1_temperament !== undefined) {
+        payload.status = 'completed';
+        payload.game_result = gameResult;
+      }
     } else {
       if (myScore !== '') payload.p2_score = myScore as number;
       if (oppScore !== '') payload.p1_score = oppScore as number;
       payload.p2_lore = myLore;
       payload.p1_temperament = oppTemperament as number;
       payload.p1_rules_engagement = oppRulesEngagement as number;
+      
+      if (match.p2_temperament !== null && match.p2_temperament !== undefined) {
+        payload.status = 'completed';
+        payload.game_result = gameResult;
+      }
     }
 
     const { error } = await supabase.from('matchups').update(payload).eq('id', activeMatch);
     if (error) {
       setMessage('Error: ' + error.message);
     } else {
-      setMessage('Battle report sealed. The Codex Administratum has been updated.');
+      setMessage(payload.status === 'completed' ? 'Battle report sealed. The Codex Administratum has been updated.' : 'Your report is sealed. Awaiting opponent...');
       setActiveMatch(null);
       setIsFinalizing(false);
       fetchBattles();
@@ -204,6 +214,10 @@ export default function CampaignBattles() {
 
   const activeMatchData = allMatchups.find(m => m.id === activeMatch);
   const isP1Active = activeMatchData?.p1_id === userId;
+  const hasFinalized = activeMatchData 
+    ? (isP1Active ? activeMatchData.p2_temperament != null : activeMatchData.p1_temperament != null)
+    : false;
+  const isLocked = activeMatchData?.status === 'completed' || hasFinalized;
 
   const getTopCommanders = () => {
     const scores: Record<string, { name: string, totalTemp: number, countTemp: number, totalSpirit: number, countSpirit: number, games: number }> = {};
@@ -549,8 +563,8 @@ export default function CampaignBattles() {
                     <input
                       id="myScore" type="number" min={0} value={myScore}
                       onChange={e => setMyScore(parseInt(e.target.value) || '')}
-                      disabled={activeMatchData.status === 'completed'}
-                      style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box', opacity: activeMatchData.status === 'completed' ? 0.5 : 1 }}
+                      disabled={isLocked}
+                      style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box', opacity: isLocked ? 0.5 : 1 }}
                     />
                   </div>
                   <div>
@@ -558,8 +572,8 @@ export default function CampaignBattles() {
                     <input
                       id="oppScore" type="number" min={0} value={oppScore}
                       onChange={e => setOppScore(parseInt(e.target.value) || '')}
-                      disabled={activeMatchData.status === 'completed'}
-                      style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box', opacity: activeMatchData.status === 'completed' ? 0.5 : 1 }}
+                      disabled={isLocked}
+                      style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box', opacity: isLocked ? 0.5 : 1 }}
                     />
                   </div>
                 </div>
@@ -567,21 +581,27 @@ export default function CampaignBattles() {
                   <label htmlFor="lore" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem' }}>Narrative Perspective</label>
                   <textarea
                     id="lore" value={myLore} onChange={e => setMyLore(e.target.value)}
-                    disabled={activeMatchData.status === 'completed'}
+                    disabled={isLocked}
                     placeholder="Describe the flow of battle, key moments, lore implications..."
                     style={{
                       width: '100%', height: '100px', padding: '1rem',
                       backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-fg)',
                       border: '1px solid var(--theme-border)', boxSizing: 'border-box',
-                      opacity: activeMatchData.status === 'completed' ? 0.5 : 1,
+                      opacity: isLocked ? 0.5 : 1,
                     }}
                   />
                 </div>
-                {activeMatchData.status !== 'completed' && (
+                {!isLocked && (
                   <button type="submit" className="btn primary">Save VP Progress</button>
                 )}
                 {message && <div style={{ color: 'var(--theme-accent)', fontSize: '0.9rem' }}>{message}</div>}
               </form>
+            ) : hasFinalized && activeMatchData.status !== 'completed' ? (
+              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--theme-accent)', border: '1px solid var(--theme-accent)', borderRadius: '8px', backgroundColor: 'var(--theme-bg-secondary)' }}>
+                <h3 style={{ margin: '0 0 1rem 0' }}>Report Sealed</h3>
+                <p style={{ color: 'var(--theme-fg-muted)' }}>Your battle report and honour ratings have been securely logged.</p>
+                <p style={{ color: 'var(--theme-fg-muted)' }}>Awaiting your opponent to submit their report to conclude the match.</p>
+              </div>
             ) : (
               /* ── Phase 2: Final Assessment — Honour ratings FIRST ── */
               <form onSubmit={handleFinalizeMatch} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
