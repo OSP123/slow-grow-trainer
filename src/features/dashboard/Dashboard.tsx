@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../supabaseClient';
 import Globe from 'react-globe.gl';
-
+import * as THREE from 'three';
 interface WarEffort {
   mega_faction: 'imperium' | 'chaos' | 'xenos';
   score: number;
@@ -13,7 +13,7 @@ const THEATRES_OF_WAR = [
   { name: 'The Ash Wastes', lat: 0, lng: -120, narrative: 'Scorched deserts holding vital Promethium pipelines.' },
   { name: 'Magma Forges', lat: 45, lng: 40, narrative: 'Heavy industrial sector controlled by the Mechanicus.' },
   { name: 'Orbital Tether', lat: -10, lng: 140, narrative: 'The only reliable way off this rock.' },
-  { name: 'The Sump', lat: -70, lng: -20, narrative: 'Deep underhive slums infested with mutants.' },
+  { name: 'The Sump', lat: -50, lng: 100, narrative: 'Deep underhive slums infested with mutants.' },
   { name: 'Rad-Zone Gamma', lat: 60, lng: -140, narrative: 'Irradiated badlands where ancient weapons sleep.' }
 ];
 
@@ -234,6 +234,56 @@ export default function Dashboard() {
               };
               
               return el;
+            }}
+            objectsData={theatres}
+            objectLat="lat"
+            objectLng="lng"
+            objectAltitude={0}
+            objectThreeObject={(d: any) => {
+              const group = new THREE.Group();
+              const baseColor = d.color;
+              
+              const glowingMaterial = new THREE.MeshBasicMaterial({ color: baseColor, transparent: true, opacity: 0.8 });
+              const darkMaterial = new THREE.MeshLambertMaterial({ color: '#222222' });
+              
+              if (d.name === 'Hive Primus') {
+                const spire = new THREE.Mesh(new THREE.ConeGeometry(0.6, 4, 8), glowingMaterial);
+                spire.position.y = 2;
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 2, 1, 8), darkMaterial);
+                base.position.y = 0.5;
+                group.add(spire, base);
+              } else if (d.name === 'Orbital Tether') {
+                const tether = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 15, 8), glowingMaterial);
+                tether.position.y = 7.5;
+                const platform = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.5, 8), darkMaterial);
+                platform.position.y = 0.25;
+                group.add(tether, platform);
+              } else if (d.name === 'Magma Forges') {
+                const factory1 = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 1.5), darkMaterial);
+                factory1.position.set(0, 0.75, 0);
+                const factory2 = new THREE.Mesh(new THREE.BoxGeometry(1, 2.5, 1), glowingMaterial);
+                factory2.position.set(1, 1.25, 0.5);
+                group.add(factory1, factory2);
+              } else if (d.name === 'The Sump') {
+                const dome = new THREE.Mesh(new THREE.SphereGeometry(1.5, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2), darkMaterial);
+                dome.position.y = 0;
+                const vent = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 2, 8), glowingMaterial);
+                vent.position.set(0.5, 1, 0.5);
+                group.add(dome, vent);
+              } else if (d.name === 'The Ash Wastes') {
+                const spike1 = new THREE.Mesh(new THREE.ConeGeometry(0.5, 2.5, 4), glowingMaterial);
+                spike1.position.set(-0.5, 1.25, -0.5);
+                const spike2 = new THREE.Mesh(new THREE.ConeGeometry(0.4, 1.5, 4), darkMaterial);
+                spike2.position.set(0.5, 0.75, 0.5);
+                group.add(spike1, spike2);
+              } else if (d.name === 'Rad-Zone Gamma') {
+                const ruin = new THREE.Mesh(new THREE.ConeGeometry(1.2, 2.5, 4), glowingMaterial);
+                ruin.rotation.x = Math.PI; 
+                ruin.position.y = 1.25;
+                group.add(ruin);
+              }
+              
+              return group;
             }}
           />
         )}
