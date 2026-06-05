@@ -174,13 +174,38 @@ export default function Briefing() {
         </div>
       </div>
 
-      <div className="card">
+      <div className="card" style={{ marginBottom: '2rem' }}>
         <h3 style={{ color: 'var(--theme-accent)', marginBottom: '1rem', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>
           Thematic Override
         </h3>
         <p style={{ lineHeight: '1.6' }}>
           Located at the top-right of your operational view is the <strong>Theme Override</strong> selector. Switch it to match your chosen army faction — Chaos, Tyranids, Orks, Necrons, and more — to adapt the visual styling of the entire interface.
         </p>
+      </div>
+
+      <div className="card">
+        <h3 style={{ color: 'var(--theme-accent)', marginBottom: '1rem', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>
+          Credits & Acknowledgements
+        </h3>
+        <p style={{ lineHeight: '1.6', marginBottom: '1.5rem' }}>
+          The immersive aesthetic of this simulation is made possible by the incredible work of the community. We extend our deepest gratitude to the following creators:
+        </p>
+        
+        <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-fg)' }}>Campaign Imagery</h4>
+        <ul style={{ paddingLeft: '1.5rem', lineHeight: '1.6', marginBottom: '1.5rem', color: 'var(--theme-fg-muted)', fontSize: '0.9rem' }}>
+          <li>All environmental and theatre of war images contributed by <strong>Yaro</strong> (Discord: <em>iyaro87</em>). Massive props to him for bringing these battlefields to life!</li>
+        </ul>
+
+        <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-fg)' }}>Typography</h4>
+        <ul style={{ paddingLeft: '1.5rem', lineHeight: '1.6', color: 'var(--theme-fg-muted)', fontSize: '0.9rem' }}>
+          <li><strong>CaslonAntique</strong> by Typographer Mediengestaltung (<a href="https://www.1001fonts.com/users/steffmann/" target="_blank" rel="noopener noreferrer">Link</a>)</li>
+          <li><strong>EldarRunes</strong> (<a href="https://www.dafontfree.net/eldar-runes-normal-font/f122723.htm" target="_blank" rel="noopener noreferrer">Link</a>)</li>
+          <li><strong>Necron-Crypt</strong> by Mageek (<a href="https://strolen.com/author/Mageek" target="_blank" rel="noopener noreferrer">Link</a>)</li>
+          <li><strong>OrkGlyphs</strong> © 1995 Dragon's Den Typefoundry (<a href="https://fonts2u.com/ork-glyphs.font" target="_blank" rel="noopener noreferrer">Link</a>)</li>
+          <li><strong>tau-40k</strong> by Nekneeb (<a href="https://fontstruct.com/fontstructions/show/1005383/tau_40k" target="_blank" rel="noopener noreferrer">Link</a>)</li>
+          <li><strong>ZarathustraBleeds</strong> by 203X (<a href="https://www.1001fonts.com/zarathustra-bleeds-font.html" target="_blank" rel="noopener noreferrer">Link</a>)</li>
+          <li><strong>Zeus-Borne</strong> by Masyafi Studio (<a href="https://fontesk.com/zeus-borne-font/" target="_blank" rel="noopener noreferrer">Link</a>)</li>
+        </ul>
       </div>
     </div>
   );
