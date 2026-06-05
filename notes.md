@@ -527,3 +527,10 @@ Tasks:
 - Added a massive shoutout to Yaro (Discord: iyaro87) for contributing all the environmental and theatre of war imagery used across the campaign.
 Follow-ups:
 - None
+
+Date: 2026-06-05 (Follow-up 7)
+Tasks:
+- Replaced the final `orbital_tether.png` reference in the `Dashboard.tsx` with its `.jpg` variant to complete the image format optimizations.
+- Removed the deprecated `.png` asset from the repository.
+Follow-ups:
+- None
