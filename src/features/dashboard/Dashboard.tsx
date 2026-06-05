@@ -8,12 +8,12 @@ import { FACTIONS } from '../../data/warhammer40k';
 import { getTransformUrl } from '../../utils/imageCompression';
 
 const THEATRES_OF_WAR = [
-  { name: 'Hive Primus', lat: 15, lng: 20, narrative: 'The planetary capital and primary stronghold.', Icon: Castle, image: 'hive_primus.png' }, // Africa
+  { name: 'Hive Primus', lat: 15, lng: 20, narrative: 'The planetary capital and primary stronghold.', Icon: Castle, image: 'hive_primus.jpg' }, // Africa
   { name: 'The Ash Wastes', lat: 25, lng: 10, narrative: 'Scorched deserts holding vital Promethium pipelines.', Icon: Mountain, image: 'the_ash_wastes.jpg' }, // Sahara, Africa
   { name: 'Magma Forges', lat: 45, lng: 60, narrative: 'Heavy industrial sector controlled by the Mechanicus.', Icon: Factory, image: 'magma_forges.jpg' }, // Kazakhstan/Russia
   { name: 'Orbital Tether', lat: -10, lng: -55, narrative: 'The only reliable way off this rock.', Icon: Satellite, image: 'orbital_tether.png' }, // Brazil, South America
   { name: 'The Sump', lat: -25, lng: 135, narrative: 'Deep underhive slums infested with mutants.', Icon: Skull, image: 'the_sump.jpg' }, // Central Australia
-  { name: 'Rad-Zone Gamma', lat: 60, lng: -110, narrative: 'Irradiated badlands where ancient weapons sleep.', Icon: Biohazard, image: 'rad_zone_gamma.png' } // Northern Canada
+  { name: 'Rad-Zone Gamma', lat: 60, lng: -110, narrative: 'Irradiated badlands where ancient weapons sleep.', Icon: Biohazard, image: 'rad_zone_gamma.jpg' } // Northern Canada
 ];
 
 const FACTION_COLORS = {
