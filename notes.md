@@ -478,3 +478,11 @@ Tasks:
 - Ensured Chaos terminal still displays the "INTERCEPTED TRANSMISSION" header without accidentally inheriting any Xenos-specific CSS overrides (red text or custom typography).
 Follow-ups:
 - None
+
+Date: 2026-06-05
+Tasks:
+- Created a "Forces Deployed" widget directly above the Sector Command Roster on the dashboard.
+- Mapped each recognized Warhammer 40k faction to a thematic lucide-react icon (e.g. Shield for Imperium/Custodes, Cog for Mechanicus, Bug for Tyranids, Skull for Chaos, etc.).
+- The widget actively tallies the count of commanders registered for each faction dynamically based on database entries.
+Follow-ups:
+- None
