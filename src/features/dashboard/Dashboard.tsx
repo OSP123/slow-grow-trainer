@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../supabaseClient';
 import Globe from 'react-globe.gl';
-import { Castle, Factory, Satellite, Skull, Biohazard, Mountain, Target, Shield, Cog, Flame, Bug, Moon, Aperture, Sword, Crosshair, Ghost, Stars } from 'lucide-react';
+import { Castle, Factory, Satellite, Skull, Biohazard, Mountain, Target } from 'lucide-react';
 import { FACTIONS } from '../../data/warhammer40k';
 import { getTransformUrl } from '../../utils/imageCompression';
 
@@ -20,27 +20,6 @@ const FACTION_COLORS = {
   imperium: '#3b82f6', // Blue
   chaos: '#ef4444',    // Red
   xenos: '#22c55e'     // Green
-};
-
-const getFactionIcon = (faction: string) => {
-  const f = faction.toLowerCase();
-  if (f.includes('space marine') || f.includes('blood angel') || f.includes('dark angel') || f.includes('space wolf') || f.includes('black templar') || f.includes('deathwatch') || f.includes('grey knight') || f.includes('ultramarine') || f.includes('imperial fist') || f.includes('iron hand') || f.includes('raven guard') || f.includes('salamander') || f.includes('white scar')) return <Sword size={18} />;
-  if (f.includes('mechanicus')) return <Cog size={18} />;
-  if (f.includes('sororitas')) return <Flame size={18} />;
-  if (f.includes('custodes')) return <Shield size={18} />;
-  if (f.includes('astra militarum') || f.includes('guard')) return <Target size={18} />;
-  if (f.includes('knight')) return <Shield size={18} />;
-  
-  if (f.includes('chaos') || f.includes('death guard') || f.includes('thousand sons') || f.includes('world eaters') || f.includes('daemon')) return <Skull size={18} />;
-  
-  if (f.includes('tyranid') || f.includes('genestealer')) return <Bug size={18} />;
-  if (f.includes('ork')) return <Crosshair size={18} />;
-  if (f.includes('tau')) return <Aperture size={18} />;
-  if (f.includes('necrons')) return <Ghost size={18} />;
-  if (f.includes('aeldari') || f.includes('drukhari')) return <Moon size={18} />;
-  if (f.includes('votann')) return <Stars size={18} />;
-  
-  return <Shield size={18} />;
 };
 
 // Deterministic scatter offsets
@@ -503,9 +482,6 @@ export default function Dashboard() {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
             {sortedFactions.map(([faction, count]) => (
               <div key={faction} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: 'var(--theme-bg)', padding: '0.75rem 1.25rem', borderRadius: '8px', border: '1px solid var(--theme-border)' }}>
-                <div style={{ color: 'var(--theme-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {getFactionIcon(faction)}
-                </div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <span style={{ fontWeight: 'bold', color: 'var(--theme-fg)' }}>{faction}</span>
                   <span style={{ fontSize: '0.85rem', color: 'var(--theme-fg-muted)' }}>{count} Commander{count !== 1 ? 's' : ''}</span>
