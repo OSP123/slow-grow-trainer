@@ -471,3 +471,10 @@ Tasks:
 - Chaos factions now correctly display the red "INTERCEPTED TRANSMISSION" text while retaining a legible monospace font, instead of mistakenly inheriting the illegible alien glyph fonts reserved for Xenos.
 Follow-ups:
 - None
+
+Date: 2026-06-04 (Follow-up 4)
+Tasks:
+- Reverted Chaos terminal communique styles to perfectly match Imperium terminal styles (green monospace).
+- Ensured Chaos terminal still displays the "INTERCEPTED TRANSMISSION" header without accidentally inheriting any Xenos-specific CSS overrides (red text or custom typography).
+Follow-ups:
+- None
