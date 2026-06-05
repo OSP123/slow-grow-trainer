@@ -505,3 +505,10 @@ Tasks:
 - Applied the secondary Chaos font (`ZarathustraBleeds`) to all sub-headers (`h2`-`h6`) across all Chaos-related themes. The aggressive, hard-to-read primary Chaos font (`ZeusBorne`) is now restricted solely to the highest-level `h1` titles on each page for better overall legibility.
 Follow-ups:
 - None
+
+Date: 2026-06-05 (Follow-up 4)
+Tasks:
+- Replaced the previous `hive_primus.png` and `rad_zone_gamma.png` image references in the War Effort map data with their new `.jpg` variants.
+- Removed the deprecated `.png` files from the public assets directory.
+Follow-ups:
+- None
