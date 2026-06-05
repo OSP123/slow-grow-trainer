@@ -512,3 +512,10 @@ Tasks:
 - Removed the deprecated `.png` files from the public assets directory.
 Follow-ups:
 - None
+
+Date: 2026-06-05 (Follow-up 5)
+Tasks:
+- Further refined Chaos typography by restricting the aggressive primary font (like `ZeusBorne`) strictly to the top-level `.faction-header h1` element which represents the actual title of the page.
+- Adjusted all other `h1` elements across the site to use the highly legible secondary Chaos font, exactly aligning with the user's explicit preference.
+Follow-ups:
+- None
