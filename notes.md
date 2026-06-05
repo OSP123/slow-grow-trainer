@@ -431,3 +431,10 @@ Tasks:
 - Dynamically updated the communique title and color if the user belongs to a non-imperial faction (Chaos or Xenos).
 Follow-ups:
 - None
+
+
+Date: 2026-06-04
+Tasks:
+- Updated Dashboard terminal styling to use the current theme's primary font (var(--font-head)) when the user is a non-imperial faction.
+Follow-ups:
+- None
