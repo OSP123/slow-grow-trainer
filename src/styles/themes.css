@@ -25,7 +25,8 @@
   --theme-border: #450a0a;
   --theme-border-accent: #b91c1c;
   --theme-shadow: 0 4px 20px rgba(220, 38, 38, 0.15);
-  --font-head: 'ZeusBorne', 'Creepster', 'Outfit', sans-serif;
+  --font-head: 'ZarathustraBleeds', 'Inter', sans-serif;
+  --font-title: 'ZeusBorne', 'Creepster', 'Outfit', sans-serif;
   --panel-radius: 0px;
 }
 
@@ -260,7 +261,8 @@
   --theme-border-accent: #dc2626; /* Chaos star glow */
   --theme-shadow: 0 4px 20px rgba(250, 204, 21, 0.1);
   --font-body: 'ZarathustraBleeds', 'Inter', sans-serif;
-  --font-head: 'ZeusBorne', 'Creepster', 'Outfit', sans-serif;
+  --font-head: 'ZarathustraBleeds', 'Inter', sans-serif;
+  --font-title: 'ZeusBorne', 'Creepster', 'Outfit', sans-serif;
   --panel-radius: 0px;
 }
 
@@ -276,7 +278,8 @@
   --theme-border-accent: #d97706;
   --theme-shadow: 0 4px 20px rgba(163, 230, 53, 0.1);
   --font-body: 'ZarathustraBleeds', 'Inter', sans-serif;
-  --font-head: 'ZeusBorne', 'Creepster', 'Outfit', sans-serif;
+  --font-head: 'ZarathustraBleeds', 'Inter', sans-serif;
+  --font-title: 'ZeusBorne', 'Creepster', 'Outfit', sans-serif;
   --panel-radius: 12px;
 }
 
@@ -292,7 +295,8 @@
   --theme-border-accent: #38bdf8;
   --theme-shadow: 0 4px 20px rgba(56, 189, 248, 0.2);
   --font-body: 'ZarathustraBleeds', 'Inter', sans-serif;
-  --font-head: 'ZeusBorne', 'Cinzel Decorative', 'Outfit', sans-serif;
+  --font-head: 'ZarathustraBleeds', 'Inter', sans-serif;
+  --font-title: 'ZeusBorne', 'Cinzel Decorative', 'Outfit', sans-serif;
   --panel-radius: 4px;
 }
 
@@ -308,7 +312,8 @@
   --theme-border-accent: #ef4444;
   --theme-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
   --font-body: 'ZarathustraBleeds', 'Inter', sans-serif;
-  --font-head: 'ZeusBorne', 'Black Ops One', 'Outfit', sans-serif;
+  --font-head: 'ZarathustraBleeds', 'Inter', sans-serif;
+  --font-title: 'ZeusBorne', 'Black Ops One', 'Outfit', sans-serif;
   --panel-radius: 0px;
 }
 
@@ -324,7 +329,8 @@
   --theme-border-accent: #f43f5e; /* Pink Horror/Bloodletter glow */
   --theme-shadow: 0 4px 30px rgba(192, 132, 252, 0.2);
   --font-body: 'ZarathustraBleeds', 'Inter', sans-serif;
-  --font-head: 'ZeusBorne', 'Creepster', 'Outfit', sans-serif;
+  --font-head: 'ZarathustraBleeds', 'Inter', sans-serif;
+  --font-title: 'ZeusBorne', 'Creepster', 'Outfit', sans-serif;
   --panel-radius: 12px;
 }
 
@@ -340,19 +346,9 @@
   --theme-border-accent: #d97706; /* Rust glow */
   --theme-shadow: 0 4px 20px rgba(153, 27, 27, 0.2);
   --font-body: 'ZarathustraBleeds', 'Inter', sans-serif;
-  --font-head: 'ZeusBorne', 'Cinzel Decorative', 'Outfit', sans-serif;
+  --font-head: 'ZarathustraBleeds', 'Inter', sans-serif;
+  --font-title: 'ZeusBorne', 'Cinzel Decorative', 'Outfit', sans-serif;
   --panel-radius: 0px;
-}
-
-/* Chaos sub-header font overrides for legibility */
-[data-theme="chaos"] :is(h2, h3, h4, h5, h6),
-[data-theme="chaos_space_marines"] :is(h2, h3, h4, h5, h6),
-[data-theme="death_guard"] :is(h2, h3, h4, h5, h6),
-[data-theme="thousand_sons"] :is(h2, h3, h4, h5, h6),
-[data-theme="world_eaters"] :is(h2, h3, h4, h5, h6),
-[data-theme="chaos_daemons"] :is(h2, h3, h4, h5, h6),
-[data-theme="chaos_knights"] :is(h2, h3, h4, h5, h6) {
-  font-family: var(--font-body);
 }
 
 /* ============================================
