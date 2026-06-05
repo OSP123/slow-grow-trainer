@@ -447,3 +447,12 @@ Tasks:
 - Corrected the Necrons theme in themes.css which was incorrectly using the EldarRunes font instead of NecronCrypt.
 Follow-ups:
 - None
+
+
+Date: 2026-06-04 (Follow-up)
+Tasks:
+- Fixed the lingering English text bug for Xenos faction terminal communiques.
+- Applied CSS classes instead of inline styles for the Dashboard terminal text to avoid React CSS variable conflicts.
+- Wrapped the raw Xenos narrative string in JavaScript `.toLowerCase()` calls, ensuring the underlying DOM text characters mapped perfectly to the lowercase-only Xenos font glyphs (this prevented the browser from silently falling back to readable English fonts when evaluating the uppercase characters like `V` in `Vespera`).
+Follow-ups:
+- None

@@ -44,8 +44,35 @@ export default function Dashboard() {
   const [selectedTheatre, setSelectedTheatre] = useState<any>(null);
   const [activeEvent, setActiveEvent] = useState<any>(null);
   const [commanders, setCommanders] = useState<any[]>([]);
-  const [currentUserFaction, setCurrentUserFaction] = useState<string>('');
   const globeEl = useRef<any>(null);
+
+  const [activeTheme, setActiveTheme] = useState(document.body.getAttribute('data-theme') || 'imperium');
+
+  useEffect(() => {
+    // Watch for theme changes from the sidebar dropdown
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          setActiveTheme(document.body.getAttribute('data-theme') || 'imperium');
+        }
+      });
+    });
+    observer.observe(document.body, { attributes: true });
+    return () => observer.disconnect();
+  }, []);
+
+  const isNonImperial = !['imperium', 'space_marines', 'astra_militarum', 'adeptus_mechanicus', 'adepta_sororitas', 'adeptus_custodes', 'imperial_knights'].includes(activeTheme);
+  const isXenos = ['necrons', 'tau', 'aeldari', 'drukhari', 'orks'].includes(activeTheme);
+  const needsLowercase = ['necrons', 'tau', 'aeldari', 'drukhari'].includes(activeTheme);
+
+  // @ts-ignore
+  const [topCommanders, setTopCommanders] = useState<any[]>([]);
+  // @ts-ignore
+  const [recentNarratives, setRecentNarratives] = useState<any[]>([]);
+  // @ts-ignore
+  const [allCommandersData, setAllCommandersData] = useState<any[]>([]);
+  // @ts-ignore
+  const [theatreEffort, setTheatreEffort] = useState<any[]>([]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -71,17 +98,103 @@ export default function Dashboard() {
         const { data: matchups, error } = await supabase
           .from('matchups')
           .select('theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, army_faction, avatar_url, army_lore), p2_profile:profiles!p2_id(commander_name, army_faction, avatar_url, army_lore)')
-          .eq('status', 'completed')
-          .order('created_at', { ascending: false });
+          .in('game_result', ['P1_WIN', 'P2_WIN']);
 
         if (error) {
-          console.error('Error fetching matchups', error);
+          console.error("Error fetching matchups:", error);
           setTheatres(THEATRES_OF_WAR.map(t => ({ ...t, isBase: true, color: '#ef4444' })));
-        } else if (matchups) {
-          const allElements: any[] = [];
+          return;
+        }
 
+        if (matchups) {
+          const effortCount: { [theatre: string]: { Imperium: number; Chaos: number; Xenos: number } } = {};
+          
+          matchups.forEach((m: any) => {
+            const theatre = m.theatre_name || 'Unknown Theatre';
+            if (!effortCount[theatre]) {
+              effortCount[theatre] = { Imperium: 0, Chaos: 0, Xenos: 0 };
+            }
+
+            const winnerProfile = m.game_result === 'P1_WIN' ? m.p1_profile : m.p2_profile;
+            
+            if (winnerProfile?.army_faction) {
+              const factionData = FACTIONS.find(f => f.name === winnerProfile.army_faction);
+              if (factionData) {
+                effortCount[theatre][factionData.grandAlliance as 'Imperium' | 'Chaos' | 'Xenos']++;
+              }
+            }
+          });
+
+          const summary = Object.entries(effortCount).map(([theatre, counts]) => {
+            const total = counts.Imperium + counts.Chaos + counts.Xenos;
+            let controllingAlliance = 'Contested';
+            let controllingFaction = 'Mixed';
+            
+            if (counts.Imperium > counts.Chaos && counts.Imperium > counts.Xenos) {
+              controllingAlliance = 'Imperium';
+            } else if (counts.Chaos > counts.Imperium && counts.Chaos > counts.Xenos) {
+              controllingAlliance = 'Chaos';
+            } else if (counts.Xenos > counts.Imperium && counts.Xenos > counts.Chaos) {
+              controllingAlliance = 'Xenos';
+            }
+            
+            const factionWins: { [faction: string]: number } = {};
+            matchups.filter((m: any) => m.theatre_name === theatre).forEach((m: any) => {
+              const winnerProfile = m.game_result === 'P1_WIN' ? m.p1_profile : m.p2_profile;
+              if (winnerProfile?.army_faction) {
+                factionWins[winnerProfile.army_faction] = (factionWins[winnerProfile.army_faction] || 0) + 1;
+              }
+            });
+            
+            if (Object.keys(factionWins).length > 0) {
+              const topFaction = Object.entries(factionWins).sort((a, b) => b[1] - a[1])[0];
+              controllingFaction = topFaction[0];
+            }
+
+            return {
+              theatre,
+              imperium: counts.Imperium,
+              chaos: counts.Chaos,
+              xenos: counts.Xenos,
+              total,
+              controllingAlliance,
+              controllingFaction
+            };
+          });
+
+          setTheatreEffort(summary);
+          
+          const commandersWins: { [id: string]: { wins: number, profile: any } } = {};
+          matchups.forEach((m: any) => {
+            const winnerId = m.game_result === 'P1_WIN' ? m.p1_id : m.p2_id;
+            const winnerProfile = m.game_result === 'P1_WIN' ? m.p1_profile : m.p2_profile;
+            
+            if (winnerId && winnerProfile) {
+              if (!commandersWins[winnerId]) commandersWins[winnerId] = { wins: 0, profile: winnerProfile };
+              commandersWins[winnerId].wins++;
+            }
+          });
+          
+          const sortedCommanders = Object.values(commandersWins)
+            .sort((a, b) => b.wins - a.wins)
+            .slice(0, 3)
+            .map(c => c.profile);
+            
+          setTopCommanders(sortedCommanders);
+          
+          const narratives = matchups
+            .filter((m: any) => m.p1_lore || m.p2_lore)
+            .slice(0, 5)
+            .map((m: any) => ({
+              theatre: m.theatre_name,
+              winner: m.game_result === 'P1_WIN' ? m.p1_profile?.commander_name : m.p2_profile?.commander_name,
+              lore: m.game_result === 'P1_WIN' ? m.p1_lore : m.p2_lore
+            }));
+            
+          setRecentNarratives(narratives);
+
+          const allElements: any[] = [];
           THEATRES_OF_WAR.forEach(baseTheatre => {
-            // 1. Add the Base Theatre anchor point
             allElements.push({
               ...baseTheatre,
               isBase: true,
@@ -155,14 +268,6 @@ export default function Dashboard() {
             setCommanders(cmdrs.filter(c => c.campaign_status !== 'Paused' && c.campaign_status !== 'Removed'));
           }
         } catch (err) {}
-
-        try {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            const { data: profile } = await supabase.from('profiles').select('army_faction').eq('id', user.id).single();
-            if (profile) setCurrentUserFaction(profile.army_faction);
-          }
-        } catch (err) {}
       } finally {
         setLoading(false);
       }
@@ -182,8 +287,7 @@ export default function Dashboard() {
     return <div style={{ color: 'var(--theme-fg-muted)' }}>Synchronizing Telemetry...</div>;
   }
 
-  const factionData = FACTIONS.find(f => f.name === currentUserFaction);
-  const isNonImperial = factionData ? factionData.grandAlliance !== 'Imperium' : false;
+  // Variables isNonImperial, isXenos, needsLowercase are defined above using activeTheme
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -204,7 +308,7 @@ export default function Dashboard() {
           <span className={isNonImperial ? 'xenos-terminal-text' : 'imperial-terminal-text'} style={{ color: isNonImperial ? '#ef4444' : '#4ade80', fontSize: '1.2rem', fontFamily: isNonImperial ? 'var(--font-head)' : 'monospace' }}>_</span>
           <h2 
             className={isNonImperial ? 'xenos-terminal-text' : 'imperial-terminal-text'}
-            data-text={isNonImperial ? 'INTERCEPTED TRANSMISSION :: SECTOR COMMAND' : undefined}
+            data-text={isXenos ? 'INTERCEPTED TRANSMISSION :: SECTOR COMMAND' : undefined}
             style={{ 
               fontSize: '1rem', 
               margin: 0, 
@@ -214,27 +318,27 @@ export default function Dashboard() {
               letterSpacing: '1px' 
             }}
           >
-            {isNonImperial ? 'intercepted transmission :: sector command' : 'INCOMING COMMUNIQUE :: SECTOR COMMAND'}
+            {needsLowercase ? 'intercepted transmission :: sector command' : (isNonImperial ? 'INTERCEPTED TRANSMISSION :: SECTOR COMMAND' : 'INCOMING COMMUNIQUE :: SECTOR COMMAND')}
           </h2>
         </div>
         <div className={`terminal-communique ${isNonImperial ? 'xenos' : 'imperial'}`}>
-          <p style={{ margin: 0 }} data-text={isNonImperial ? "Vespera Prime, a planet only a few lightyears away from noble Elysia. Once a verdant agriworld thousands of years past, it is now a planet hostile to nearly all life, a casualty from the days of the Horus Heresy. Millennia of war have broken the crust, revealing continents of volcanic activity and rivers of magma. Ancient fields of forest have become ash wastes and rad-soaked wastelands. Aberrant storms create torrential acidic rains that eat away at any attempt at life on the continents, while mighty oceans once teeming with life are toxic soups of poison." : undefined}>
-            {isNonImperial ? "Vespera Prime, a planet only a few lightyears away from noble Elysia. Once a verdant agriworld thousands of years past, it is now a planet hostile to nearly all life, a casualty from the days of the Horus Heresy. Millennia of war have broken the crust, revealing continents of volcanic activity and rivers of magma. Ancient fields of forest have become ash wastes and rad-soaked wastelands. Aberrant storms create torrential acidic rains that eat away at any attempt at life on the continents, while mighty oceans once teeming with life are toxic soups of poison.".toLowerCase() : "Vespera Prime, a planet only a few lightyears away from noble Elysia. Once a verdant agriworld thousands of years past, it is now a planet hostile to nearly all life, a casualty from the days of the Horus Heresy. Millennia of war have broken the crust, revealing continents of volcanic activity and rivers of magma. Ancient fields of forest have become ash wastes and rad-soaked wastelands. Aberrant storms create torrential acidic rains that eat away at any attempt at life on the continents, while mighty oceans once teeming with life are toxic soups of poison."}
+          <p style={{ margin: 0 }} data-text={isXenos ? "Vespera Prime, a planet only a few lightyears away from noble Elysia. Once a verdant agriworld thousands of years past, it is now a planet hostile to nearly all life, a casualty from the days of the Horus Heresy. Millennia of war have broken the crust, revealing continents of volcanic activity and rivers of magma. Ancient fields of forest have become ash wastes and rad-soaked wastelands. Aberrant storms create torrential acidic rains that eat away at any attempt at life on the continents, while mighty oceans once teeming with life are toxic soups of poison." : undefined}>
+            {needsLowercase ? "Vespera Prime, a planet only a few lightyears away from noble Elysia. Once a verdant agriworld thousands of years past, it is now a planet hostile to nearly all life, a casualty from the days of the Horus Heresy. Millennia of war have broken the crust, revealing continents of volcanic activity and rivers of magma. Ancient fields of forest have become ash wastes and rad-soaked wastelands. Aberrant storms create torrential acidic rains that eat away at any attempt at life on the continents, while mighty oceans once teeming with life are toxic soups of poison.".toLowerCase() : "Vespera Prime, a planet only a few lightyears away from noble Elysia. Once a verdant agriworld thousands of years past, it is now a planet hostile to nearly all life, a casualty from the days of the Horus Heresy. Millennia of war have broken the crust, revealing continents of volcanic activity and rivers of magma. Ancient fields of forest have become ash wastes and rad-soaked wastelands. Aberrant storms create torrential acidic rains that eat away at any attempt at life on the continents, while mighty oceans once teeming with life are toxic soups of poison."}
           </p>
-          <p style={{ margin: 0 }} data-text={isNonImperial ? "But where one might see a death world, the Imperium saw opportunity. For the last 4,000 years, the Imperium has created a foothold on the planet, extracting rare minerals and promethium pushed up from the crust. The planet is now a crucial resource station for the endless armies of the Imperium. Several billion inhabitants live in hive cities, working in the manufactorums and helping to extract resources from this dying world." : undefined}>
-            {isNonImperial ? "But where one might see a death world, the Imperium saw opportunity. For the last 4,000 years, the Imperium has created a foothold on the planet, extracting rare minerals and promethium pushed up from the crust. The planet is now a crucial resource station for the endless armies of the Imperium. Several billion inhabitants live in hive cities, working in the manufactorums and helping to extract resources from this dying world.".toLowerCase() : "But where one might see a death world, the Imperium saw opportunity. For the last 4,000 years, the Imperium has created a foothold on the planet, extracting rare minerals and promethium pushed up from the crust. The planet is now a crucial resource station for the endless armies of the Imperium. Several billion inhabitants live in hive cities, working in the manufactorums and helping to extract resources from this dying world."}
+          <p style={{ margin: 0 }} data-text={isXenos ? "But where one might see a death world, the Imperium saw opportunity. For the last 4,000 years, the Imperium has created a foothold on the planet, extracting rare minerals and promethium pushed up from the crust. The planet is now a crucial resource station for the endless armies of the Imperium. Several billion inhabitants live in hive cities, working in the manufactorums and helping to extract resources from this dying world." : undefined}>
+            {needsLowercase ? "But where one might see a death world, the Imperium saw opportunity. For the last 4,000 years, the Imperium has created a foothold on the planet, extracting rare minerals and promethium pushed up from the crust. The planet is now a crucial resource station for the endless armies of the Imperium. Several billion inhabitants live in hive cities, working in the manufactorums and helping to extract resources from this dying world.".toLowerCase() : "But where one might see a death world, the Imperium saw opportunity. For the last 4,000 years, the Imperium has created a foothold on the planet, extracting rare minerals and promethium pushed up from the crust. The planet is now a crucial resource station for the endless armies of the Imperium. Several billion inhabitants live in hive cities, working in the manufactorums and helping to extract resources from this dying world."}
           </p>
-          <p style={{ margin: 0 }} data-text={isNonImperial ? "Life is harsh for the average Imperial citizen, and many have abandoned the weary hive cities to live in the wastes, finding ancient relics and machines to plunder for some coin. These people have since become nomadic tribes living on the edge of society and forming their own ways of life, eschewing the safety of the walls for relative freedom." : undefined}>
-            {isNonImperial ? "Life is harsh for the average Imperial citizen, and many have abandoned the weary hive cities to live in the wastes, finding ancient relics and machines to plunder for some coin. These people have since become nomadic tribes living on the edge of society and forming their own ways of life, eschewing the safety of the walls for relative freedom.".toLowerCase() : "Life is harsh for the average Imperial citizen, and many have abandoned the weary hive cities to live in the wastes, finding ancient relics and machines to plunder for some coin. These people have since become nomadic tribes living on the edge of society and forming their own ways of life, eschewing the safety of the walls for relative freedom."}
+          <p style={{ margin: 0 }} data-text={isXenos ? "Life is harsh for the average Imperial citizen, and many have abandoned the weary hive cities to live in the wastes, finding ancient relics and machines to plunder for some coin. These people have since become nomadic tribes living on the edge of society and forming their own ways of life, eschewing the safety of the walls for relative freedom." : undefined}>
+            {needsLowercase ? "Life is harsh for the average Imperial citizen, and many have abandoned the weary hive cities to live in the wastes, finding ancient relics and machines to plunder for some coin. These people have since become nomadic tribes living on the edge of society and forming their own ways of life, eschewing the safety of the walls for relative freedom.".toLowerCase() : "Life is harsh for the average Imperial citizen, and many have abandoned the weary hive cities to live in the wastes, finding ancient relics and machines to plunder for some coin. These people have since become nomadic tribes living on the edge of society and forming their own ways of life, eschewing the safety of the walls for relative freedom."}
           </p>
-          <p style={{ margin: 0 }} data-text={isNonImperial ? "Meanwhile, the magma forges are run by the Adeptus Mechanicus. These enormous structures utilize the immense heat of the forges to run the manufactorums that extract both the precious promethium and other minerals near the surface. No creature can survive here except the augmented or genetically enhanced. Plumes of smoke billow into the sky, and ash chokes nearly every corridor. Those found guilty of crimes in the hive are often sent to work the forges—a grueling death sentence and a cruel method of maintaining order in a hopeless world." : undefined}>
-            {isNonImperial ? "Meanwhile, the magma forges are run by the Adeptus Mechanicus. These enormous structures utilize the immense heat of the forges to run the manufactorums that extract both the precious promethium and other minerals near the surface. No creature can survive here except the augmented or genetically enhanced. Plumes of smoke billow into the sky, and ash chokes nearly every corridor. Those found guilty of crimes in the hive are often sent to work the forges—a grueling death sentence and a cruel method of maintaining order in a hopeless world.".toLowerCase() : "Meanwhile, the magma forges are run by the Adeptus Mechanicus. These enormous structures utilize the immense heat of the forges to run the manufactorums that extract both the precious promethium and other minerals near the surface. No creature can survive here except the augmented or genetically enhanced. Plumes of smoke billow into the sky, and ash chokes nearly every corridor. Those found guilty of crimes in the hive are often sent to work the forges—a grueling death sentence and a cruel method of maintaining order in a hopeless world."}
+          <p style={{ margin: 0 }} data-text={isXenos ? "Meanwhile, the magma forges are run by the Adeptus Mechanicus. These enormous structures utilize the immense heat of the forges to run the manufactorums that extract both the precious promethium and other minerals near the surface. No creature can survive here except the augmented or genetically enhanced. Plumes of smoke billow into the sky, and ash chokes nearly every corridor. Those found guilty of crimes in the hive are often sent to work the forges—a grueling death sentence and a cruel method of maintaining order in a hopeless world." : undefined}>
+            {needsLowercase ? "Meanwhile, the magma forges are run by the Adeptus Mechanicus. These enormous structures utilize the immense heat of the forges to run the manufactorums that extract both the precious promethium and other minerals near the surface. No creature can survive here except the augmented or genetically enhanced. Plumes of smoke billow into the sky, and ash chokes nearly every corridor. Those found guilty of crimes in the hive are often sent to work the forges—a grueling death sentence and a cruel method of maintaining order in a hopeless world.".toLowerCase() : "Meanwhile, the magma forges are run by the Adeptus Mechanicus. These enormous structures utilize the immense heat of the forges to run the manufactorums that extract both the precious promethium and other minerals near the surface. No creature can survive here except the augmented or genetically enhanced. Plumes of smoke billow into the sky, and ash chokes nearly every corridor. Those found guilty of crimes in the hive are often sent to work the forges—a grueling death sentence and a cruel method of maintaining order in a hopeless world."}
           </p>
-          <p style={{ margin: 0 }} data-text={isNonImperial ? "Yet, there are harsher places to live on this death world. The Sump is an abandoned hive from before the Heresy. The city was one of the first to fall to the traitor legions. Once a gleaming fortress of towers overseeing the entirety of the planet from its tall peaks, it now resembles a series of pockmarked craters, thousands of feet deep. Billions were killed in the bombardment, but there were still millions trapped beneath the craters. Those in the underlevels at the time had hoped that help would come for them and waited out the war. That was over 10,000 years ago." : undefined}>
-            {isNonImperial ? "Yet, there are harsher places to live on this death world. The Sump is an abandoned hive from before the Heresy. The city was one of the first to fall to the traitor legions. Once a gleaming fortress of towers overseeing the entirety of the planet from its tall peaks, it now resembles a series of pockmarked craters, thousands of feet deep. Billions were killed in the bombardment, but there were still millions trapped beneath the craters. Those in the underlevels at the time had hoped that help would come for them and waited out the war. That was over 10,000 years ago.".toLowerCase() : "Yet, there are harsher places to live on this death world. The Sump is an abandoned hive from before the Heresy. The city was one of the first to fall to the traitor legions. Once a gleaming fortress of towers overseeing the entirety of the planet from its tall peaks, it now resembles a series of pockmarked craters, thousands of feet deep. Billions were killed in the bombardment, but there were still millions trapped beneath the craters. Those in the underlevels at the time had hoped that help would come for them and waited out the war. That was over 10,000 years ago."}
+          <p style={{ margin: 0 }} data-text={isXenos ? "Yet, there are harsher places to live on this death world. The Sump is an abandoned hive from before the Heresy. The city was one of the first to fall to the traitor legions. Once a gleaming fortress of towers overseeing the entirety of the planet from its tall peaks, it now resembles a series of pockmarked craters, thousands of feet deep. Billions were killed in the bombardment, but there were still millions trapped beneath the craters. Those in the underlevels at the time had hoped that help would come for them and waited out the war. That was over 10,000 years ago." : undefined}>
+            {needsLowercase ? "Yet, there are harsher places to live on this death world. The Sump is an abandoned hive from before the Heresy. The city was one of the first to fall to the traitor legions. Once a gleaming fortress of towers overseeing the entirety of the planet from its tall peaks, it now resembles a series of pockmarked craters, thousands of feet deep. Billions were killed in the bombardment, but there were still millions trapped beneath the craters. Those in the underlevels at the time had hoped that help would come for them and waited out the war. That was over 10,000 years ago.".toLowerCase() : "Yet, there are harsher places to live on this death world. The Sump is an abandoned hive from before the Heresy. The city was one of the first to fall to the traitor legions. Once a gleaming fortress of towers overseeing the entirety of the planet from its tall peaks, it now resembles a series of pockmarked craters, thousands of feet deep. Billions were killed in the bombardment, but there were still millions trapped beneath the craters. Those in the underlevels at the time had hoped that help would come for them and waited out the war. That was over 10,000 years ago."}
           </p>
-          <div style={{ marginTop: '1rem', color: isNonImperial ? '#ef4444' : '#16a34a', fontSize: '0.8rem', borderTop: isNonImperial ? '1px dashed #450a0a' : '1px dashed #1a2e1a', paddingTop: '1rem' }} data-text={isNonImperial ? "[END TRANSMISSION] // NO REPLIES PERMITTED" : undefined}>
-            {isNonImperial ? "[END TRANSMISSION] // NO REPLIES PERMITTED // THE EMPEROR PROTECTS".toLowerCase() : "[END TRANSMISSION] // NO REPLIES PERMITTED // THE EMPEROR PROTECTS"}
+          <div style={{ marginTop: '1rem', color: isNonImperial ? '#ef4444' : '#16a34a', fontSize: '0.8rem', borderTop: isNonImperial ? '1px dashed #450a0a' : '1px dashed #1a2e1a', paddingTop: '1rem' }} data-text={isXenos ? "[END TRANSMISSION] // NO REPLIES PERMITTED" : undefined}>
+            {needsLowercase ? "[END TRANSMISSION] // NO REPLIES PERMITTED // THE EMPEROR PROTECTS".toLowerCase() : "[END TRANSMISSION] // NO REPLIES PERMITTED // THE EMPEROR PROTECTS"}
           </div>
         </div>
       </div>
