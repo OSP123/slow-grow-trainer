@@ -400,3 +400,11 @@ Tasks:
 - Fixed issue where users could not save their Commander Specs. This was caused by a missing UPDATE row-level-security policy on the profiles table. Created migration 20260604000004_user_update_profiles.sql.
 Follow-ups:
 - None
+
+
+Date: 2026-06-04
+Tasks:
+- Updated Dashboard.tsx to use magma_forges.jpg and the_ash_wastes.jpg.
+- Deleted the old .png versions of those images.
+Follow-ups:
+- None
