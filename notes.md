@@ -464,3 +464,10 @@ Tasks:
 - Terminal text styling and Xenos font translations now correctly update and map glyphs when toggling between themes using the sidebar UI.
 Follow-ups:
 - None
+
+Date: 2026-06-04 (Follow-up 3)
+Tasks:
+- Created a separate `.chaos` terminal class to decouple Chaos faction styling from Xenos faction styling.
+- Chaos factions now correctly display the red "INTERCEPTED TRANSMISSION" text while retaining a legible monospace font, instead of mistakenly inheriting the illegible alien glyph fonts reserved for Xenos.
+Follow-ups:
+- None
