@@ -187,24 +187,41 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--theme-accent)' }}>Global Command Interface</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', color: 'var(--theme-fg-muted)', lineHeight: 1.6, fontSize: '0.95rem' }}>
-          <p>
+      <div className="card" style={{ marginBottom: '2rem', padding: '0', overflow: 'hidden', border: '1px solid #1a2e1a' }}>
+        <div style={{ backgroundColor: '#0a140a', padding: '0.75rem 1.5rem', borderBottom: '1px solid #1a2e1a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ color: '#4ade80', fontSize: '1.2rem', fontFamily: 'monospace' }}>_</span>
+          <h2 style={{ fontSize: '1rem', margin: 0, color: '#4ade80', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '1px' }}>INCOMING COMMUNIQUE :: SECTOR COMMAND</h2>
+        </div>
+        <div style={{ 
+          padding: '2rem', 
+          backgroundColor: '#050a05', 
+          color: '#22c55e', 
+          fontFamily: '"Courier New", Courier, monospace', 
+          lineHeight: 1.6, 
+          fontSize: '0.95rem',
+          boxShadow: 'inset 0 0 20px rgba(0,255,0,0.05)',
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '1.5rem'
+        }}>
+          <p style={{ margin: 0 }}>
             Vespera Prime, a planet only a few lightyears away from noble Elysia. Once a verdant agriworld thousands of years past, it is now a planet hostile to nearly all life, a casualty from the days of the Horus Heresy. Millennia of war have broken the crust, revealing continents of volcanic activity and rivers of magma. Ancient fields of forest have become ash wastes and rad-soaked wastelands. Aberrant storms create torrential acidic rains that eat away at any attempt at life on the continents, while mighty oceans once teeming with life are toxic soups of poison.
           </p>
-          <p>
+          <p style={{ margin: 0 }}>
             But where one might see a death world, the Imperium saw opportunity. For the last 4,000 years, the Imperium has created a foothold on the planet, extracting rare minerals and promethium pushed up from the crust. The planet is now a crucial resource station for the endless armies of the Imperium. Several billion inhabitants live in hive cities, working in the manufactorums and helping to extract resources from this dying world.
           </p>
-          <p>
+          <p style={{ margin: 0 }}>
             Life is harsh for the average Imperial citizen, and many have abandoned the weary hive cities to live in the wastes, finding ancient relics and machines to plunder for some coin. These people have since become nomadic tribes living on the edge of society and forming their own ways of life, eschewing the safety of the walls for relative freedom.
           </p>
-          <p>
+          <p style={{ margin: 0 }}>
             Meanwhile, the magma forges are run by the Adeptus Mechanicus. These enormous structures utilize the immense heat of the forges to run the manufactorums that extract both the precious promethium and other minerals near the surface. No creature can survive here except the augmented or genetically enhanced. Plumes of smoke billow into the sky, and ash chokes nearly every corridor. Those found guilty of crimes in the hive are often sent to work the forges—a grueling death sentence and a cruel method of maintaining order in a hopeless world.
           </p>
-          <p>
+          <p style={{ margin: 0 }}>
             Yet, there are harsher places to live on this death world. The Sump is an abandoned hive from before the Heresy. The city was one of the first to fall to the traitor legions. Once a gleaming fortress of towers overseeing the entirety of the planet from its tall peaks, it now resembles a series of pockmarked craters, thousands of feet deep. Billions were killed in the bombardment, but there were still millions trapped beneath the craters. Those in the underlevels at the time had hoped that help would come for them and waited out the war. That was over 10,000 years ago.
           </p>
+          <div style={{ marginTop: '1rem', color: '#16a34a', fontSize: '0.8rem', borderTop: '1px dashed #1a2e1a', paddingTop: '1rem' }}>
+            [END TRANSMISSION] // NO REPLIES PERMITTED // THE EMPEROR PROTECTS
+          </div>
         </div>
       </div>
 

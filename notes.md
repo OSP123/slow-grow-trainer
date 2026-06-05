@@ -408,3 +408,11 @@ Tasks:
 - Deleted the old .png versions of those images.
 Follow-ups:
 - None
+
+
+Date: 2026-06-04
+Tasks:
+- Added Vespera Prime narrative lore to the Global Command Interface (Dashboard.tsx).
+- Fixed grammar and spelling (e.g. "Horus Heresy", "Millennia", "Promethium").
+Follow-ups:
+- None
