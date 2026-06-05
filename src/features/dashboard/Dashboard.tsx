@@ -529,7 +529,7 @@ export default function Dashboard() {
                 </div>
                 
                 <div style={{ padding: '1rem', paddingTop: 0 }}>
-                  <Link to={`/commander/${cmd.id}`} className="btn secondary" style={{ width: '100%', textAlign: 'center', display: 'block', boxSizing: 'border-box' }}>
+                  <Link to={`/profile/${cmd.id}`} className="btn secondary" style={{ width: '100%', textAlign: 'center', display: 'block', boxSizing: 'border-box' }}>
                     View Full Dossier
                   </Link>
                 </div>
