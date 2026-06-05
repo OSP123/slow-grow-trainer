@@ -44,7 +44,7 @@ const FACTIONS = [
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
-  const [activeTheme, setActiveTheme] = useState('imperium');
+  const [activeTheme, setActiveTheme] = useState(localStorage.getItem('themeOverride') || 'imperium');
   const [isRecovering, setIsRecovering] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -72,6 +72,8 @@ function App() {
   // Fetch user profile to automatically set theme
   useEffect(() => {
     async function loadTheme() {
+      if (localStorage.getItem('themeOverride')) return;
+      
       if (session?.user) {
         const { data } = await supabase
           .from('profiles')
@@ -279,7 +281,10 @@ function App() {
             <select 
               id="theme-select" 
               value={activeTheme} 
-              onChange={(e) => setActiveTheme(e.target.value)}
+              onChange={(e) => {
+                setActiveTheme(e.target.value);
+                localStorage.setItem('themeOverride', e.target.value);
+              }}
             >
               {FACTIONS.map(f => (
                 <option key={f.id} value={f.id}>{f.label}</option>
