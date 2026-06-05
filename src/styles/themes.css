@@ -344,6 +344,17 @@
   --panel-radius: 0px;
 }
 
+/* Chaos sub-header font overrides for legibility */
+[data-theme="chaos"] :is(h2, h3, h4, h5, h6),
+[data-theme="chaos_space_marines"] :is(h2, h3, h4, h5, h6),
+[data-theme="death_guard"] :is(h2, h3, h4, h5, h6),
+[data-theme="thousand_sons"] :is(h2, h3, h4, h5, h6),
+[data-theme="world_eaters"] :is(h2, h3, h4, h5, h6),
+[data-theme="chaos_daemons"] :is(h2, h3, h4, h5, h6),
+[data-theme="chaos_knights"] :is(h2, h3, h4, h5, h6) {
+  font-family: var(--font-body);
+}
+
 /* ============================================
    Alien Font Translations
    Applies alien script to ALL text and adds
