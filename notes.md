@@ -492,3 +492,10 @@ Tasks:
 - Fixed a broken route link on the Dashboard where the "View Full Dossier" button incorrectly pointed to `/commander/:id` instead of the correct `/profile/:id` route. Navigating from the Sector Command Roster now correctly opens the full dossier.
 Follow-ups:
 - None
+
+Date: 2026-06-05 (Follow-up 2)
+Tasks:
+- Fixed a bug where a manually selected UI Theme would revert upon page reload if the user's registered faction was different (e.g. reverting back to Chaos if their profile was set to a Chaos faction).
+- Theme selections are now correctly persisted using `localStorage`, ensuring the interface remembers the commander's manual override preference between sessions.
+Follow-ups:
+- None
