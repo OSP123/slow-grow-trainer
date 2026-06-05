@@ -456,3 +456,11 @@ Tasks:
 - Wrapped the raw Xenos narrative string in JavaScript `.toLowerCase()` calls, ensuring the underlying DOM text characters mapped perfectly to the lowercase-only Xenos font glyphs (this prevented the browser from silently falling back to readable English fonts when evaluating the uppercase characters like `V` in `Vespera`).
 Follow-ups:
 - None
+
+Date: 2026-06-04 (Follow-up 2)
+Tasks:
+- Uncovered root cause of Xenos terminal styling: Dashboard was statically rendering the terminal based on the logged-in user's database profile faction, entirely ignoring the UI theme selector dropdown.
+- Replaced static database fetch with a MutationObserver to listen to dynamic changes to document.body.getAttribute("data-theme").
+- Terminal text styling and Xenos font translations now correctly update and map glyphs when toggling between themes using the sidebar UI.
+Follow-ups:
+- None
