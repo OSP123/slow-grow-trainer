@@ -110,6 +110,34 @@ a:hover {
   border-color: var(--theme-border-accent);
 }
 
+.terminal-communique {
+  padding: 2rem;
+  background-color: #050a05;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.terminal-communique.imperial {
+  font-family: "Courier New", Courier, monospace;
+  color: #22c55e;
+  box-shadow: inset 0 0 20px rgba(0,255,0,0.05);
+}
+
+.terminal-communique.xenos {
+  font-family: var(--font-head) !important;
+  color: #ef4444;
+  box-shadow: inset 0 0 20px rgba(239,68,68,0.05);
+}
+
+.terminal-communique.xenos p,
+.terminal-communique.xenos h2,
+.terminal-communique.xenos div {
+  font-family: var(--font-head) !important;
+}
+
 .btn {
   background-color: var(--theme-bg-secondary);
   color: var(--theme-accent);

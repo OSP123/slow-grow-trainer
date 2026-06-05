@@ -438,3 +438,12 @@ Tasks:
 - Updated Dashboard terminal styling to use the current theme's primary font (var(--font-head)) when the user is a non-imperial faction.
 Follow-ups:
 - None
+
+
+Date: 2026-06-04
+Tasks:
+- Fixed a bug where Xenos fonts failed to render correctly for intercepted transmissions due to inline textTransform properties overriding the required lowercase glyph mapping.
+- Added data-text attributes to the terminal communique elements to ensure the English translations correctly show up below the alien glyphs.
+- Corrected the Necrons theme in themes.css which was incorrectly using the EldarRunes font instead of NecronCrypt.
+Follow-ups:
+- None
