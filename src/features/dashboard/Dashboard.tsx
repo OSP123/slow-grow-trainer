@@ -63,9 +63,8 @@ export default function Dashboard() {
 
   const isNonImperial = !['imperium', 'space_marines', 'astra_militarum', 'adeptus_mechanicus', 'adepta_sororitas', 'adeptus_custodes', 'imperial_knights'].includes(activeTheme);
   const isXenos = ['necrons', 'tau', 'aeldari', 'drukhari', 'orks'].includes(activeTheme);
-  const isChaos = ['chaos', 'chaos_space_marines', 'death_guard', 'thousand_sons', 'world_eaters', 'chaos_daemons', 'chaos_knights'].includes(activeTheme);
   const needsLowercase = ['necrons', 'tau', 'aeldari', 'drukhari'].includes(activeTheme);
-  const terminalClass = isXenos ? 'xenos' : (isChaos ? 'chaos' : 'imperial');
+  const terminalClass = isXenos ? 'xenos' : 'imperial';
 
   // @ts-ignore
   const [topCommanders, setTopCommanders] = useState<any[]>([]);
@@ -307,15 +306,15 @@ export default function Dashboard() {
 
       <div className="card" style={{ marginBottom: '2rem', padding: '0', overflow: 'hidden', border: '1px solid #1a2e1a' }}>
         <div style={{ backgroundColor: '#0a140a', padding: '0.75rem 1.5rem', borderBottom: '1px solid #1a2e1a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ color: isNonImperial ? '#ef4444' : '#4ade80', fontSize: '1.2rem', fontFamily: isXenos ? 'var(--font-head)' : 'monospace' }}>_</span>
+          <span style={{ color: isXenos ? '#ef4444' : '#4ade80', fontSize: '1.2rem', fontFamily: isXenos ? 'var(--font-head)' : 'monospace' }}>_</span>
           <h2 
             data-text={isXenos ? 'INTERCEPTED TRANSMISSION :: SECTOR COMMAND' : undefined}
             style={{ 
               fontSize: '1rem', 
               margin: 0, 
-              color: isNonImperial ? '#ef4444' : '#4ade80', 
+              color: isXenos ? '#ef4444' : '#4ade80', 
               fontFamily: isXenos ? 'var(--font-head)' : 'monospace', 
-              textTransform: isNonImperial ? 'none' : 'uppercase', 
+              textTransform: isXenos ? 'none' : 'uppercase', 
               letterSpacing: '1px' 
             }}
           >
@@ -338,7 +337,7 @@ export default function Dashboard() {
           <p style={{ margin: 0 }} data-text={isXenos ? "Yet, there are harsher places to live on this death world. The Sump is an abandoned hive from before the Heresy. The city was one of the first to fall to the traitor legions. Once a gleaming fortress of towers overseeing the entirety of the planet from its tall peaks, it now resembles a series of pockmarked craters, thousands of feet deep. Billions were killed in the bombardment, but there were still millions trapped beneath the craters. Those in the underlevels at the time had hoped that help would come for them and waited out the war. That was over 10,000 years ago." : undefined}>
             {needsLowercase ? "Yet, there are harsher places to live on this death world. The Sump is an abandoned hive from before the Heresy. The city was one of the first to fall to the traitor legions. Once a gleaming fortress of towers overseeing the entirety of the planet from its tall peaks, it now resembles a series of pockmarked craters, thousands of feet deep. Billions were killed in the bombardment, but there were still millions trapped beneath the craters. Those in the underlevels at the time had hoped that help would come for them and waited out the war. That was over 10,000 years ago.".toLowerCase() : "Yet, there are harsher places to live on this death world. The Sump is an abandoned hive from before the Heresy. The city was one of the first to fall to the traitor legions. Once a gleaming fortress of towers overseeing the entirety of the planet from its tall peaks, it now resembles a series of pockmarked craters, thousands of feet deep. Billions were killed in the bombardment, but there were still millions trapped beneath the craters. Those in the underlevels at the time had hoped that help would come for them and waited out the war. That was over 10,000 years ago."}
           </p>
-          <div style={{ marginTop: '1rem', color: isNonImperial ? '#ef4444' : '#16a34a', fontSize: '0.8rem', borderTop: isNonImperial ? '1px dashed #450a0a' : '1px dashed #1a2e1a', paddingTop: '1rem' }} data-text={isXenos ? "[END TRANSMISSION] // NO REPLIES PERMITTED" : undefined}>
+          <div style={{ marginTop: '1rem', color: isXenos ? '#ef4444' : '#16a34a', fontSize: '0.8rem', borderTop: isXenos ? '1px dashed #450a0a' : '1px dashed #1a2e1a', paddingTop: '1rem' }} data-text={isXenos ? "[END TRANSMISSION] // NO REPLIES PERMITTED" : undefined}>
             {needsLowercase ? "[END TRANSMISSION] // NO REPLIES PERMITTED // THE EMPEROR PROTECTS".toLowerCase() : "[END TRANSMISSION] // NO REPLIES PERMITTED // THE EMPEROR PROTECTS"}
           </div>
         </div>

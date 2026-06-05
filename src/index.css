@@ -126,12 +126,6 @@ a:hover {
   box-shadow: inset 0 0 20px rgba(0,255,0,0.05);
 }
 
-.terminal-communique.chaos {
-  font-family: "Courier New", Courier, monospace;
-  color: #ef4444;
-  box-shadow: inset 0 0 20px rgba(239,68,68,0.05);
-}
-
 .terminal-communique.xenos {
   font-family: var(--font-head) !important;
   color: #ef4444;
