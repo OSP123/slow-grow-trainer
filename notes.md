@@ -519,3 +519,11 @@ Tasks:
 - Adjusted all other `h1` elements across the site to use the highly legible secondary Chaos font, exactly aligning with the user's explicit preference.
 Follow-ups:
 - None
+
+Date: 2026-06-05 (Follow-up 6)
+Tasks:
+- Appended a "Credits & Acknowledgements" section to the bottom of the Field Manual (`Briefing.tsx`).
+- Added formal attributions for all custom 40k typography (CaslonAntique, EldarRunes, Necron-Crypt, OrkGlyphs, tau-40k, ZarathustraBleeds, Zeus-Borne) with links to their respective foundries/authors.
+- Added a massive shoutout to Yaro (Discord: iyaro87) for contributing all the environmental and theatre of war imagery used across the campaign.
+Follow-ups:
+- None
