@@ -486,3 +486,9 @@ Tasks:
 - The widget actively tallies the count of commanders registered for each faction dynamically based on database entries.
 Follow-ups:
 - None
+
+Date: 2026-06-05 (Follow-up)
+Tasks:
+- Fixed a broken route link on the Dashboard where the "View Full Dossier" button incorrectly pointed to `/commander/:id` instead of the correct `/profile/:id` route. Navigating from the Sector Command Roster now correctly opens the full dossier.
+Follow-ups:
+- None
