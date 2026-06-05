@@ -383,3 +383,12 @@ Tasks:
 - Updated state, form, and save logic in CommanderProfile.tsx to handle commander_name updates directly to the database.
 Follow-ups:
 - None
+
+
+Date: 2026-06-04
+Tasks:
+- Created a Sector Command Roster on the Dashboard.
+- Queries the profiles database for active commanders.
+- Displays grid of Dossier cards featuring Avatar, Name, Faction, and Lore snippet with a link to the full profile.
+Follow-ups:
+- None

@@ -270,7 +270,7 @@ export default function CommanderProfile() {
       </div>
 
       {/* Tab Bar */}
-      <div style={{ display: 'flex', borderBottom: '2px solid var(--theme-border)', marginBottom: '1.5rem', gap: '0' }}>
+      <div style={{ display: 'flex', borderBottom: '2px solid var(--theme-border)', marginBottom: '1.5rem', gap: '0', overflowX: 'auto', whiteSpace: 'nowrap' }}>
         {TABS.map(tab => (
           <button
             key={tab.key}
@@ -282,6 +282,7 @@ export default function CommanderProfile() {
               borderBottom: activeTab === tab.key ? '2px solid var(--theme-accent)' : '2px solid transparent',
               marginBottom: '-2px', fontWeight: activeTab === tab.key ? 'bold' : 'normal',
               transition: 'color 0.15s',
+              whiteSpace: 'nowrap',
             }}
           >
             {tab.label}
