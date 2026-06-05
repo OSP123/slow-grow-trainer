@@ -392,3 +392,11 @@ Tasks:
 - Displays grid of Dossier cards featuring Avatar, Name, Faction, and Lore snippet with a link to the full profile.
 Follow-ups:
 - None
+
+
+Date: 2026-06-04
+Tasks:
+- Fixed mobile tab overflow issue by adding overflowX: auto and whiteSpace: nowrap to the Commander Profile tab wrapper.
+- Fixed issue where users could not save their Commander Specs. This was caused by a missing UPDATE row-level-security policy on the profiles table. Created migration 20260604000004_user_update_profiles.sql.
+Follow-ups:
+- None
