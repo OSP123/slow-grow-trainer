@@ -423,3 +423,11 @@ Tasks:
 - Styled the Vespera Prime lore on the Dashboard to look like a retro terminal communique (green monospace font, dark background, transmission tags).
 Follow-ups:
 - None
+
+
+Date: 2026-06-04
+Tasks:
+- Fetched current user profile on the Dashboard to determine their faction.
+- Dynamically updated the communique title and color if the user belongs to a non-imperial faction (Chaos or Xenos).
+Follow-ups:
+- None
