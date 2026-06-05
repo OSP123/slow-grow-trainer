@@ -44,6 +44,7 @@ export default function Dashboard() {
   const [selectedTheatre, setSelectedTheatre] = useState<any>(null);
   const [activeEvent, setActiveEvent] = useState<any>(null);
   const [commanders, setCommanders] = useState<any[]>([]);
+  const [currentUserFaction, setCurrentUserFaction] = useState<string>('');
   const globeEl = useRef<any>(null);
 
   useEffect(() => {
@@ -154,6 +155,14 @@ export default function Dashboard() {
             setCommanders(cmdrs.filter(c => c.campaign_status !== 'Paused' && c.campaign_status !== 'Removed'));
           }
         } catch (err) {}
+
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { data: profile } = await supabase.from('profiles').select('army_faction').eq('id', user.id).single();
+            if (profile) setCurrentUserFaction(profile.army_faction);
+          }
+        } catch (err) {}
       } finally {
         setLoading(false);
       }
@@ -173,6 +182,9 @@ export default function Dashboard() {
     return <div style={{ color: 'var(--theme-fg-muted)' }}>Synchronizing Telemetry...</div>;
   }
 
+  const factionData = FACTIONS.find(f => f.name === currentUserFaction);
+  const isNonImperial = factionData ? factionData.grandAlliance !== 'Imperium' : false;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       {activeEvent && (
@@ -189,17 +201,19 @@ export default function Dashboard() {
 
       <div className="card" style={{ marginBottom: '2rem', padding: '0', overflow: 'hidden', border: '1px solid #1a2e1a' }}>
         <div style={{ backgroundColor: '#0a140a', padding: '0.75rem 1.5rem', borderBottom: '1px solid #1a2e1a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ color: '#4ade80', fontSize: '1.2rem', fontFamily: 'monospace' }}>_</span>
-          <h2 style={{ fontSize: '1rem', margin: 0, color: '#4ade80', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '1px' }}>INCOMING COMMUNIQUE :: SECTOR COMMAND</h2>
+          <span style={{ color: isNonImperial ? '#ef4444' : '#4ade80', fontSize: '1.2rem', fontFamily: 'monospace' }}>_</span>
+          <h2 style={{ fontSize: '1rem', margin: 0, color: isNonImperial ? '#ef4444' : '#4ade80', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            {isNonImperial ? 'INTERCEPTED TRANSMISSION :: SECTOR COMMAND' : 'INCOMING COMMUNIQUE :: SECTOR COMMAND'}
+          </h2>
         </div>
         <div style={{ 
           padding: '2rem', 
           backgroundColor: '#050a05', 
-          color: '#22c55e', 
+          color: isNonImperial ? '#ef4444' : '#22c55e', 
           fontFamily: '"Courier New", Courier, monospace', 
           lineHeight: 1.6, 
           fontSize: '0.95rem',
-          boxShadow: 'inset 0 0 20px rgba(0,255,0,0.05)',
+          boxShadow: isNonImperial ? 'inset 0 0 20px rgba(239,68,68,0.05)' : 'inset 0 0 20px rgba(0,255,0,0.05)',
           display: 'flex', 
           flexDirection: 'column', 
           gap: '1.5rem'

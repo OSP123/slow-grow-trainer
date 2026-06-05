@@ -416,3 +416,10 @@ Tasks:
 - Fixed grammar and spelling (e.g. "Horus Heresy", "Millennia", "Promethium").
 Follow-ups:
 - None
+
+
+Date: 2026-06-04
+Tasks:
+- Styled the Vespera Prime lore on the Dashboard to look like a retro terminal communique (green monospace font, dark background, transmission tags).
+Follow-ups:
+- None
