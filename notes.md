@@ -499,3 +499,9 @@ Tasks:
 - Theme selections are now correctly persisted using `localStorage`, ensuring the interface remembers the commander's manual override preference between sessions.
 Follow-ups:
 - None
+
+Date: 2026-06-05 (Follow-up 3)
+Tasks:
+- Applied the secondary Chaos font (`ZarathustraBleeds`) to all sub-headers (`h2`-`h6`) across all Chaos-related themes. The aggressive, hard-to-read primary Chaos font (`ZeusBorne`) is now restricted solely to the highest-level `h1` titles on each page for better overall legibility.
+Follow-ups:
+- None
