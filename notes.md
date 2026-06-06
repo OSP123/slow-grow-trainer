@@ -575,3 +575,11 @@ Follow-ups:
 - User must run seed_units.sql in the Supabase SQL Editor to populate the unit_points table
 - User must run 20260606000000_warlord_momentum.sql in the Supabase SQL Editor for the Warlord momentum feature
 - Pre-existing Dashboard.test.tsx failure needs fixing (supabase mock issue)
+
+Date: 2026-06-05 (Fix for World Eaters Dropdown)
+Tasks:
+- Fixed a bug where `useUnitRegistry.ts` was hitting the default 1000-row Supabase limit, causing units for "World Eaters" and other late-alphabet factions to silently not load on the frontend. Increased the range to 4999.
+- Fixed faction name mismatches in `warhammer40k.ts` (e.g., "Agents of the Imperium" to "Imperial Agents") so that the dropdown exactly matches the database records.
+- Pushed changes to `main`.
+Follow-ups:
+- None
