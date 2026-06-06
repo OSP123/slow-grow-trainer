@@ -199,9 +199,11 @@ export default function Briefing() {
         <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-fg)' }}>Typography</h4>
         <ul style={{ paddingLeft: '1.5rem', lineHeight: '1.6', color: 'var(--theme-fg-muted)', fontSize: '0.9rem' }}>
           <li><strong>CaslonAntique</strong> by Typographer Mediengestaltung (<a href="https://www.1001fonts.com/users/steffmann/" target="_blank" rel="noopener noreferrer">Link</a>)</li>
+          <li><strong>CoreScript</strong> by 0dy5 (<a href="https://drive.google.com/file/d/1OcU1rt5E8ZI80RDm3gb0Vv651O41yFbO/view" target="_blank" rel="noopener noreferrer">Link</a>)</li>
           <li><strong>EldarRunes</strong> (<a href="https://www.dafontfree.net/eldar-runes-normal-font/f122723.htm" target="_blank" rel="noopener noreferrer">Link</a>)</li>
           <li><strong>Necron-Crypt</strong> by Mageek (<a href="https://strolen.com/author/Mageek" target="_blank" rel="noopener noreferrer">Link</a>)</li>
           <li><strong>OrkGlyphs</strong> © 1995 Dragon's Den Typefoundry (<a href="https://fonts2u.com/ork-glyphs.font" target="_blank" rel="noopener noreferrer">Link</a>)</li>
+          <li><strong>Simbiot</strong> by thomasaradea@gmail.com (<a href="https://letterarastudio.com/product/simbiot/" target="_blank" rel="noopener noreferrer">Link</a>)</li>
           <li><strong>tau-40k</strong> by Nekneeb (<a href="https://fontstruct.com/fontstructions/show/1005383/tau_40k" target="_blank" rel="noopener noreferrer">Link</a>)</li>
           <li><strong>ZarathustraBleeds</strong> by 203X (<a href="https://www.1001fonts.com/zarathustra-bleeds-font.html" target="_blank" rel="noopener noreferrer">Link</a>)</li>
           <li><strong>Zeus-Borne</strong> by Masyafi Studio (<a href="https://fontesk.com/zeus-borne-font/" target="_blank" rel="noopener noreferrer">Link</a>)</li>
