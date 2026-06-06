@@ -121,6 +121,7 @@
   --theme-border: #831843;
   --theme-border-accent: #fcd34d; /* Yellow eye slit */
   --theme-shadow: 0 4px 20px rgba(236, 72, 153, 0.15);
+  --font-body: 'Simbiot', 'Inter', sans-serif;
   --font-head: 'Simbiot', 'Creepster', 'Outfit', sans-serif;
   --font-title: 'Simbiot', 'Creepster', 'Outfit', sans-serif;
   --panel-radius: 12px;
@@ -152,6 +153,7 @@
   --theme-border: #334155;
   --theme-border-accent: #38bdf8;
   --theme-shadow: 0 8px 30px rgba(251, 146, 60, 0.15);
+  --font-body: 'CoreScript', 'Inter', sans-serif;
   --font-head: 'CoreScript', 'Black Ops One', 'Outfit', sans-serif;
   --font-title: 'CoreScript', 'Black Ops One', 'Outfit', sans-serif;
   --panel-radius: 8px;
