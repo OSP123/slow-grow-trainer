@@ -583,3 +583,12 @@ Tasks:
 - Pushed changes to `main`.
 Follow-ups:
 - None
+
+Date: 2026-06-05 (Fix for World Eaters Dropdown - ACTUAL FIX)
+Tasks:
+- Re-fixed `useUnitRegistry.ts`. While `.range(0, 4999)` was added previously, the Supabase server (PostgREST) has a hard-coded internal `max-rows` limit of 1000 which overrides the client's requested range.
+- Implemented an actual `while` loop pagination in the hook to fetch all 1218 units in 1000-row chunks until all are retrieved.
+- World Eaters now absolutely loads.
+- Pushed changes to `main`.
+Follow-ups:
+- None

@@ -17,24 +17,44 @@ export function useUnitRegistry() {
   const fetchRegistry = async () => {
     setLoading(true);
     setError(null);
-    const { data, error: fetchError } = await supabase
-      .from('unit_points')
-      .select('id, faction, unit_name, base_points')
-      .order('faction', { ascending: true })
-      .order('unit_name', { ascending: true })
-      .range(0, 4999);
 
-    if (fetchError) {
-      setError(fetchError.message);
-    } else if (data) {
-      setRawRegistry(data);
-      const dict: Record<string, string[]> = {};
-      for (const row of data) {
-        if (!dict[row.faction]) dict[row.faction] = [];
-        dict[row.faction].push(row.unit_name);
+    let allData: UnitRegistryEntry[] = [];
+    let hasMore = true;
+    let offset = 0;
+    const limit = 1000;
+
+    while (hasMore) {
+      const { data, error: fetchError } = await supabase
+        .from('unit_points')
+        .select('id, faction, unit_name, base_points')
+        .order('faction', { ascending: true })
+        .order('unit_name', { ascending: true })
+        .range(offset, offset + limit - 1);
+
+      if (fetchError) {
+        setError(fetchError.message);
+        setLoading(false);
+        return;
       }
-      setUnitsByFaction(dict);
+
+      if (data && data.length > 0) {
+        allData = [...allData, ...data];
+        offset += limit;
+        if (data.length < limit) {
+          hasMore = false;
+        }
+      } else {
+        hasMore = false;
+      }
     }
+
+    setRawRegistry(allData);
+    const dict: Record<string, string[]> = {};
+    for (const row of allData) {
+      if (!dict[row.faction]) dict[row.faction] = [];
+      dict[row.faction].push(row.unit_name);
+    }
+    setUnitsByFaction(dict);
     setLoading(false);
   };
 
