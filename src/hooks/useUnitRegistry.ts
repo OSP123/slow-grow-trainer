@@ -21,7 +21,8 @@ export function useUnitRegistry() {
       .from('unit_points')
       .select('id, faction, unit_name, base_points')
       .order('faction', { ascending: true })
-      .order('unit_name', { ascending: true });
+      .order('unit_name', { ascending: true })
+      .range(0, 4999);
 
     if (fetchError) {
       setError(fetchError.message);

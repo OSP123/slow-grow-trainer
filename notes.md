@@ -551,3 +551,27 @@ Tasks:
 - Updated `Briefing.tsx` to include creator credits and links for the two new fonts.
 Follow-ups:
 - None
+
+Date: 2026-06-05
+Tasks:
+- Re-parsed the PDF with `pdf-parse` but fell back to regenerating `seed_units.sql` using the robust PDF-to-text linear parser.
+- Created `CREDITS.md` in `public/fonts` to properly attribute `CoreScript` and `Simbiot`.
+- Created SQL migration `20260606000000_warlord_momentum.sql` to automatically insert a Warlord into a user's roster with `built: false` and `painted: false`, providing momentum for the first 400 points.
+- Removed standalone 'Warlord Built' and 'Warlord Painted' items from Logistics milestones so they integrate into the 400 point path.
+Follow-ups:
+- User must download `CoreScript.otf` and `Simbiot.ttf` and place them in `public/fonts/`.
+- User must run `seed_units.sql` and `20260606000000_warlord_momentum.sql` against the Supabase instance using the SQL editor.
+
+Date: 2026-06-05 (continued)
+Tasks:
+- Completely rewrote the Munitorum Field Manual PDF parser (parse_munitorum_v4.cjs) to properly handle the multi-column PDF layout
+- Fixed: Previous parser was missing entire factions (T'au Empire, Tyranids, World Eaters, Space Wolves, Thousand Sons) because the linear pdftotext output interleaved columns and the parser lost track
+- Fixed: X-101 and UR-025 unit names were being treated as Legends faction headers; now only known faction names are treated as faction headers in the Legends section
+- Fixed: Emperor's Children faction name had a curly/smart quote that wasn't being matched
+- Generated new seed_units.sql with 1218 units across 31 factions (up from ~1000 incomplete units in the DB)
+- Cleaned up scratch parser files
+- Build passes, all relevant tests pass (1 pre-existing Dashboard test failure unrelated to changes)
+Follow-ups:
+- User must run seed_units.sql in the Supabase SQL Editor to populate the unit_points table
+- User must run 20260606000000_warlord_momentum.sql in the Supabase SQL Editor for the Warlord momentum feature
+- Pre-existing Dashboard.test.tsx failure needs fixing (supabase mock issue)

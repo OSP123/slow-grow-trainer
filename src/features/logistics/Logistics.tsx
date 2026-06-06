@@ -3,8 +3,6 @@ import { supabase } from '../../supabaseClient';
 import { compressImage } from '../../utils/imageCompression';
 
 const MILESTONES = [
-  'Warlord Built',
-  'Warlord Painted',
   '400 Points Built',
   '400 Points Painted',
   '800 Points Built',

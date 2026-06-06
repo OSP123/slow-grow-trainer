@@ -29,7 +29,9 @@ export const FACTIONS: Faction[] = [
   { name: 'Adeptus Custodes',     grandAlliance: 'Imperium' },
   { name: 'Adeptus Mechanicus',   grandAlliance: 'Imperium' },
   { name: 'Imperial Knights',     grandAlliance: 'Imperium' },
-  { name: 'Agents of the Imperium', grandAlliance: 'Imperium' },
+  { name: 'Imperial Agents',      grandAlliance: 'Imperium' },
+  { name: 'Adeptus Titanicus',    grandAlliance: 'Imperium' },
+  { name: 'Unaligned Forces',     grandAlliance: 'Imperium' },
   // ── CHAOS ────────────────────────────────────────────────────────
   { name: 'Chaos Space Marines',  grandAlliance: 'Chaos' },
   { name: 'World Eaters',         grandAlliance: 'Chaos' },
