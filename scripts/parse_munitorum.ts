@@ -28,6 +28,7 @@ async function seedDatabase() {
   let currentFaction: string | null = null;
   let currentUnitName: string | null = null;
   let skipSection = false;
+  let inLegends = false;
 
   const unitsMap = new Map<string, any>();
 
@@ -70,6 +71,50 @@ async function seedDatabase() {
 
       skipSection = false;
       continue;
+    }
+
+    if (line === 'LEGENDS FIELD MANUAL') {
+      inLegends = true;
+      continue;
+    }
+
+    if (inLegends && line === line.toUpperCase() && line.length > 3 && !line.includes('PTS')) {
+      // It's a Legends sub-faction header
+      let tempFaction = line.trim();
+      if (tempFaction === 'ADEPTA SORORITAS') tempFaction = 'Adepta Sororitas';
+      else if (tempFaction === 'SPACE MARINES') tempFaction = 'Space Marines';
+      else if (tempFaction === 'ASTRA MILITARUM') tempFaction = 'Astra Militarum';
+      else if (tempFaction === 'BLACK TEMPLARS') tempFaction = 'Black Templars';
+      else if (tempFaction === 'BLOOD ANGELS') tempFaction = 'Blood Angels';
+      else if (tempFaction === 'SPACE WOLVES') tempFaction = 'Space Wolves';
+      else if (tempFaction === 'DARK ANGELS') tempFaction = 'Dark Angels';
+      else if (tempFaction === 'DEATHWATCH') tempFaction = 'Deathwatch';
+      else if (tempFaction === 'GREY KNIGHTS') tempFaction = 'Grey Knights';
+      else if (tempFaction === 'ADEPTUS CUSTODES') tempFaction = 'Adeptus Custodes';
+      else if (tempFaction === 'ADEPTUS MECHANICUS') tempFaction = 'Adeptus Mechanicus';
+      else if (tempFaction === 'CHAOS SPACE MARINES') tempFaction = 'Chaos Space Marines';
+      else if (tempFaction === 'DEATH GUARD') tempFaction = 'Death Guard';
+      else if (tempFaction === 'THOUSAND SONS') tempFaction = 'Thousand Sons';
+      else if (tempFaction === 'WORLD EATERS') tempFaction = 'World Eaters';
+      else if (tempFaction === 'CHAOS DAEMONS') tempFaction = 'Chaos Daemons';
+      else if (tempFaction === 'CHAOS KNIGHTS') tempFaction = 'Chaos Knights';
+      else if (tempFaction === 'AELDARI') tempFaction = 'Aeldari';
+      else if (tempFaction === 'DRUKHARI') tempFaction = 'Drukhari';
+      else if (tempFaction === 'ORKS') tempFaction = 'Orks';
+      else if (tempFaction === 'NECRONS') tempFaction = 'Necrons';
+      else if (tempFaction === 'TYRANIDS') tempFaction = 'Tyranids';
+      else if (tempFaction === 'GENESTEALER CULTS') tempFaction = 'Genestealer Cults';
+      else if (tempFaction === 'T’AU EMPIRE') tempFaction = "T'au Empire";
+      else if (tempFaction === 'LEAGUES OF VOTANN') tempFaction = 'Leagues of Votann';
+      else if (tempFaction === 'IMPERIAL KNIGHTS') tempFaction = 'Imperial Knights';
+      else if (tempFaction === 'AGENTS OF THE IMPERIUM' || tempFaction === 'IMPERIAL AGENTS') tempFaction = 'Agents of the Imperium';
+      
+      // If we matched one of our canonical casing strings
+      if (tempFaction !== line.trim()) {
+         currentFaction = tempFaction;
+         skipSection = false;
+         continue;
+      }
     }
 
     if (line.includes('DETACHMENT ENHANCEMENTS')) {
