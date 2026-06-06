@@ -534,3 +534,12 @@ Tasks:
 - Removed the deprecated `.png` asset from the repository.
 Follow-ups:
 - None
+
+Date: 2026-06-05 (Follow-up 8)
+Tasks:
+- Wrote a custom Node.js parser script to automatically extract all Warhammer 40,000 units from the Munitorum Field Manual PDF text dump.
+- Extracted Matched Play, Forge World, and Legends Field Manual units while stripping out enhancements and point values.
+- Built a merge script to append exactly 1,052 missing units to the appropriate sub-faction arrays in `src/data/warhammer40k.ts`.
+- Verified TypeScript compilation (`npm run build`) and pushed changes to main.
+Follow-ups:
+- None
