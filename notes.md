@@ -543,3 +543,11 @@ Tasks:
 - Verified TypeScript compilation (`npm run build`) and pushed changes to main.
 Follow-ups:
 - None
+
+Date: 2026-06-05 (Follow-up 9)
+Tasks:
+- Added `CoreScript` font styling for Leagues of Votann titles.
+- Added `Simbiot` font styling for Tyranids titles.
+- Updated `Briefing.tsx` to include creator credits and links for the two new fonts.
+Follow-ups:
+- None
