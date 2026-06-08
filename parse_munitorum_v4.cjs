@@ -11,7 +11,7 @@
  */
 const fs = require('fs');
 
-const rawText = fs.readFileSync('public/munitorum_linear.txt', 'utf-8');
+const rawText = fs.readFileSync('public/munitorum_blocks.txt', 'utf-8');
 const lines = rawText.split('\n');
 
 const FACTION_MAP = {
@@ -131,7 +131,7 @@ for (let i = 0; i < lines.length; i++) {
   if (ptsMatch) {
     if (MODEL_RE.test(line)) {
       // Unit points line — has model count
-      if (lastUnitName && !inEnhancements) {
+      if (lastUnitName) {
         const points = parseInt(ptsMatch[1], 10);
         const key = `${currentFaction}|||${lastUnitName}`;
         if (!unitsMap.has(key)) {
@@ -149,9 +149,6 @@ for (let i = 0; i < lines.length; i++) {
 
   // ── Model count line without pts (shouldn't happen normally) ──
   if (MODEL_RE.test(line)) continue;
-
-  // ── If in enhancements, skip everything ──
-  if (inEnhancements) continue;
 
   // ── Otherwise: unit name ──
   lastUnitName = line;

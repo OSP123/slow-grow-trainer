@@ -13,6 +13,7 @@ import AdminDashboard from './features/admin/AdminDashboard';
 import CommanderProfile from './features/profile/CommanderProfile';
 import CampaignBattles from './features/battles/CampaignBattles';
 import Briefing from './features/briefing/Briefing';
+import FAQ from './features/faq/FAQ';
 import Gallery from './features/gallery/Gallery';
 import TranslatedHeader from './components/TranslatedHeader';
 import './App.css';
@@ -164,7 +165,7 @@ function App() {
     return <UpdatePassword setIsRecovering={setIsRecovering} />;
   }
 
-  const isPublicRoute = location.pathname.startsWith('/briefing');
+  const isPublicRoute = location.pathname.startsWith('/briefing') || location.pathname.startsWith('/faq');
 
   if (!session && !isPublicRoute) {
     return <Login />;
@@ -210,6 +211,13 @@ function App() {
             <span>Field Manual</span>
           </div>
           <div 
+            className={`nav-item ${activeView === 'faq' ? 'active' : ''}`}
+            onClick={() => navigateTo('/faq')}
+          >
+            <BookOpen size={20} />
+            <span>FAQ</span>
+          </div>
+          <div 
             className={`nav-item ${activeView === 'logistics' ? 'active' : ''}`}
             onClick={() => navigateTo('/logistics')}
           >
@@ -221,7 +229,7 @@ function App() {
             onClick={() => navigateTo('/assessments')}
           >
             <Activity size={20} />
-            <span>Officer Assessment</span>
+            <span>End-of-Campaign Assessment</span>
           </div>
           <div 
             className={`nav-item ${activeView === 'battles' ? 'active' : ''}`}
@@ -295,9 +303,10 @@ function App() {
 
         {/* Dashboard Router */}
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/briefing" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/briefing" element={<Briefing />} />
+          <Route path="/faq" element={<FAQ />} />
           <Route path="/logistics" element={<Logistics />} />
           <Route path="/assessments" element={<Assessments />} />
           <Route path="/battles" element={<CampaignBattles />} />

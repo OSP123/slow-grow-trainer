@@ -605,10 +605,18 @@ export default function CampaignBattles() {
             ) : (
               /* ── Phase 2: Final Assessment — Honour ratings FIRST ── */
               <form onSubmit={handleFinalizeMatch} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                <div style={{ padding: '1rem', backgroundColor: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-accent)', borderRadius: '6px' }}>
-                  <p style={{ margin: 0, fontSize: '0.85rem', lineHeight: '1.6' }}>
+                <div style={{ padding: '1rem', backgroundColor: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-accent)', borderRadius: '6px', marginBottom: '1rem' }}>
+                  <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-accent)' }}>Honour Ratings Explained</h4>
+                  <p style={{ margin: '0 0 1rem 0', fontSize: '0.85rem', lineHeight: '1.6' }}>
                     <strong style={{ color: 'var(--theme-accent)' }}>Honour ratings are the most important part of this report.</strong>
-                    {' '}They are permanent and visible to all Commanders. Rate your opponent honestly on a scale of 1–5 stars.
+                    {' '}They are permanent and visible to all Commanders. Rate your opponent honestly on a scale of 1–5 stars on two critical axes:
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: '1.5rem', fontSize: '0.85rem', lineHeight: '1.5', color: 'var(--theme-fg-muted)' }}>
+                    <li style={{ marginBottom: '0.5rem' }}><strong>Command Temperament:</strong> How sportsmanlike was your opponent? Did they play in a positive, respectful spirit? Were they a fun game to have regardless of the result?</li>
+                    <li><strong>Hobby Spirit & Helpfulness:</strong> Did your opponent help clarify rules and ensure a fun, patient, and welcoming game experience? Did they contribute positively to the hobby community?</li>
+                  </ul>
+                  <p style={{ margin: '1rem 0 0 0', fontSize: '0.85rem', lineHeight: '1.6', color: 'var(--theme-fg-muted)' }}>
+                    These honour ratings are used purely for end-of-campaign celebratory awards and to ensure everyone is having a positive experience. <strong>Your match will remain active and will not appear on the War Effort Map until both you and your opponent have securely logged these ratings.</strong>
                   </p>
                 </div>
 

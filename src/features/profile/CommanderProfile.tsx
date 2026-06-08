@@ -7,6 +7,7 @@ import { useUnitRegistry } from '../../hooks/useUnitRegistry';
 import { useCommanderCampaignData } from '../../hooks/useCommanderCampaignData';
 import DatasheetBuilder from './DatasheetBuilder';
 import DatasheetViewer from './DatasheetViewer';
+import CampaignQuests from '../../components/CampaignQuests';
 
 export interface CrucibleRangedWeapon {
   id: string;
@@ -268,6 +269,8 @@ export default function CommanderProfile() {
           </div>
         )}
       </div>
+
+      <CampaignQuests profile={profile} isOwner={isOwner} />
 
       {/* Tab Bar */}
       <div style={{ display: 'flex', borderBottom: '2px solid var(--theme-border)', marginBottom: '1.5rem', gap: '0', overflowX: 'auto', whiteSpace: 'nowrap' }}>

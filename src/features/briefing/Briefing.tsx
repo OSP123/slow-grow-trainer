@@ -1,3 +1,5 @@
+import CampaignTimeline from '../../components/CampaignTimeline';
+
 export default function Briefing() {
   return (
     <div style={{ paddingBottom: '4rem' }}>
@@ -5,6 +7,8 @@ export default function Briefing() {
         <h2 style={{ fontSize: '2rem', margin: 0 }}>Strategic Briefing (Field Manual)</h2>
         <p style={{ color: 'var(--theme-fg-muted)' }}>Operational guidelines and toolset orientation for all active Commanders.</p>
       </div>
+
+      <CampaignTimeline />
 
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h3 style={{ color: 'var(--theme-accent)', marginBottom: '1rem', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>
@@ -36,6 +40,18 @@ export default function Briefing() {
         <p style={{ lineHeight: '1.6', marginBottom: '1rem' }}>
           To participate in the league, there is a nominal <strong>$15 entry fee</strong>. 100% of these fees go directly toward supporting the venue and funding the prize pool for the conclusion of the campaign.
         </p>
+        
+        <div style={{ background: 'var(--theme-bg-secondary)', padding: '1rem', borderRadius: '4px', border: '1px solid var(--theme-border)', marginBottom: '1.5rem' }}>
+          <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-accent)' }}>League Payment</h4>
+          <p style={{ margin: '0 0 0.5rem 0' }}>
+            Please submit your entry fee via Venmo:<br />
+            <a href="https://venmo.com/code?user_id=1242039823892480948&created=1780955737" target="_blank" rel="noreferrer" style={{ color: 'var(--theme-accent)', textDecoration: 'underline' }}>Pay via Venmo</a>
+          </p>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--theme-fg-muted)' }}>
+            <em>Note: If you do not have Venmo, please DM me directly for alternative payment information.</em>
+          </p>
+        </div>
+
         <p style={{ lineHeight: '1.6' }}>
           The league culminates in a <strong>Final 2000-Point Tournament</strong>. At this grand finale, all Commanders will deploy their completed forces, and we will announce the overall campaign prizes for: <strong>Best Painted, Best Converted, Best Sportsmanship, and Best General</strong>.
         </p>
@@ -104,75 +120,6 @@ export default function Briefing() {
         </ul>
       </div>
 
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <h3 style={{ color: 'var(--theme-accent)', marginBottom: '1rem', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>
-          Honour Ratings Explained
-        </h3>
-        <p style={{ lineHeight: '1.6', marginBottom: '1rem' }}>
-          At the conclusion of every game, both Commanders submit a final battle report that includes ratings for their opponent on two critical axes:
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div style={{ padding: '1rem', border: '1px solid var(--theme-accent)', borderRadius: '6px' }}>
-            <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-accent)' }}>⚔ Command Temperament</h4>
-            <p style={{ margin: 0, fontSize: '0.85rem', lineHeight: '1.5' }}>
-              How sportsmanlike was your opponent? Did they play in a positive, respectful spirit? Were they a fun game to have regardless of the result?
-            </p>
-          </div>
-          <div style={{ padding: '1rem', border: '1px solid var(--theme-accent)', borderRadius: '6px' }}>
-            <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-accent)' }}>⚔ Hobby Spirit & Helpfulness</h4>
-            <p style={{ margin: 0, fontSize: '0.85rem', lineHeight: '1.5' }}>
-              Did your opponent help clarify rules and ensure a fun, patient, and welcoming game experience? Did they contribute positively to the hobby community?
-            </p>
-          </div>
-        </div>
-        <p style={{ lineHeight: '1.6', marginTop: '1rem', color: 'var(--theme-fg-muted)', fontSize: '0.85rem' }}>
-          Ratings are on a 1–5 star scale. These honour ratings are used purely for end-of-campaign celebratory awards and to ensure everyone is having a positive experience. <strong>Your match will remain active and will not appear on the War Effort Map until both you and your opponent have securely logged these ratings.</strong>
-        </p>
-      </div>
-
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <h3 style={{ color: 'var(--theme-accent)', marginBottom: '1rem', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>
-          Frequently Asked Questions (FAQ)
-        </h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div>
-            <h4 style={{ margin: '0 0 0.5rem 0' }}>Q: What exactly is a "slow grow" campaign?</h4>
-            <p style={{ margin: 0, lineHeight: '1.6', fontSize: '0.9rem' }}>
-              <strong>A:</strong> A slow grow campaign is a structured way of gradually building and painting a new army over time. Instead of needing a full 2000-point army right away, players start small and add to their army in set increments (milestones), playing a game at each milestone. In our campaign, the milestones are set at 400-point increments.
-            </p>
-          </div>
-          <div>
-            <h4 style={{ margin: '0 0 0.5rem 0' }}>Q: Can I use half-painted or primed models in the slow grow campaign?</h4>
-            <p style={{ margin: 0, lineHeight: '1.6', fontSize: '0.9rem' }}>
-              <strong>A:</strong> Absolutely. Our goal is to help commanders reduce their grey piles of shame and make progress on their armies. Bring your WIP, primed, or partially painted models to the table—what matters most is that you're getting games in and making progress over the course of the campaign!
-            </p>
-          </div>
-          <div>
-            <h4 style={{ margin: '0 0 0.5rem 0' }}>Q: What is the overall timeline for the slow grow campaign?</h4>
-            <p style={{ margin: 0, lineHeight: '1.6', fontSize: '0.9rem' }}>
-              <strong>A:</strong> The campaign runs for a total of 5 months. Each month, commanders are required to post an additional 400 points of units (built or painted) and play at least 1 recorded game. This structure scales smoothly from 400 points in Month 1 up to a full 2000-point army in Month 5!
-            </p>
-          </div>
-          <div>
-            <h4 style={{ margin: '0 0 0.5rem 0' }}>Q: Are Legends units allowed?</h4>
-            <p style={{ margin: 0, lineHeight: '1.6', fontSize: '0.9rem' }}>
-              <strong>A:</strong> Yes.
-            </p>
-          </div>
-          <div>
-            <h4 style={{ margin: '0 0 0.5rem 0' }}>Q: Is narrative allowed?</h4>
-            <p style={{ margin: 0, lineHeight: '1.6', fontSize: '0.9rem' }}>
-              <strong>A:</strong> Not only is it allowed, but encouraged! We have a section in your commander profile to fill in your lore and a section in the battle report for your game to add the story for your game. There will be a prize for best narrative at the final game. Plus, the plan is to have the training module transition into a crusade...
-            </p>
-          </div>
-          <div>
-            <h4 style={{ margin: '0 0 0.5rem 0' }}>Q: Does a narrative campaign mean that we can't play normal 40k games?</h4>
-            <p style={{ margin: 0, lineHeight: '1.6', fontSize: '0.9rem' }}>
-              <strong>A:</strong> No! Feel free to play either competitive or narrative games with your opponent. It's up to you and your opponent what type of game you want to play. The only restriction is the number of points you'll be playing with at each interval.
-            </p>
-          </div>
-        </div>
-      </div>
 
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h3 style={{ color: 'var(--theme-accent)', marginBottom: '1rem', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>
@@ -201,7 +148,7 @@ export default function Briefing() {
           <li><strong>CaslonAntique</strong> by Typographer Mediengestaltung (<a href="https://www.1001fonts.com/users/steffmann/" target="_blank" rel="noopener noreferrer">Link</a>)</li>
           <li><strong>CoreScript</strong> by 0dy5 (<a href="https://drive.google.com/file/d/1OcU1rt5E8ZI80RDm3gb0Vv651O41yFbO/view" target="_blank" rel="noopener noreferrer">Link</a>)</li>
           <li><strong>EldarRunes</strong> (<a href="https://www.dafontfree.net/eldar-runes-normal-font/f122723.htm" target="_blank" rel="noopener noreferrer">Link</a>)</li>
-          <li><strong>Necron-Crypt</strong> by Mageek (<a href="https://strolen.com/author/Mageek" target="_blank" rel="noopener noreferrer">Link</a>)</li>
+          <li><strong>Necron-Crypt</strong> by Mageek (<a href="https://strolen.com/author/Mageek" target="_blank" rel="noopener noreferrer">Strolen Link</a>, <a href="https://www.reddit.com/r/Necrontyr/comments/1qh1whk/necron_glyphs_otf_ttf_woff_and_woff2_font_files/" target="_blank" rel="noopener noreferrer">Reddit Post</a>)</li>
           <li><strong>OrkGlyphs</strong> © 1995 Dragon's Den Typefoundry (<a href="https://fonts2u.com/ork-glyphs.font" target="_blank" rel="noopener noreferrer">Link</a>)</li>
           <li><strong>Simbiot</strong> by thomasaradea@gmail.com (<a href="https://letterarastudio.com/product/simbiot/" target="_blank" rel="noopener noreferrer">Link</a>)</li>
           <li><strong>tau-40k</strong> by Nekneeb (<a href="https://fontstruct.com/fontstructions/show/1005383/tau_40k" target="_blank" rel="noopener noreferrer">Link</a>)</li>

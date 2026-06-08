@@ -283,80 +283,61 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                 <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>
                   Unit {!selectedFaction && <span style={{ color: 'var(--theme-fg-muted)' }}>(select faction first, or type freely)</span>}
                 </label>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <input
-                    type="text"
+                
+                {selectedFaction && availableUnits.length > 0 ? (
+                  <select
                     value={selectedUnit || unitSearch}
                     onChange={e => {
                       const val = e.target.value;
                       setUnitSearch(val);
-                      setSelectedUnit('');
+                      setSelectedUnit(val);
                       setPointsLookedUp(false);
-                      // If the typed value exactly matches a known unit, auto-lookup
-                      if (selectedFaction && unitsByFaction[selectedFaction]?.includes(val)) {
+                      if (val) {
                         lookupUnitPoints(val, selectedFaction);
                       }
                     }}
-                    placeholder={selectedFaction ? 'Search or type unit name...' : 'Type unit name...'}
-                    style={{ width: '100%', padding: '0.6rem', paddingRight: '2rem', boxSizing: 'border-box' }}
-                    list="unit-suggestions"
-                  />
-                  {(selectedUnit || unitSearch) && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUnitSearch('');
-                        setSelectedUnit('');
-                        setPoints('');
+                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  >
+                    <option value="">-- Select a unit from {selectedFaction} --</option>
+                    {availableUnits.map(u => (
+                      <option key={u} value={u}>{u}</option>
+                    ))}
+                    <option value="custom_other">-- Other / Custom Unit --</option>
+                  </select>
+                ) : null}
+
+                {(!selectedFaction || availableUnits.length === 0 || selectedUnit === 'custom_other') && (
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginTop: selectedFaction && availableUnits.length > 0 ? '0.5rem' : '0' }}>
+                    <input
+                      type="text"
+                      value={selectedUnit === 'custom_other' ? '' : (selectedUnit || unitSearch)}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setUnitSearch(val);
+                        if (selectedUnit !== 'custom_other') setSelectedUnit('');
                         setPointsLookedUp(false);
                       }}
-                      style={{
-                        position: 'absolute',
-                        right: '8px',
-                        background: 'none',
-                        border: 'none',
-                        color: 'var(--theme-fg-muted)',
-                        cursor: 'pointer',
-                        fontSize: '1.2rem',
-                        padding: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        lineHeight: 1
-                      }}
-                      title="Clear selection"
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-                {/* Native datalist for autocomplete */}
-                <datalist id="unit-suggestions">
-                  {availableUnits.map(u => <option key={u} value={u} />)}
-                </datalist>
-                {/* Suggestion pills when few results */}
-                {unitSearch.length >= 2 && availableUnits.length > 0 && availableUnits.length <= 8 && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.35rem' }}>
-                    {availableUnits.map(u => (
+                      placeholder="Type unit name..."
+                      style={{ width: '100%', padding: '0.6rem', paddingRight: '2rem', boxSizing: 'border-box' }}
+                    />
+                    {(selectedUnit || unitSearch) && selectedUnit !== 'custom_other' && (
                       <button
                         type="button"
-                        key={u}
                         onClick={() => {
-                          setSelectedUnit(u);
-                          setUnitSearch(u);
-                          lookupUnitPoints(u, selectedFaction);
+                          setUnitSearch('');
+                          setSelectedUnit('');
+                          setPoints('');
+                          setPointsLookedUp(false);
                         }}
                         style={{
-                          padding: '2px 10px', fontSize: '0.75rem',
-                          border: `1px solid ${selectedUnit === u ? 'var(--theme-accent)' : 'var(--theme-border)'}`,
-                          backgroundColor: selectedUnit === u ? 'var(--theme-accent)' : 'var(--theme-bg)',
-                          color: selectedUnit === u ? '#fff' : 'var(--theme-fg)',
-                          borderRadius: '12px', cursor: 'pointer',
+                          position: 'absolute', right: '8px', background: 'none', border: 'none',
+                          color: 'var(--theme-fg-muted)', cursor: 'pointer', fontSize: '1.2rem', padding: 0
                         }}
+                        title="Clear selection"
                       >
-                        {u}
+                        ×
                       </button>
-                    ))}
+                    )}
                   </div>
                 )}
               </div>

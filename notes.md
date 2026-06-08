@@ -592,3 +592,71 @@ Tasks:
 - Pushed changes to `main`.
 Follow-ups:
 - None
+
+Date: 2026-06-05 (End-to-End Testing & Verification)
+Tasks:
+- Created automated integration test suite via `src/hooks/useUnitRegistry.test.ts`.
+- Manually verified via headless node testing and automated Vitest suite that the `useUnitRegistry` pagination fully bypassed the `1000` row limit and successfully captured 1218 units.
+- Proved World Eaters dropdown properly captures units like 'Angron' end-to-end against the live backend database.
+- Removed obsolete test script and committed test coverage.
+Follow-ups:
+- None
+
+Date: 2026-06-05
+Tasks:
+- Fixed the ArmyRoster unit input UI. Replaced the hidden datalist with a proper native <select> dropdown so that all parsed Munitorum Field Manual units (like the 30 World Eaters units) are immediately visible to the user without needing to start typing.
+- Investigated the parser and confirmed the database is accurately populated with all 1,338 units.
+Follow-ups:
+- None
+
+Date: 2026-06-05
+Tasks:
+- Fixed the multi-line unit name parsing error. Units like "Death Company Dreadnought with Magna-grapple" and "Captain in Terminator Armour" that wrapped across multiple lines in the PDF are now correctly concatenated instead of being truncated into fragments like "with Magna-grapple".
+- Re-ran the parser and generated updated seed_units.sql and warhammer40k.ts with 1,341 perfectly parsed units.
+Follow-ups:
+- None
+
+Date: 2026-06-05
+Tasks:
+- Verified that all multi-line unit names ("in [Armour]", "with [Wargear]") are flawlessly merged in the database.
+- Discovered and fixed a minor anomaly where a lengthy instructional paragraph from the Agents of the Imperium section was merged into "Sisters of Battle Immolator" due to the new multi-line concatenation rules. Added a word-count filter to safely ignore non-unit paragraphs.
+- Regenerated seed_units.sql and warhammer40k.ts with 1,340 pristine units.
+Follow-ups:
+- None
+
+Date: 2026-06-05
+Tasks:
+- Fixed a major faction header parsing bug where fractions with headers split across two lines (e.g., "CODEX SUPPLEMENT:" on line 1, "BLACK TEMPLARS" on line 2) were entirely skipped. This successfully recovered the missing Black Templars roster (17 units), and the standard rosters for Blood Angels (+15 units) and Dark Angels (+16 units), bringing the new true unit total to 1,388.
+- Updated warhammer40k.ts and seed_units.sql to reflect all 31 factions perfectly.
+Follow-ups:
+- None
+
+Date: 2026-06-08
+Tasks:
+- Added a League Payment section directly to the Briefing page under the "Campaign Structure & Matchmaking" section.
+- Included the Venmo payment link and specific instructions to DM for alternative payment options.
+Follow-ups:
+- None
+
+Date: 2026-06-08
+Tasks:
+- Updated the credits section in the Briefing page to include Mageek's Reddit post link for the Necrons font alongside the original Strolen link.
+Follow-ups:
+- None
+
+Date: 2026-06-08
+Tasks:
+- Added a new question and answer to the FAQ section in Briefing.tsx regarding the campaign start date (July 1) and the final sign-up date (June 27).
+Follow-ups:
+- None
+
+Date: 2026-06-08
+Tasks:
+- Implemented CampaignQuests component in CommanderProfile to gamify phase progression (enlistment, plus 400 pt increments).
+- Implemented CampaignTimeline component and injected it into the Briefing for a visual countdown to July 1, 2026.
+- Overhauled the Gallery UI to feature an Instagram-style modal with a side-by-side image and comments/emotes overlay.
+- Added Supabase migrations for `gallery_comments` and `gallery_emotes` to support the new UI.
+- Executed routing and navigation updates, separating FAQ into its own tab and directing logged out traffic to the Briefing.
+- Shifted Honour Ratings explanation out of the Briefing and directly into the Campaign Battles finalization flow.
+Follow-ups:
+- Remind user to run `setup_gallery.sql` in their Supabase dashboard so the new Gallery comments feature operates without database errors.
