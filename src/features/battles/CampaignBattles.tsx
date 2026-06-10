@@ -285,7 +285,7 @@ export default function CampaignBattles() {
   
   const topCommanders = getTopCommanders();
 
-  if (loading) return <div style={{ textAlign: 'center', marginTop: '4rem' }}>Locating Active Warzones...</div>;
+  if (loading) return <div style={{ textAlign: 'center', marginTop: '4rem' }}>Awaiting Astropathic Relay...</div>;
 
   return (
     <div style={{ padding: '2rem' }}>

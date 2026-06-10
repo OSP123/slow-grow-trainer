@@ -255,7 +255,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
     Xenos: '#a855f7',
   };
 
-  if (loading || registryLoading) return <div style={{ color: 'var(--theme-fg-muted)', padding: '1rem' }}>Loading roster...</div>;
+  if (loading || registryLoading) return <div style={{ color: 'var(--theme-fg-muted)', padding: '1rem' }}>Calibrating Auspex Arrays...</div>;
 
   return (
     <div>

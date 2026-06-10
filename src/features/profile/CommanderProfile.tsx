@@ -182,7 +182,7 @@ export default function CommanderProfile() {
     }
   };
 
-  if (!profile) return <div style={{ textAlign: 'center', marginTop: '4rem' }}>Downloading Profile...</div>;
+  if (!profile) return <div style={{ textAlign: 'center', marginTop: '4rem' }}>Communing with the Omnissiah...</div>;
 
   const TABS: { key: Tab; label: string }[] = [
     { key: 'specs', label: 'Commander Specs' },

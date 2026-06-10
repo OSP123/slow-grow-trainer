@@ -285,7 +285,7 @@ export default function Dashboard() {
   }, [loading]);
 
   if (loading) {
-    return <div style={{ color: 'var(--theme-fg-muted)' }}>Synchronizing Telemetry...</div>;
+    return <div style={{ color: 'var(--theme-fg-muted)' }}>Synchronizing Noospheric Link...</div>;
   }
 
   // Variables isNonImperial, isXenos, needsLowercase are defined above using activeTheme

@@ -427,7 +427,7 @@ export default function AdminDashboard() {
     }
   };
 
-  if (loading) return <div style={{ textAlign: 'center', marginTop: '4rem' }}>Scanning biometric signatures...</div>;
+  if (loading) return <div style={{ textAlign: 'center', marginTop: '4rem' }}>Interrogating Machine Spirit...</div>;
 
   if (email !== 'omarpatel123@gmail.com') {
     return (
@@ -634,7 +634,7 @@ export default function AdminDashboard() {
         </p>
 
         {fetchingUsers ? (
-          <p>Loading roster...</p>
+          <p>Awaiting Astropathic Relay...</p>
         ) : users.length === 0 ? (
           <p style={{ color: 'var(--theme-fg-muted)' }}>No commanders registered yet.</p>
         ) : (

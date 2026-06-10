@@ -96,7 +96,7 @@ describe('CommanderProfile', () => {
 
   it('shows loading state initially', () => {
     renderProfile();
-    expect(screen.getByText(/Downloading Profile/i)).toBeInTheDocument();
+    expect(screen.getByText(/Communing with the Omnissiah/i)).toBeInTheDocument();
   });
 
   it('renders commander name and tabs after load', async () => {

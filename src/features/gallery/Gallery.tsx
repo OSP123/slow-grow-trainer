@@ -126,7 +126,7 @@ export default function Gallery() {
 
 
 
-  if (loading) return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--theme-fg-muted)' }}>Scanning Pict-Captures...</div>;
+  if (loading) return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--theme-fg-muted)' }}>Interrogating Machine Spirit...</div>;
 
   return (
     <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>

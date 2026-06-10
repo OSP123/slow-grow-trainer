@@ -56,7 +56,7 @@ describe('Campaign Battles Integrations', () => {
 
   it('shows loading state initially', () => {
     render(<CampaignBattles />);
-    expect(screen.getByText(/Locating Active Warzones/i)).toBeInTheDocument();
+    expect(screen.getByText(/Awaiting Astropathic Relay/i)).toBeInTheDocument();
   });
 
   it('renders both global board and assigned frontlines after load', async () => {

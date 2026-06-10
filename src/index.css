@@ -238,3 +238,69 @@ img, video, svg, table {
     box-sizing: border-box;
   }
 }
+
+/* ── Dataslate Aesthetics ── */
+.dataslate {
+  clip-path: polygon(
+    12px 0,        /* top-left chamfer start */
+    100% 0,        /* top-right (unchamfered) */
+    100% calc(100% - 12px), /* bottom-right chamfer start */
+    calc(100% - 12px) 100%, /* bottom-right chamfer end */
+    0 100%,        /* bottom-left (unchamfered) */
+    0 12px         /* top-left chamfer end */
+  );
+  box-shadow:
+    inset 0 0 0 2px var(--theme-border-accent),
+    0 0 15px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+/* ── Scanline overlay ── */
+.scanline-overlay {
+  position: relative;
+}
+
+.scanline-overlay::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 200%;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.04) 2px,
+    rgba(255, 255, 255, 0.04) 4px
+  );
+  animation: scanline-scroll 8s linear infinite;
+  opacity: 1;
+}
+
+@keyframes scanline-scroll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+/* ── Caution / Warning Banner ── */
+.caution-banner {
+  background: repeating-linear-gradient(
+    -45deg,
+    #1a1a00,
+    #1a1a00 10px,
+    #2a2a00 10px,
+    #2a2a00 20px
+  );
+  border: 1px solid #b8860b;
+  color: #ffd700;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.7rem;
+  text-align: center;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
