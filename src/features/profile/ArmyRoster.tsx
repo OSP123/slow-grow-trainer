@@ -40,7 +40,7 @@ const GROUPED_FACTIONS = getFactionsGrouped();
 const ALLIANCE_ORDER: ('Imperium' | 'Chaos' | 'Xenos')[] = ['Imperium', 'Chaos', 'Xenos'];
 
 export default function ArmyRoster({ profileId, isOwner }: Props) {
-  const { unitsByFaction, loading: registryLoading } = useUnitRegistry();
+  const { unitsByFaction, rawRegistry, loading: registryLoading } = useUnitRegistry();
   const [units, setUnits] = useState<ArmyUnit[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadingUnitId, setUploadingUnitId] = useState<string | null>(null);
@@ -51,9 +51,10 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
   const [unitSearch, setUnitSearch] = useState('');
   const [selectedUnit, setSelectedUnit] = useState('');
   const [modelCount, setModelCount] = useState<number>(1);
-  const [points, setPoints] = useState<number | ''>('');
+  const [points, setPoints] = useState<number | string>('');
   const [pointsLookedUp, setPointsLookedUp] = useState(false); // true if auto-filled from DB
   const [notes, setNotes] = useState('');
+  const [availableCostTiers, setAvailableCostTiers] = useState<{models: number, points: number}[]>([]);
   const [addingUnit, setAddingUnit] = useState(false);
   const [formMessage, setFormMessage] = useState('');
 
@@ -85,21 +86,27 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
     setUnitSearch('');
     setPoints('');
     setPointsLookedUp(false);
+    setAvailableCostTiers([]);
   };
 
   const lookupUnitPoints = async (unitName: string, faction: string) => {
     if (!unitName || !faction) return;
-    const { data } = await supabase
-      .from('unit_points')
-      .select('base_points')
-      .eq('faction', faction)
-      .eq('unit_name', unitName)
-      .maybeSingle();
-    if (data?.base_points != null) {
-      setPoints(data.base_points);
-      setPointsLookedUp(true);
+    
+    const unitDef = rawRegistry.find(u => u.faction === faction && u.unit_name === unitName);
+    
+    if (unitDef) {
+      if (unitDef.cost_tiers && unitDef.cost_tiers.length > 0) {
+        setAvailableCostTiers(unitDef.cost_tiers);
+        setModelCount(unitDef.cost_tiers[0].models);
+        setPoints(unitDef.cost_tiers[0].points);
+        setPointsLookedUp(true);
+      } else if (unitDef.base_points != null) {
+        setAvailableCostTiers([]);
+        setPoints(unitDef.base_points);
+        setPointsLookedUp(true);
+      }
     } else {
-      // No registry entry — clear auto-fill but don't overwrite manual input
+      setAvailableCostTiers([]);
       setPointsLookedUp(false);
     }
   };
@@ -167,6 +174,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
     setPointsLookedUp(false);
     setNotes('');
     setEditingUnitId(null);
+    setAvailableCostTiers([]);
   };
 
   const handleEditUnit = (unit: ArmyUnit) => {
@@ -179,6 +187,15 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
     setPointsLookedUp(false);
     setNotes(unit.notes || '');
     setFormMessage('');
+    
+    // Hydrate available cost tiers if it's a known unit
+    const unitDef = rawRegistry.find(u => u.faction === unit.faction && u.unit_name === unit.unit_name);
+    if (unitDef && unitDef.cost_tiers && unitDef.cost_tiers.length > 0) {
+      setAvailableCostTiers(unitDef.cost_tiers);
+    } else {
+      setAvailableCostTiers([]);
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -310,7 +327,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                   <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginTop: selectedFaction && availableUnits.length > 0 ? '0.5rem' : '0' }}>
                     <input
                       type="text"
-                      value={selectedUnit === 'custom_other' ? '' : (selectedUnit || unitSearch)}
+                      value={selectedUnit === 'custom_other' ? unitSearch : (selectedUnit || unitSearch)}
                       onChange={e => {
                         const val = e.target.value;
                         setUnitSearch(val);
@@ -327,6 +344,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                           setUnitSearch('');
                           setSelectedUnit('');
                           setPoints('');
+                          setAvailableCostTiers([]);
                           setPointsLookedUp(false);
                         }}
                         style={{
@@ -347,11 +365,31 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
             <div style={{ display: 'grid', gridTemplateColumns: '80px 80px 1fr', gap: '0.75rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>Models</label>
-                <input
-                  type="number" min={1} value={modelCount}
-                  onChange={e => setModelCount(parseInt(e.target.value) || 1)}
-                  style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
-                />
+                {availableCostTiers.length > 0 ? (
+                  <select
+                    value={modelCount}
+                    onChange={e => {
+                      const count = parseInt(e.target.value);
+                      setModelCount(count);
+                      const tier = availableCostTiers.find(t => t.models === count);
+                      if (tier) {
+                        setPoints(tier.points);
+                        setPointsLookedUp(true);
+                      }
+                    }}
+                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  >
+                    {availableCostTiers.map(t => (
+                      <option key={t.models} value={t.models}>{t.models} models</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="number" min={1} value={modelCount}
+                    onChange={e => setModelCount(parseInt(e.target.value) || 1)}
+                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  />
+                )}
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>

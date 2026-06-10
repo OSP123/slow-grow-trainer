@@ -62,6 +62,7 @@ let currentFaction = null;
 let lastUnitName = null;
 let inEnhancements = false;
 let inLegends = false;
+let wasPointsLine = false;
 const unitsMap = new Map();
 
 for (let i = 0; i < lines.length; i++) {
@@ -129,18 +130,26 @@ for (let i = 0; i < lines.length; i++) {
   // ── Points line ──
   const ptsMatch = line.match(POINTS_RE);
   if (ptsMatch) {
+    wasPointsLine = true;
     if (MODEL_RE.test(line)) {
       // Unit points line — has model count
       if (lastUnitName) {
         const points = parseInt(ptsMatch[1], 10);
+        const modelMatch = line.match(/^(\d+)\s+model/);
+        const models = modelMatch ? parseInt(modelMatch[1], 10) : 1;
+        
         const key = `${currentFaction}|||${lastUnitName}`;
         if (!unitsMap.has(key)) {
           unitsMap.set(key, {
             faction: currentFaction,
             unit_name: lastUnitName,
             base_points: points,
+            cost_tiers: []
           });
         }
+        
+        // Add to cost tiers
+        unitsMap.get(key).cost_tiers.push({ models, points });
       }
     }
     // Enhancement pts lines (no model count) — skip
@@ -148,10 +157,24 @@ for (let i = 0; i < lines.length; i++) {
   }
 
   // ── Model count line without pts (shouldn't happen normally) ──
-  if (MODEL_RE.test(line)) continue;
+  if (MODEL_RE.test(line)) {
+    wasPointsLine = true;
+    continue;
+  }
 
   // ── Otherwise: unit name ──
-  lastUnitName = line;
+  const wordCount = line.split(/\s+/).length;
+  if (wordCount > 12) {
+    continue; // Ignore explanatory paragraphs (e.g. Agents of the Imperium notes)
+  }
+
+  if (wasPointsLine || !lastUnitName) {
+    lastUnitName = line;
+  } else {
+    lastUnitName += ' ' + line;
+  }
+  
+  wasPointsLine = false;
 }
 
 const units = Array.from(unitsMap.values());
@@ -174,12 +197,13 @@ let sql = `-- Munitorum Field Manual v4.3 - Complete Unit Points Registry\n`;
 sql += `-- Generated ${new Date().toISOString()}\n`;
 sql += `-- Total units: ${units.length}\n\n`;
 sql += `DELETE FROM unit_points;\n\n`;
-sql += `INSERT INTO unit_points (faction, unit_name, base_points)\nVALUES\n`;
+sql += `INSERT INTO unit_points (faction, unit_name, base_points, cost_tiers)\nVALUES\n`;
 
 const values = units.map(u => {
   const safeFaction = u.faction.replace(/'/g, "''");
   const safeUnit = u.unit_name.replace(/'/g, "''");
-  return `  ('${safeFaction}', '${safeUnit}', ${u.base_points})`;
+  const tiersJson = JSON.stringify(u.cost_tiers).replace(/'/g, "''");
+  return `  ('${safeFaction}', '${safeUnit}', ${u.base_points}, '${tiersJson}'::jsonb)`;
 });
 
 sql += values.join(',\n') + ';\n';

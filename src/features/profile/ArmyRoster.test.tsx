@@ -16,7 +16,9 @@ vi.mock('../../hooks/useUnitRegistry', () => ({
       'Space Marines': ['Intercessor Squad', 'Dreadnought'],
       'Astra Militarum': ['Infantry Squad']
     },
-    rawRegistry: [],
+    rawRegistry: [
+      { id: 'u1', faction: 'Space Marines', unit_name: 'Intercessor Squad', base_points: 125, cost_tiers: [{ models: 5, points: 125 }] }
+    ],
     loading: false,
     refreshRegistry: vi.fn()
   })

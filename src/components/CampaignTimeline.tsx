@@ -66,7 +66,7 @@ export default function CampaignTimeline() {
         </div>
       ) : (
         <div style={{ marginBottom: '2rem', padding: '1rem', border: '1px solid var(--theme-accent)', backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 'bold' }}>
-          Campaign Active
+          The War for Vespera Prime Begins
         </div>
       )}
 

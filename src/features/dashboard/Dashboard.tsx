@@ -42,7 +42,7 @@ export default function Dashboard() {
   const [theatres, setTheatres] = useState<any[]>([]);
   const [windowSize, setWindowSize] = useState({ width: 800, height: 600 });
   const [selectedTheatre, setSelectedTheatre] = useState<any>(null);
-  const [activeEvent, setActiveEvent] = useState<any>(null);
+  const [activeEvents, setActiveEvents] = useState<any[]>([]);
   const [commanders, setCommanders] = useState<any[]>([]);
   const globeEl = useRef<any>(null);
 
@@ -256,8 +256,8 @@ export default function Dashboard() {
         }
 
         try {
-          const { data: eventData } = await supabase.from('global_events').select('*').eq('is_active', true).maybeSingle();
-          if (eventData) setActiveEvent(eventData);
+          const { data: eventData } = await supabase.from('global_events').select('*').eq('is_active', true);
+          if (eventData) setActiveEvents(eventData);
         } catch (err) {}
         try {
           const { data: cmdrs } = await supabase
@@ -300,17 +300,17 @@ export default function Dashboard() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      {activeEvent && (
-        <div style={{ padding: '1.5rem', background: 'linear-gradient(to right, rgba(168, 85, 247, 0.2), transparent)', borderLeft: '4px solid #a855f7', borderRadius: '4px', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+      {activeEvents.filter(e => !e.theatre_name).map(evt => (
+        <div key={evt.id} style={{ padding: '1.5rem', background: 'linear-gradient(to right, rgba(168, 85, 247, 0.2), transparent)', borderLeft: '4px solid #a855f7', borderRadius: '4px', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
             <span style={{ color: '#a855f7', fontSize: '1.5rem' }}>⚠️</span>
-            <h3 style={{ margin: 0, color: '#a855f7', textTransform: 'uppercase', letterSpacing: '2px' }}>Sector-Wide Alert: {activeEvent.title}</h3>
+            <h3 style={{ margin: 0, color: '#a855f7', textTransform: 'uppercase', letterSpacing: '2px' }}>Sector-Wide Alert: {evt.title}</h3>
           </div>
           <p style={{ color: '#fff', fontSize: '1.1rem', margin: 0, lineHeight: 1.5 }}>
-            {activeEvent.description}
+            {evt.description}
           </p>
         </div>
-      )}
+      ))}
 
       <div className="card" style={{ marginBottom: '2rem', padding: '0', overflow: 'hidden', border: '1px solid #1a2e1a' }}>
         <div style={{ backgroundColor: '#0a140a', padding: '0.75rem 1.5rem', borderBottom: '1px solid #1a2e1a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -554,6 +554,18 @@ export default function Dashboard() {
 
             <div style={{ padding: '1.5rem' }}>
               <i style={{ color: '#aaa', fontSize: '1rem', display: 'block', marginBottom: '1.5rem' }}>"{selectedTheatre.narrative}"</i>
+              
+              {activeEvents.filter(e => e.theatre_name === selectedTheatre.name).map(evt => (
+                <div key={evt.id} style={{ marginBottom: '1.5rem', padding: '1rem', background: 'linear-gradient(to right, rgba(168, 85, 247, 0.2), transparent)', borderLeft: '4px solid #a855f7', borderRadius: '4px', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <span style={{ color: '#a855f7', fontSize: '1.25rem' }}>⚠️</span>
+                    <h4 style={{ margin: 0, color: '#a855f7', textTransform: 'uppercase', letterSpacing: '1px' }}>Local Effect: {evt.title}</h4>
+                  </div>
+                  <p style={{ color: '#fff', fontSize: '0.95rem', margin: 0, lineHeight: 1.5 }}>
+                    {evt.description}
+                  </p>
+                </div>
+              ))}
               
               {selectedTheatre.warlord ? (
                 <>

@@ -17,6 +17,7 @@ export interface GlobalEvent {
   title: string;
   description: string;
   is_active: boolean;
+  theatre_name?: string;
   created_at: string;
 }
 
@@ -70,6 +71,7 @@ export default function AdminDashboard() {
   const [globalEvents, setGlobalEvents] = useState<GlobalEvent[]>([]);
   const [newEventTitle, setNewEventTitle] = useState('');
   const [newEventDesc, setNewEventDesc] = useState('');
+  const [newEventTheatre, setNewEventTheatre] = useState('');
   const [eventMessage, setEventMessage] = useState('');
 
   // Matchup management
@@ -272,25 +274,28 @@ export default function AdminDashboard() {
     e.preventDefault();
     if (!newEventTitle || !newEventDesc) return;
     try {
-      const { error } = await supabase.from('global_events').insert({ title: newEventTitle, description: newEventDesc, is_active: false });
+      const { error } = await supabase.from('global_events').insert({ 
+        title: newEventTitle, 
+        description: newEventDesc, 
+        is_active: false,
+        theatre_name: newEventTheatre || null
+      });
       if (error) setEventMessage('Error: ' + error.message);
       else {
-        setEventMessage('Global Event queued.');
+        setEventMessage('Event queued successfully.');
         setNewEventTitle('');
         setNewEventDesc('');
+        setNewEventTheatre('');
         fetchGlobalEvents();
       }
     } catch (err) {
-      setEventMessage('Database schema update pending for Global Events.');
+      setEventMessage('Database schema update pending for Events.');
     }
   };
 
   const handleToggleEvent = async (eventId: string, currentActive: boolean) => {
     try {
-      if (!currentActive) {
-        // Deactivate all others
-        await supabase.from('global_events').update({ is_active: false }).neq('id', eventId);
-      }
+      // Allow multiple active events so each theatre can have one
       await supabase.from('global_events').update({ is_active: !currentActive }).eq('id', eventId);
       fetchGlobalEvents();
     } catch (err) {
@@ -902,7 +907,7 @@ export default function AdminDashboard() {
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h2>Global Events Override</h2>
         <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1rem' }}>
-          Trigger sector-wide narrative conditions. Only one event can be active at a time.
+          Trigger narrative conditions. You can now apply events globally or specifically to an individual Theatre of War.
         </p>
         
         {eventMessage && (
@@ -913,9 +918,18 @@ export default function AdminDashboard() {
 
         <form onSubmit={handleAddEvent} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
           <input type="text" placeholder="Event Title (e.g. Warp Storm)" value={newEventTitle}
-            onChange={e => setNewEventTitle(e.target.value)} required style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box' }} />
+            onChange={e => setNewEventTitle(e.target.value)} required style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box', minWidth: '150px' }} />
           <input type="text" placeholder="Narrative Description / Rules" value={newEventDesc}
-            onChange={e => setNewEventDesc(e.target.value)} required style={{ flex: 2, padding: '0.75rem', boxSizing: 'border-box' }} />
+            onChange={e => setNewEventDesc(e.target.value)} required style={{ flex: 2, padding: '0.75rem', boxSizing: 'border-box', minWidth: '200px' }} />
+          <select value={newEventTheatre} onChange={e => setNewEventTheatre(e.target.value)} style={{ padding: '0.75rem', boxSizing: 'border-box' }}>
+            <option value="">Global Event (All Theatres)</option>
+            <option value="Hive Primus">Hive Primus</option>
+            <option value="The Ash Wastes">The Ash Wastes</option>
+            <option value="Magma Forges">Magma Forges</option>
+            <option value="Orbital Tether">Orbital Tether</option>
+            <option value="The Sump">The Sump</option>
+            <option value="Rad-Zone Gamma">Rad-Zone Gamma</option>
+          </select>
           <button type="submit" className="btn primary">Stage Event</button>
         </form>
 
@@ -925,6 +939,7 @@ export default function AdminDashboard() {
             <li key={event.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '1rem', borderBottom: '1px solid var(--theme-border)', backgroundColor: event.is_active ? 'rgba(168, 85, 247, 0.1)' : 'transparent', borderLeft: event.is_active ? '4px solid #a855f7' : '4px solid transparent' }}>
               <div style={{ flex: 1 }}>
                 <strong style={{ color: event.is_active ? '#a855f7' : 'var(--theme-fg)', fontSize: '1.1rem' }}>{event.title}</strong>
+                {event.theatre_name && <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', padding: '2px 6px', backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-accent)', border: '1px solid var(--theme-accent)', borderRadius: '4px' }}>{event.theatre_name}</span>}
                 {event.is_active && <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', padding: '2px 6px', backgroundColor: '#a855f7', color: 'white', borderRadius: '4px', textTransform: 'uppercase' }}>Active</span>}
                 <div style={{ color: 'var(--theme-fg-muted)', marginTop: '0.25rem', fontSize: '0.9rem' }}>{event.description}</div>
               </div>

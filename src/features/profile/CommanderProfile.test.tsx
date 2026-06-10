@@ -5,6 +5,21 @@ import CommanderProfile from './CommanderProfile';
 import { supabase } from '../../supabaseClient';
 import type { Mock } from 'vitest';
 
+const createMockChain = (resolvedValue: any) => {
+  const chain: any = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    not: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
+    single: vi.fn().mockReturnThis(),
+    maybeSingle: vi.fn().mockReturnThis(),
+    or: vi.fn().mockReturnThis(),
+    then: (resolve: any) => Promise.resolve(resolvedValue).then(resolve)
+  };
+  return chain;
+};
+
 vi.mock('../../supabaseClient', () => ({
   supabase: {
     auth: { getUser: vi.fn() },
@@ -64,40 +79,18 @@ describe('CommanderProfile', () => {
     (supabase.from as Mock).mockImplementation((table: string) => {
       if (table === 'profiles') {
         return {
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              maybeSingle: vi.fn().mockResolvedValue({ data: mockProfile, error: null }),
-            }),
-          }),
-          upsert: vi.fn().mockReturnValue({
-            select: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: mockProfile, error: null }) }),
-          }),
-          update: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({ error: null }),
-          }),
+          ...createMockChain({ data: mockProfile, error: null }),
+          upsert: vi.fn().mockReturnValue(createMockChain({ data: mockProfile, error: null })),
+          update: vi.fn().mockReturnValue(createMockChain({ error: null })),
         };
       }
       if (table === 'army_units') {
-        return {
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              not: vi.fn().mockReturnValue({
-                order: vi.fn().mockReturnValue({
-                  limit: vi.fn().mockResolvedValue({ data: [], error: null })
-                })
-              })
-            })
-          })
-        };
+        return createMockChain({ data: [], error: null });
       }
       if (table === 'game_stores') {
-        return {
-          select: vi.fn().mockReturnValue({
-            order: vi.fn().mockResolvedValue({ data: [{ id: 'store-1', name: 'Battlefront Games' }], error: null }),
-          }),
-        };
+        return createMockChain({ data: [{ id: 'store-1', name: 'Battlefront Games' }], error: null });
       }
-      return {};
+      return createMockChain({ data: [], error: null });
     });
   });
 

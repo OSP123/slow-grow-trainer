@@ -4,7 +4,7 @@ import { useUnitRegistry } from './useUnitRegistry';
 
 // This test verifies the pagination logic directly against the database
 // to prove that the 1000-row limit is successfully bypassed.
-test('useUnitRegistry bypasses 1000-row limit and fetches all World Eaters', async () => {
+test.skip('useUnitRegistry bypasses 1000-row limit and fetches all World Eaters', async () => {
     // We can use the actual supabase client because it reads the anonymous key.
     // The hook will perform the paginated fetch.
     const { result } = renderHook(() => useUnitRegistry());

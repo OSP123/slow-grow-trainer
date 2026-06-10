@@ -660,3 +660,13 @@ Tasks:
 - Shifted Honour Ratings explanation out of the Briefing and directly into the Campaign Battles finalization flow.
 Follow-ups:
 - Remind user to run `setup_gallery.sql` in their Supabase dashboard so the new Gallery comments feature operates without database errors.
+
+Date: 2026-06-10
+Tasks:
+- Fixed the Custom Unit input text field logic in ArmyRoster.tsx.
+- Created fix_gallery_fkeys.sql to properly reference public.profiles for comments and emotes.
+- Added cost_tiers JSONB to unit_points via migration.
+- Updated Munitorum Field Manual parser to capture all unit sizes and costs instead of just base points.
+- Updated ArmyRoster to natively support selecting model sizes and automatically pulling correct points.
+Follow-ups:
+- User needs to run fix_gallery_fkeys.sql, update_unit_points.sql, and seed_units.sql.
