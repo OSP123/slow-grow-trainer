@@ -713,3 +713,11 @@ Tasks:
 Follow-ups:
   - Keep an eye on mobile performance feedback; tune CSS ember count if needed
   - Update algorithm for minitorum field manual with points based on wargear eventually
+
+
+Date: 2026-06-10
+Tasks:
+  - Enhanced gothic framing on .card to be more pronounced with heavy, multi-layered brutalist borders, arched top highlights, and 3D iron corner rivets
+Follow-ups:
+  - Keep an eye on mobile performance feedback; tune CSS ember count if needed
+  - Update algorithm for minitorum field manual with points based on wargear eventually
