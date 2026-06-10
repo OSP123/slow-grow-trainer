@@ -670,3 +670,10 @@ Tasks:
 - Updated ArmyRoster to natively support selecting model sizes and automatically pulling correct points.
 Follow-ups:
 - User needs to run fix_gallery_fkeys.sql, update_unit_points.sql, and seed_units.sql.
+
+Date: 2026-06-10
+Tasks:
+- Added maxHeight and overflow properties to Dashboard terminal communique to improve UI layout and keep the lore scrollable instead of stretching the globe.
+
+Follow-ups:
+- None
