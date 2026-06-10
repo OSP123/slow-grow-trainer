@@ -162,6 +162,28 @@ function App() {
     };
   }, [activeTheme]);
 
+  // Global click/touch sound effect for mobile and desktop immersion
+  useEffect(() => {
+    const handleGlobalInteraction = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement;
+      // Find if we clicked on a button, link, or nav-item
+      const isInteractive = target.closest('button') || target.closest('a') || target.closest('.nav-item');
+      if (isInteractive) {
+        import('./utils/audioEffects').then(({ playClickSound }) => {
+          playClickSound();
+        });
+      }
+    };
+
+    document.addEventListener('click', handleGlobalInteraction);
+    // On mobile, touchend can provide faster feedback sometimes, but click is usually sufficient. 
+    // We'll stick to click to avoid double-playing.
+
+    return () => {
+      document.removeEventListener('click', handleGlobalInteraction);
+    };
+  }, []);
+
   if (isRecovering) {
     return <UpdatePassword setIsRecovering={setIsRecovering} />;
   }

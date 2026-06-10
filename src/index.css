@@ -170,13 +170,20 @@ a:hover {
   font-family: var(--font-head);
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.1s ease; /* Faster transition for snappier mobile feel */
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  transform: scale(1);
 }
 
 .btn:hover {
   background-color: var(--theme-accent);
+  color: var(--theme-bg);
+}
+
+.btn:active {
+  transform: scale(0.96); /* Tactile visual press down */
+  background-color: var(--theme-accent-hover);
   color: var(--theme-bg);
 }
 
@@ -187,6 +194,11 @@ a:hover {
 
 .btn.primary:hover {
   background-color: var(--theme-accent-hover);
+}
+
+.btn.primary:active {
+  transform: scale(0.96);
+  background-color: var(--theme-border-accent);
 }
 
 input, select, textarea {
