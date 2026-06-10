@@ -149,13 +149,15 @@ export default function DatasheetBuilder({ profile, setProfile, datasheetIndex, 
               <input type="text" placeholder="Weapon Name" value={w.name} onChange={e => updateRangedWeapon(w.id, 'name', e.target.value)} style={{ flex: 1, padding: '0.5rem' }} />
               <button type="button" onClick={() => removeRangedWeapon(w.id)} style={{ background: 'none', border: 'none', color: 'red', cursor: 'pointer', fontSize: '1.2rem' }}>&times;</button>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <input type="text" placeholder="Range" value={w.range} onChange={e => updateRangedWeapon(w.id, 'range', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Range" />
-              <input type="text" placeholder="A" value={w.a} onChange={e => updateRangedWeapon(w.id, 'a', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Attacks" />
-              <input type="text" placeholder="BS" value={w.bs} onChange={e => updateRangedWeapon(w.id, 'bs', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Ballistic Skill" />
-              <input type="text" placeholder="S" value={w.s} onChange={e => updateRangedWeapon(w.id, 's', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Strength" />
-              <input type="text" placeholder="AP" value={w.ap} onChange={e => updateRangedWeapon(w.id, 'ap', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Armor Penetration" />
-              <input type="text" placeholder="D" value={w.d} onChange={e => updateRangedWeapon(w.id, 'd', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Damage" />
+            <div style={{ overflowX: 'auto', paddingBottom: '0.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem', minWidth: '350px' }}>
+                <input type="text" placeholder="Range" value={w.range} onChange={e => updateRangedWeapon(w.id, 'range', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Range" />
+                <input type="text" placeholder="A" value={w.a} onChange={e => updateRangedWeapon(w.id, 'a', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Attacks" />
+                <input type="text" placeholder="BS" value={w.bs} onChange={e => updateRangedWeapon(w.id, 'bs', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Ballistic Skill" />
+                <input type="text" placeholder="S" value={w.s} onChange={e => updateRangedWeapon(w.id, 's', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Strength" />
+                <input type="text" placeholder="AP" value={w.ap} onChange={e => updateRangedWeapon(w.id, 'ap', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Armor Penetration" />
+                <input type="text" placeholder="D" value={w.d} onChange={e => updateRangedWeapon(w.id, 'd', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Damage" />
+              </div>
             </div>
             <input type="text" placeholder="Keywords (e.g. Assault, Heavy)" value={w.keywords} onChange={e => updateRangedWeapon(w.id, 'keywords', e.target.value)} style={{ width: '100%', padding: '0.5rem', boxSizing: 'border-box' }} />
           </div>
@@ -173,13 +175,15 @@ export default function DatasheetBuilder({ profile, setProfile, datasheetIndex, 
               <input type="text" placeholder="Weapon Name" value={w.name} onChange={e => updateMeleeWeapon(w.id, 'name', e.target.value)} style={{ flex: 1, padding: '0.5rem' }} />
               <button type="button" onClick={() => removeMeleeWeapon(w.id)} style={{ background: 'none', border: 'none', color: 'red', cursor: 'pointer', fontSize: '1.2rem' }}>&times;</button>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <input type="text" placeholder="Range" value={w.range} onChange={e => updateMeleeWeapon(w.id, 'range', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Range" disabled />
-              <input type="text" placeholder="A" value={w.a} onChange={e => updateMeleeWeapon(w.id, 'a', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Attacks" />
-              <input type="text" placeholder="WS" value={w.ws} onChange={e => updateMeleeWeapon(w.id, 'ws', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Weapon Skill" />
-              <input type="text" placeholder="S" value={w.s} onChange={e => updateMeleeWeapon(w.id, 's', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Strength" />
-              <input type="text" placeholder="AP" value={w.ap} onChange={e => updateMeleeWeapon(w.id, 'ap', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Armor Penetration" />
-              <input type="text" placeholder="D" value={w.d} onChange={e => updateMeleeWeapon(w.id, 'd', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Damage" />
+            <div style={{ overflowX: 'auto', paddingBottom: '0.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem', minWidth: '350px' }}>
+                <input type="text" placeholder="Range" value={w.range} onChange={e => updateMeleeWeapon(w.id, 'range', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Range" disabled />
+                <input type="text" placeholder="A" value={w.a} onChange={e => updateMeleeWeapon(w.id, 'a', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Attacks" />
+                <input type="text" placeholder="WS" value={w.ws} onChange={e => updateMeleeWeapon(w.id, 'ws', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Weapon Skill" />
+                <input type="text" placeholder="S" value={w.s} onChange={e => updateMeleeWeapon(w.id, 's', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Strength" />
+                <input type="text" placeholder="AP" value={w.ap} onChange={e => updateMeleeWeapon(w.id, 'ap', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Armor Penetration" />
+                <input type="text" placeholder="D" value={w.d} onChange={e => updateMeleeWeapon(w.id, 'd', e.target.value)} style={{ padding: '0.5rem', textAlign: 'center' }} title="Damage" />
+              </div>
             </div>
             <input type="text" placeholder="Keywords (e.g. Devastating Wounds)" value={w.keywords} onChange={e => updateMeleeWeapon(w.id, 'keywords', e.target.value)} style={{ width: '100%', padding: '0.5rem', boxSizing: 'border-box' }} />
           </div>

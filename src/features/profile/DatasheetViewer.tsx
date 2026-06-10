@@ -36,35 +36,37 @@ export default function DatasheetViewer({ datasheet }: { datasheet: CrucibleData
       {rangedWeapons && rangedWeapons.length > 0 && (
         <div style={{ padding: '0 1rem 1rem 1rem' }}>
           <h5 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-accent)', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.25rem' }}>Ranged Weapons</h5>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={thStyle}>Weapon</th>
-                <th style={{...thStyle, textAlign: 'center'}}>Range</th>
-                <th style={{...thStyle, textAlign: 'center'}}>A</th>
-                <th style={{...thStyle, textAlign: 'center'}}>BS</th>
-                <th style={{...thStyle, textAlign: 'center'}}>S</th>
-                <th style={{...thStyle, textAlign: 'center'}}>AP</th>
-                <th style={{...thStyle, textAlign: 'center'}}>D</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rangedWeapons.map(w => (
-                <tr key={w.id}>
-                  <td style={tdStyle}>
-                    <div style={{ fontWeight: 'bold' }}>{w.name || 'Unnamed'}</div>
-                    {w.keywords && <div style={{ fontSize: '0.75rem', color: 'var(--theme-fg-muted)', fontStyle: 'italic' }}>[{w.keywords}]</div>}
-                  </td>
-                  <td style={centerTd}>{w.range || '-'}</td>
-                  <td style={centerTd}>{w.a || '-'}</td>
-                  <td style={centerTd}>{w.bs || '-'}</td>
-                  <td style={centerTd}>{w.s || '-'}</td>
-                  <td style={centerTd}>{w.ap || '-'}</td>
-                  <td style={centerTd}>{w.d || '-'}</td>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '400px' }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>Weapon</th>
+                  <th style={{...thStyle, textAlign: 'center'}}>Range</th>
+                  <th style={{...thStyle, textAlign: 'center'}}>A</th>
+                  <th style={{...thStyle, textAlign: 'center'}}>BS</th>
+                  <th style={{...thStyle, textAlign: 'center'}}>S</th>
+                  <th style={{...thStyle, textAlign: 'center'}}>AP</th>
+                  <th style={{...thStyle, textAlign: 'center'}}>D</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {rangedWeapons.map(w => (
+                  <tr key={w.id}>
+                    <td style={tdStyle}>
+                      <div style={{ fontWeight: 'bold' }}>{w.name || 'Unnamed'}</div>
+                      {w.keywords && <div style={{ fontSize: '0.75rem', color: 'var(--theme-fg-muted)', fontStyle: 'italic' }}>[{w.keywords}]</div>}
+                    </td>
+                    <td style={centerTd}>{w.range || '-'}</td>
+                    <td style={centerTd}>{w.a || '-'}</td>
+                    <td style={centerTd}>{w.bs || '-'}</td>
+                    <td style={centerTd}>{w.s || '-'}</td>
+                    <td style={centerTd}>{w.ap || '-'}</td>
+                    <td style={centerTd}>{w.d || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -72,35 +74,37 @@ export default function DatasheetViewer({ datasheet }: { datasheet: CrucibleData
       {meleeWeapons && meleeWeapons.length > 0 && (
         <div style={{ padding: '0 1rem 1rem 1rem' }}>
           <h5 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-accent)', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.25rem' }}>Melee Weapons</h5>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={thStyle}>Weapon</th>
-                <th style={{...thStyle, textAlign: 'center'}}>Range</th>
-                <th style={{...thStyle, textAlign: 'center'}}>A</th>
-                <th style={{...thStyle, textAlign: 'center'}}>WS</th>
-                <th style={{...thStyle, textAlign: 'center'}}>S</th>
-                <th style={{...thStyle, textAlign: 'center'}}>AP</th>
-                <th style={{...thStyle, textAlign: 'center'}}>D</th>
-              </tr>
-            </thead>
-            <tbody>
-              {meleeWeapons.map(w => (
-                <tr key={w.id}>
-                  <td style={tdStyle}>
-                    <div style={{ fontWeight: 'bold' }}>{w.name || 'Unnamed'}</div>
-                    {w.keywords && <div style={{ fontSize: '0.75rem', color: 'var(--theme-fg-muted)', fontStyle: 'italic' }}>[{w.keywords}]</div>}
-                  </td>
-                  <td style={centerTd}>Melee</td>
-                  <td style={centerTd}>{w.a || '-'}</td>
-                  <td style={centerTd}>{w.ws || '-'}</td>
-                  <td style={centerTd}>{w.s || '-'}</td>
-                  <td style={centerTd}>{w.ap || '-'}</td>
-                  <td style={centerTd}>{w.d || '-'}</td>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '400px' }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>Weapon</th>
+                  <th style={{...thStyle, textAlign: 'center'}}>Range</th>
+                  <th style={{...thStyle, textAlign: 'center'}}>A</th>
+                  <th style={{...thStyle, textAlign: 'center'}}>WS</th>
+                  <th style={{...thStyle, textAlign: 'center'}}>S</th>
+                  <th style={{...thStyle, textAlign: 'center'}}>AP</th>
+                  <th style={{...thStyle, textAlign: 'center'}}>D</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {meleeWeapons.map(w => (
+                  <tr key={w.id}>
+                    <td style={tdStyle}>
+                      <div style={{ fontWeight: 'bold' }}>{w.name || 'Unnamed'}</div>
+                      {w.keywords && <div style={{ fontSize: '0.75rem', color: 'var(--theme-fg-muted)', fontStyle: 'italic' }}>[{w.keywords}]</div>}
+                    </td>
+                    <td style={centerTd}>Melee</td>
+                    <td style={centerTd}>{w.a || '-'}</td>
+                    <td style={centerTd}>{w.ws || '-'}</td>
+                    <td style={centerTd}>{w.s || '-'}</td>
+                    <td style={centerTd}>{w.ap || '-'}</td>
+                    <td style={centerTd}>{w.d || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
