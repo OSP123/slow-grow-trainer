@@ -6,9 +6,17 @@
 
 let audioCtx: AudioContext | null = null;
 
-function getAudioContext(): AudioContext {
+function getAudioContext(): AudioContext | null {
+  if (typeof window === 'undefined') return null;
   if (!audioCtx) {
-    audioCtx = new AudioContext();
+    try {
+      const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtxClass) {
+        audioCtx = new AudioCtxClass();
+      }
+    } catch {
+      return null;
+    }
   }
   return audioCtx;
 }
@@ -16,8 +24,8 @@ function getAudioContext(): AudioContext {
 // Ensure the AudioContext is resumed upon the first user interaction
 function initAudio() {
   const ctx = getAudioContext();
-  if (ctx.state === 'suspended') {
-    ctx.resume();
+  if (ctx && ctx.state === 'suspended') {
+    ctx.resume().catch(() => {});
   }
   document.removeEventListener('click', initAudio);
   document.removeEventListener('keydown', initAudio);
@@ -52,6 +60,7 @@ export function playClickSound(): void {
   if (!isSoundEnabled()) return;
   try {
     const ctx = getAudioContext();
+    if (!ctx) return;
     const now = ctx.currentTime;
 
     const osc = ctx.createOscillator();
@@ -82,6 +91,8 @@ export function playHoverSound(): void {
   if (!isSoundEnabled()) return;
   try {
     const ctx = getAudioContext();
+    // Do not attempt to play hover sounds if context is not fully active
+    if (!ctx || ctx.state !== 'running') return;
     const now = ctx.currentTime;
 
     const osc = ctx.createOscillator();
@@ -111,6 +122,7 @@ export function playSuccessSound(): void {
   if (!isSoundEnabled()) return;
   try {
     const ctx = getAudioContext();
+    if (!ctx) return;
     const now = ctx.currentTime;
 
     // First tone: 400Hz
@@ -150,6 +162,7 @@ export function playErrorSound(): void {
   if (!isSoundEnabled()) return;
   try {
     const ctx = getAudioContext();
+    if (!ctx) return;
     const now = ctx.currentTime;
 
     const osc = ctx.createOscillator();
