@@ -114,27 +114,17 @@ a:hover {
 
 /* Global utility classes */
 .card {
-  background-color: var(--theme-bg-secondary);
-  /* True Gothic SVG Border */
-  border: 24px solid transparent;
-  border-image: url('/gothic-border.svg') 30 stretch;
-  box-shadow: 
-    0 15px 30px rgba(0, 0, 0, 0.9),
-    inset 0 0 50px rgba(0, 0, 0, 0.5); /* Inner gothic shadow */
+  /* Use the generated imperial gothic frame image as the background and border */
+  border: 40px solid transparent;
+  border-image: url('/imperial-frame.png') 180 fill stretch;
   padding: 1.5rem;
   transition: all 0.3s ease;
   position: relative;
   border-radius: 2px;
-  background-image: 
-    /* Subtle arched gothic highlight at top */
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,255,255,0.03) 0%, transparent 100%);
 }
 
 .card:hover {
-  box-shadow: 
-    0 15px 40px rgba(0, 0, 0, 0.95),
-    inset 0 0 20px rgba(0, 0, 0, 0.6);
-  filter: drop-shadow(0 0 8px var(--theme-accent));
+  filter: drop-shadow(0 0 12px var(--theme-accent));
 }
 
 .terminal-communique {
