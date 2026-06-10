@@ -16,6 +16,7 @@ import Briefing from './features/briefing/Briefing';
 import FAQ from './features/faq/FAQ';
 import Gallery from './features/gallery/Gallery';
 import TranslatedHeader from './components/TranslatedHeader';
+import { playHoverSound } from './utils/audioEffects';
 import './App.css';
 
 const FACTIONS = [
@@ -199,6 +200,7 @@ function App() {
           <div 
             className={`nav-item ${activeView === 'dashboard' ? 'active' : ''}`}
             onClick={() => navigateTo('/dashboard')}
+            onMouseEnter={() => playHoverSound()}
           >
             <Map size={20} />
             <span>War Effort Map</span>
@@ -206,6 +208,7 @@ function App() {
           <div 
             className={`nav-item ${activeView === 'briefing' ? 'active' : ''}`}
             onClick={() => navigateTo('/briefing')}
+            onMouseEnter={() => playHoverSound()}
           >
             <BookOpen size={20} />
             <span>Field Manual</span>
@@ -213,6 +216,7 @@ function App() {
           <div 
             className={`nav-item ${activeView === 'faq' ? 'active' : ''}`}
             onClick={() => navigateTo('/faq')}
+            onMouseEnter={() => playHoverSound()}
           >
             <BookOpen size={20} />
             <span>FAQ</span>
@@ -220,6 +224,7 @@ function App() {
           <div 
             className={`nav-item ${activeView === 'logistics' ? 'active' : ''}`}
             onClick={() => navigateTo('/logistics')}
+            onMouseEnter={() => playHoverSound()}
           >
             <Shield size={20} />
             <span>Logistics & Clearance</span>
@@ -227,6 +232,7 @@ function App() {
           <div 
             className={`nav-item ${activeView === 'assessments' ? 'active' : ''}`}
             onClick={() => navigateTo('/assessments')}
+            onMouseEnter={() => playHoverSound()}
           >
             <Activity size={20} />
             <span>End-of-Campaign Assessment</span>
@@ -234,6 +240,7 @@ function App() {
           <div 
             className={`nav-item ${activeView === 'battles' ? 'active' : ''}`}
             onClick={() => navigateTo('/battles')}
+            onMouseEnter={() => playHoverSound()}
           >
             <Shield size={20} />
             <span>Matchups & Lore</span>
@@ -241,6 +248,7 @@ function App() {
           <div 
             className={`nav-item ${activeView === 'gallery' ? 'active' : ''}`}
             onClick={() => navigateTo('/gallery')}
+            onMouseEnter={() => playHoverSound()}
           >
             <Camera size={20} />
             <span>Pict-Captures Gallery</span>
@@ -253,17 +261,18 @@ function App() {
               <div 
                 className={`nav-item ${activeView === 'profile' ? 'active' : ''}`}
                 onClick={() => navigateTo('/profile')}
+                onMouseEnter={() => playHoverSound()}
               >
                 <UserCircle size={20} />
                 <span>Commander Profile</span>
               </div>
-              <div className="nav-item" onClick={() => supabase.auth.signOut()}>
+              <div className="nav-item" onClick={() => supabase.auth.signOut()} onMouseEnter={() => playHoverSound()}>
                 <LogOut size={20} />
                 <span>Disengage</span>
               </div>
             </>
           ) : (
-            <div className="nav-item" onClick={() => navigateTo('/')}>
+            <div className="nav-item" onClick={() => navigateTo('/')} onMouseEnter={() => playHoverSound()}>
               <UserCircle size={20} />
               <span>Login / Enlist</span>
             </div>
@@ -272,7 +281,7 @@ function App() {
       </nav>
 
       {/* Main Content Area */}
-      <main className="main-content">
+      <main className="main-content scanline-overlay">
         <header className="faction-header">
           <div>
             <TranslatedHeader 

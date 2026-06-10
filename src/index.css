@@ -114,15 +114,23 @@ a:hover {
 /* Global utility classes */
 .card {
   background-color: var(--theme-bg-secondary);
-  border: 1px solid var(--theme-border);
-  border-radius: var(--panel-radius);
+  border: none;
   padding: 1.5rem;
-  box-shadow: var(--theme-shadow);
   transition: all 0.3s ease;
+  clip-path: polygon(
+    12px 0,
+    100% 0,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    0 100%,
+    0 12px
+  );
+  box-shadow: inset 0 0 0 1px var(--theme-border), 0 0 15px rgba(0, 0, 0, 0.3);
+  position: relative;
 }
 
 .card:hover {
-  border-color: var(--theme-border-accent);
+  box-shadow: inset 0 0 0 1px var(--theme-border-accent), 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
 .terminal-communique {
