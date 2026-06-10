@@ -721,3 +721,20 @@ Tasks:
 Follow-ups:
   - Keep an eye on mobile performance feedback; tune CSS ember count if needed
   - Update algorithm for minitorum field manual with points based on wargear eventually
+
+
+Date: 2026-06-10
+Tasks:
+  - Replaced CSS borders with an authentic scalable vector graphic (gothic-border.svg) for .card borders
+  - Frame now includes inner brass trim, structural corner blocks with diagonal support beams, and inward-facing gothic arches along all edges.
+Follow-ups:
+  - Keep an eye on mobile performance feedback; tune CSS ember count if needed
+  - Update algorithm for minitorum field manual with points based on wargear eventually
+
+
+Date: 2026-06-10
+Tasks:
+  - Replaced vector borders with the explicit generated Imperial Gothic Frame PNG (gothic_ui_frame_1781133732185.png) mapped to .card via border-image slice and stretch to serve as both the dark background and the gothic outer structural framing as requested.
+Follow-ups:
+  - Keep an eye on mobile performance feedback; tune CSS ember count if needed
+  - Update algorithm for minitorum field manual with points based on wargear eventually
