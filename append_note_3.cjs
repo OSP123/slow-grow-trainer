@@ -1,0 +1,3 @@
+const fs = require('fs');
+const content = `\nDate: 2026-06-05\nTasks:\n- Verified that all multi-line unit names ("in [Armour]", "with [Wargear]") are flawlessly merged in the database.\n- Discovered and fixed a minor anomaly where a lengthy instructional paragraph from the Agents of the Imperium section was merged into "Sisters of Battle Immolator" due to the new multi-line concatenation rules. Added a word-count filter to safely ignore non-unit paragraphs.\n- Regenerated seed_units.sql and warhammer40k.ts with 1,340 pristine units.\nFollow-ups:\n- None\n`;
+fs.appendFileSync('notes.md', content);

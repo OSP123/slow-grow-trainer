@@ -100,6 +100,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   margin-top: 0;
   color: var(--theme-accent);
+  animation: retroFlicker 12s linear infinite, plasmaPulseText 3s ease-in-out infinite alternate;
 }
 
 a {
@@ -114,7 +115,7 @@ a:hover {
 /* Global utility classes */
 .card {
   background-color: var(--theme-bg-secondary);
-  border: none;
+  border: 1px solid var(--theme-border);
   padding: 1.5rem;
   transition: all 0.3s ease;
   clip-path: polygon(
@@ -125,12 +126,33 @@ a:hover {
     0 100%,
     0 12px
   );
-  box-shadow: inset 0 0 0 1px var(--theme-border), 0 0 15px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 0 2px var(--theme-border), inset 0 0 20px rgba(0, 0, 0, 0.6), 0 5px 15px rgba(0, 0, 0, 0.4);
   position: relative;
 }
 
+.card::before {
+  content: '';
+  position: absolute;
+  top: 6px; left: 6px; right: 6px; bottom: 6px;
+  border: 1px solid rgba(255,255,255,0.03);
+  pointer-events: none;
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+  background: 
+    radial-gradient(circle 3px at 20px 20px, #222 100%, transparent 100%),
+    radial-gradient(circle 3px at calc(100% - 20px) 20px, #222 100%, transparent 100%),
+    radial-gradient(circle 3px at 20px calc(100% - 20px), #222 100%, transparent 100%),
+    radial-gradient(circle 3px at calc(100% - 20px) calc(100% - 20px), #222 100%, transparent 100%);
+  z-index: 2;
+}
+
 .card:hover {
-  box-shadow: inset 0 0 0 1px var(--theme-border-accent), 0 0 20px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 0 0 2px var(--theme-border-accent), inset 0 0 20px rgba(0, 0, 0, 0.6), 0 5px 25px rgba(0, 0, 0, 0.5);
 }
 
 .terminal-communique {
@@ -190,6 +212,7 @@ a:hover {
 .btn.primary {
   background-color: var(--theme-accent);
   color: var(--theme-bg);
+  animation: plasmaPulse 3s ease-in-out infinite alternate;
 }
 
 .btn.primary:hover {
@@ -323,4 +346,37 @@ img, video, svg, table {
   margin-bottom: 1rem;
   letter-spacing: 1px;
   text-transform: uppercase;
+}
+
+/* ── Immersive Atmosphere Classes ── */
+
+.plasma-glow {
+  animation: plasmaPulse 3s ease-in-out infinite alternate;
+}
+
+.plasma-glow-text {
+  animation: plasmaPulseText 3s ease-in-out infinite alternate;
+}
+
+@keyframes plasmaPulse {
+  0% { box-shadow: 0 0 5px var(--theme-accent); }
+  100% { box-shadow: 0 0 15px var(--theme-accent), 0 0 5px inset var(--theme-accent); }
+}
+
+@keyframes plasmaPulseText {
+  0% { text-shadow: 0 0 2px var(--theme-accent); }
+  100% { text-shadow: 0 0 10px var(--theme-accent), 0 0 2px #fff; }
+}
+
+.retro-flicker {
+  animation: retroFlicker 12s linear infinite;
+}
+
+@keyframes retroFlicker {
+  0%, 94%, 100% { opacity: 1; text-shadow: none; }
+  95% { opacity: 0.7; text-shadow: 0 0 4px #fff; }
+  96% { opacity: 0.3; text-shadow: none; }
+  97% { opacity: 0.9; text-shadow: 0 0 8px #fff; }
+  98% { opacity: 0.5; text-shadow: none; }
+  99% { opacity: 0.8; text-shadow: 0 0 2px #fff; }
 }

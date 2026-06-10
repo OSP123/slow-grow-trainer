@@ -1,0 +1,65 @@
+.atmosphere-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1; /* Below content but above background */
+  overflow: hidden;
+}
+
+/* Base ember styles */
+.ember {
+  position: absolute;
+  background-color: #ff5722;
+  border-radius: 50%;
+  box-shadow: 0 0 8px 2px rgba(255, 87, 34, 0.8), 0 0 15px rgba(255, 152, 0, 0.5);
+  opacity: 0;
+  animation: driftAndFade linear infinite;
+}
+
+/* Subtle background fog via animated repeating radial gradients */
+.fog-layer {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(20,20,20,0.1) 0%, rgba(0,0,0,0) 60%);
+  background-size: 400px 400px;
+  background-position: 0 0, 200px 200px;
+  opacity: 0.4;
+  animation: fogDrift 60s linear infinite;
+  mix-blend-mode: screen;
+}
+
+.fog-layer.layer-2 {
+  background-size: 600px 600px;
+  background-position: 100px 100px, 300px 300px;
+  opacity: 0.2;
+  animation: fogDrift 90s linear infinite reverse;
+}
+
+@keyframes fogDrift {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(100px, 50px) rotate(1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes driftAndFade {
+  0% {
+    transform: translateY(100vh) scale(0.5);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-100px) scale(1.5) translateX(calc(100px * var(--drift-dir, 1)));
+    opacity: 0;
+  }
+}

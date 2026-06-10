@@ -1,0 +1,3 @@
+const fs = require('fs');
+const content = `\nDate: 2026-06-05\nTasks:\n- Fixed a major faction header parsing bug where fractions with headers split across two lines (e.g., "CODEX SUPPLEMENT:" on line 1, "BLACK TEMPLARS" on line 2) were entirely skipped. This successfully recovered the missing Black Templars roster (17 units), and the standard rosters for Blood Angels (+15 units) and Dark Angels (+16 units), bringing the new true unit total to 1,388.\n- Updated warhammer40k.ts and seed_units.sql to reflect all 31 factions perfectly.\nFollow-ups:\n- None\n`;
+fs.appendFileSync('notes.md', content);

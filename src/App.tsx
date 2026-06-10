@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js';
 
 import { Route, Routes, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Shield, Map, Activity, UserCircle, LogOut, BookOpen, Menu, X, Camera } from 'lucide-react';
+import Atmosphere from './components/Atmosphere';
 import { supabase } from './supabaseClient';
 import Login from './features/auth/Login';
 import UpdatePassword from './features/auth/UpdatePassword';
@@ -201,6 +202,7 @@ function App() {
 
   return (
     <div className="app-container">
+      <Atmosphere />
       {/* Mobile hamburger button */}
       <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
         {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
