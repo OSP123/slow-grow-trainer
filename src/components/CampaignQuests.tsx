@@ -10,7 +10,7 @@ export default function CampaignQuests({ profile, isOwner }: { profile: ProfileD
     if (!profile.id) return;
     
     // Fetch units for points
-    supabase.from('army_units').select('points').eq('user_id', profile.id).then(({ data }) => {
+    supabase.from('army_units').select('points').eq('profile_id', profile.id).then(({ data }) => {
       if (data) {
         setTotalPoints(data.reduce((sum: number, u: any) => sum + (u.points || 0), 0));
       }
