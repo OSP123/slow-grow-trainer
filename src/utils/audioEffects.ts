@@ -90,9 +90,11 @@ export function playClickSound(): void {
 export function playHoverSound(): void {
   if (!isSoundEnabled()) return;
   try {
-    const ctx = getAudioContext();
-    // Do not attempt to play hover sounds if context is not fully active
-    if (!ctx || ctx.state !== 'running') return;
+    // Only play if the audioCtx is already initialized and running.
+    // We check the module-level variable directly to avoid instantiating via getAudioContext()
+    if (!audioCtx || audioCtx.state !== 'running') return;
+    
+    const ctx = audioCtx;
     const now = ctx.currentTime;
 
     const osc = ctx.createOscillator();
