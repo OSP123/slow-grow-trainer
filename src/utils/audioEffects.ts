@@ -13,6 +13,21 @@ function getAudioContext(): AudioContext {
   return audioCtx;
 }
 
+// Ensure the AudioContext is resumed upon the first user interaction
+function initAudio() {
+  const ctx = getAudioContext();
+  if (ctx.state === 'suspended') {
+    ctx.resume();
+  }
+  document.removeEventListener('click', initAudio);
+  document.removeEventListener('keydown', initAudio);
+}
+
+if (typeof window !== 'undefined') {
+  document.addEventListener('click', initAudio);
+  document.addEventListener('keydown', initAudio);
+}
+
 const SOUND_STORAGE_KEY = 'soundEnabled';
 
 export function setSoundEnabled(enabled: boolean): void {

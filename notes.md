@@ -677,3 +677,17 @@ Tasks:
 
 Follow-ups:
 - None
+
+Date: 2026-06-10 (immersion update)
+Tasks:
+- Added dataslate aesthetics to Login/Signup cards (chamfered clip-path corners, subtle scanline overlay, caution-stripe warning banner on signup).
+- Replaced all loading messages across 7 components with thematic 40k text (Interrogating Machine Spirit, Awaiting Astropathic Relay, Calibrating Auspex Arrays, Communing with the Omnissiah, Synchronizing Noospheric Link).
+- Created src/utils/audioEffects.ts with Web Audio API synthesized sounds (mechanical click, hover tick, success beep, error buzz) — no external audio files.
+- Wired audio effects into Login.tsx with a toggleable sound button (speaker icon, bottom-right).
+- Made Dashboard lore terminal scrollable (maxHeight 250px).
+- Fixed parse_munitorum_v4.cjs multi-line unit name concatenation regression (e.g. Wolf Guard in Terminator Armour).
+- All 52 tests passing, build verified, pushed to main.
+
+Follow-ups:
+- Run updated seed_units.sql in Supabase dashboard.
+- Consider wiring audio effects into more UI interactions (sidebar nav, battle submissions) post-launch.
