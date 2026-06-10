@@ -701,3 +701,15 @@ Tasks:
   - Fixed UI horizontal overflow bug on mobile devices for the weapons tables in both custom Commander Profile Viewer and Builder
 Follow-ups:
   - Update algorithm for minitorum field manual with points based on wargear eventually
+
+
+Date: 2026-06-10
+Tasks:
+  - Implemented immersive grimdark atmospheric visual updates
+  - Added volumetric fog and floating CSS embers via Atmosphere React component
+  - Updated .card global class to include heavy gothic framing and corner rivets using radial gradients
+  - Applied intermittent retro flicker to all header elements globally
+  - Added plasma glow pulsing to primary action buttons
+Follow-ups:
+  - Keep an eye on mobile performance feedback; tune CSS ember count if needed
+  - Update algorithm for minitorum field manual with points based on wargear eventually
