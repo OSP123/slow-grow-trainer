@@ -98,8 +98,8 @@ export default function Dashboard() {
       try {
         const { data: matchups, error } = await supabase
           .from('matchups')
-          .select('theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, army_faction, avatar_url, army_lore), p2_profile:profiles!p2_id(commander_name, army_faction, avatar_url, army_lore)')
-          .in('game_result', ['P1_WIN', 'P2_WIN']);
+          .select('theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, army_faction, avatar_url, army_lore, campaign_status), p2_profile:profiles!p2_id(commander_name, army_faction, avatar_url, army_lore, campaign_status)')
+          .in('game_result', ['P1_WIN', 'P2_WIN', 'p1_win', 'p2_win']);
 
         if (error) {
           console.error("Error fetching matchups:", error);
@@ -108,9 +108,22 @@ export default function Dashboard() {
         }
 
         if (matchups) {
+          const validMatchups = matchups.filter((m: any) => {
+            const p1Profile = Array.isArray(m.p1_profile) ? m.p1_profile[0] : m.p1_profile;
+            const p2Profile = Array.isArray(m.p2_profile) ? m.p2_profile[0] : m.p2_profile;
+            
+            const p1Status = (p1Profile?.campaign_status || 'active').toLowerCase();
+            const p2Status = (p2Profile?.campaign_status || 'active').toLowerCase();
+            
+            if (p1Status === 'removed' || p2Status === 'removed' || p1Status === 'paused' || p2Status === 'paused') {
+              return false;
+            }
+            return true;
+          });
+
           const effortCount: { [theatre: string]: { Imperium: number; Chaos: number; Xenos: number } } = {};
           
-          matchups.forEach((m: any) => {
+          validMatchups.forEach((m: any) => {
             const theatre = m.theatre_name || 'Unknown Theatre';
             if (!effortCount[theatre]) {
               effortCount[theatre] = { Imperium: 0, Chaos: 0, Xenos: 0 };
@@ -140,8 +153,8 @@ export default function Dashboard() {
             }
             
             const factionWins: { [faction: string]: number } = {};
-            matchups.filter((m: any) => m.theatre_name === theatre).forEach((m: any) => {
-              const winnerProfile = m.game_result === 'P1_WIN' ? m.p1_profile : m.p2_profile;
+            validMatchups.filter((m: any) => m.theatre_name === theatre).forEach((m: any) => {
+              const winnerProfile = (m.game_result === 'P1_WIN' || m.game_result === 'p1_win') ? m.p1_profile : m.p2_profile;
               if (winnerProfile?.army_faction) {
                 factionWins[winnerProfile.army_faction] = (factionWins[winnerProfile.army_faction] || 0) + 1;
               }
@@ -166,9 +179,10 @@ export default function Dashboard() {
           setTheatreEffort(summary);
           
           const commandersWins: { [id: string]: { wins: number, profile: any } } = {};
-          matchups.forEach((m: any) => {
-            const winnerId = m.game_result === 'P1_WIN' ? m.p1_id : m.p2_id;
-            const winnerProfile = m.game_result === 'P1_WIN' ? m.p1_profile : m.p2_profile;
+          validMatchups.forEach((m: any) => {
+            const isP1Win = m.game_result === 'P1_WIN' || m.game_result === 'p1_win';
+            const winnerId = isP1Win ? m.p1_id : m.p2_id;
+            const winnerProfile = isP1Win ? m.p1_profile : m.p2_profile;
             
             if (winnerId && winnerProfile) {
               if (!commandersWins[winnerId]) commandersWins[winnerId] = { wins: 0, profile: winnerProfile };
@@ -183,14 +197,17 @@ export default function Dashboard() {
             
           setTopCommanders(sortedCommanders);
           
-          const narratives = matchups
+          const narratives = validMatchups
             .filter((m: any) => m.p1_lore || m.p2_lore)
             .slice(0, 5)
-            .map((m: any) => ({
-              theatre: m.theatre_name,
-              winner: m.game_result === 'P1_WIN' ? m.p1_profile?.commander_name : m.p2_profile?.commander_name,
-              lore: m.game_result === 'P1_WIN' ? m.p1_lore : m.p2_lore
-            }));
+            .map((m: any) => {
+              const isP1Win = m.game_result === 'P1_WIN' || m.game_result === 'p1_win';
+              return {
+                theatre: m.theatre_name,
+                winner: isP1Win ? m.p1_profile?.commander_name : m.p2_profile?.commander_name,
+                lore: isP1Win ? m.p1_lore : m.p2_lore
+              };
+            });
             
           setRecentNarratives(narratives);
 
@@ -205,10 +222,10 @@ export default function Dashboard() {
             });
 
             // 2. Find all matches fought in this parent theatre
-            const matchesInTheatre = matchups.filter(m => m.theatre_name && m.theatre_name.startsWith(baseTheatre.name));
+            const matchesInTheatre = validMatchups.filter((m: any) => m.theatre_name && m.theatre_name.startsWith(baseTheatre.name));
 
             // 3. Add victorious sub-sectors
-            matchesInTheatre.forEach((match) => {
+            matchesInTheatre.forEach((match: any) => {
               const isP1Win = match.game_result === 'p1_win';
               const isP2Win = match.game_result === 'p2_win';
               if (match.game_result === 'draw' || (!isP1Win && !isP2Win)) return;
@@ -266,7 +283,10 @@ export default function Dashboard() {
             .order('commander_name', { ascending: true });
             
           if (cmdrs) {
-            setCommanders(cmdrs.filter(c => c.campaign_status !== 'Paused' && c.campaign_status !== 'Removed'));
+            setCommanders(cmdrs.filter(c => {
+              const status = (c.campaign_status || 'active').toLowerCase();
+              return status !== 'paused' && status !== 'removed';
+            }));
           }
         } catch (err) {}
       } finally {

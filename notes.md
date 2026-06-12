@@ -738,3 +738,19 @@ Tasks:
 Follow-ups:
   - Keep an eye on mobile performance feedback; tune CSS ember count if needed
   - Update algorithm for minitorum field manual with points based on wargear eventually
+
+
+Date: 2026-06-10
+Tasks:
+  - Reverted the gothic border image implementation entirely back to the original simple, clean dataslate CSS clipping to ensure readability and stop background stretching.
+Follow-ups:
+  - Keep an eye on mobile performance feedback; tune CSS ember count if needed
+  - Update algorithm for minitorum field manual with points based on wargear eventually
+
+Date: 2026-06-12
+Tasks:
+  - Fixed a bug where commanders removed via the admin panel still appeared in the Dashboard (War Effort Area). Filtered removed/paused profiles securely using case-insensitive status checks.
+  - Filtered removed/paused commander profiles from globe mappings, narratives, and match wins.
+
+Follow-ups:
+  - None

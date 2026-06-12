@@ -3,13 +3,10 @@ const date = new Date().toISOString().split('T')[0];
 const entry = `
 Date: ${date}
 Tasks:
-  - Replaced vector borders with the explicit generated Imperial Gothic Frame PNG (gothic_ui_frame_1781133732185.png) mapped to .card via border-image slice and stretch to serve as both the dark background and the gothic outer structural framing as requested.
+  - Fixed a bug where commanders removed via the admin panel still appeared in the Dashboard (War Effort Area). Filtered removed/paused profiles securely using case-insensitive status checks.
+  - Filtered removed/paused commander profiles from globe mappings, narratives, and match wins.
+
 Follow-ups:
-  - Keep an eye on mobile performance feedback; tune CSS ember count if needed
-  - Update algorithm for minitorum field manual with points based on wargear eventually
+  - None
 `;
-if (!fs.existsSync('notes.md')) {
-  fs.writeFileSync('notes.md', entry);
-} else {
-  fs.appendFileSync('notes.md', '\n' + entry);
-}
+fs.appendFileSync('notes.md', entry);
