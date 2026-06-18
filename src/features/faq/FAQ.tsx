@@ -50,6 +50,12 @@ export default function FAQ() {
               <strong>A:</strong> No! Feel free to play either competitive or narrative games with your opponent. It's up to you and your opponent what type of game you want to play. The only restriction is the number of points you'll be playing with at each interval.
             </p>
           </div>
+          <div>
+            <h4 style={{ margin: '0 0 0.5rem 0' }}>Q: Can I use 3DP detachments in games under 2K?</h4>
+            <p style={{ margin: 0, lineHeight: '1.6', fontSize: '0.9rem' }}>
+              <strong>A:</strong> Yes.
+            </p>
+          </div>
         </div>
       </div>
     </div>
