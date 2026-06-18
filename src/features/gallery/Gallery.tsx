@@ -32,6 +32,7 @@ export default function Gallery() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [emotes, setEmotes] = useState<Emote[]>([]);
   const [newComment, setNewComment] = useState('');
+  const [commentError, setCommentError] = useState('');
   const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
@@ -87,6 +88,12 @@ export default function Gallery() {
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || !selectedImage || !currentUser) return;
+    
+    if (newComment.trim().length > 1000) {
+      setCommentError('Comment cannot exceed 1000 characters.');
+      return;
+    }
+    setCommentError('');
     
     const { error } = await supabase.from('gallery_comments').insert({
       unit_id: selectedImage.id,
@@ -303,18 +310,24 @@ export default function Gallery() {
 
               {/* Comment Input */}
               {currentUser ? (
-                <form onSubmit={handleAddComment} style={{ padding: '1rem', borderTop: '1px solid var(--theme-border)', display: 'flex', gap: '0.5rem' }}>
-                  <input 
-                    type="text" 
-                    value={newComment}
-                    onChange={e => setNewComment(e.target.value)}
-                    placeholder="Add a comment..."
-                    style={{ flex: 1, padding: '0.5rem 0.75rem', borderRadius: '4px', border: '1px solid var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-fg)' }}
-                  />
-                  <button type="submit" disabled={!newComment.trim()} style={{ background: 'var(--theme-accent)', color: 'var(--theme-bg)', border: 'none', borderRadius: '4px', padding: '0.5rem 1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Send size={18} />
-                  </button>
-                </form>
+                <div style={{ padding: '1rem', borderTop: '1px solid var(--theme-border)' }}>
+                  <form onSubmit={handleAddComment} style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input 
+                      type="text" 
+                      value={newComment}
+                      onChange={e => { setNewComment(e.target.value); setCommentError(''); }}
+                      placeholder="Add a comment..."
+                      maxLength={1000}
+                      style={{ flex: 1, padding: '0.5rem 0.75rem', borderRadius: '4px', border: '1px solid var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-fg)' }}
+                    />
+                    <button type="submit" disabled={!newComment.trim()} style={{ background: 'var(--theme-accent)', color: 'var(--theme-bg)', border: 'none', borderRadius: '4px', padding: '0.5rem 1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Send size={18} />
+                    </button>
+                  </form>
+                  {commentError && (
+                    <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '0.5rem' }}>{commentError}</div>
+                  )}
+                </div>
               ) : (
                 <div style={{ padding: '1rem', borderTop: '1px solid var(--theme-border)', textAlign: 'center', fontSize: '0.85rem', color: 'var(--theme-fg-muted)' }}>
                   Log in to leave a comment.

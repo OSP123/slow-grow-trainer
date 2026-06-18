@@ -754,3 +754,40 @@ Tasks:
 
 Follow-ups:
   - None
+
+Date: 2026-06-16
+Tasks:
+  - Updated validMatchups in Dashboard.tsx to completely strip any matches where EITHER player is removed or paused, preventing them from showing up as the loser in tooltips.
+  - Pushed changes to origin.
+
+Follow-ups:
+  - None
+
+Date: 2026-06-17
+Tasks:
+  - Created a database migration (20260617000000_secure_private_profiles.sql) to move email, real_name, and discord_name out of the public profiles table.
+  - Implemented strict RLS on the new private_profiles table to protect sensitive user information from unauthorized access.
+  - Updated the Admin Dashboard to fetch the private information via a join, ensuring the admin panel continues to function seamlessly.
+
+Follow-ups:
+  - User needs to run the migration script against their live Supabase instance.
+
+Date: 2026-06-17
+Tasks:
+- Created and executed SQL migration `20260617000000_secure_private_profiles.sql` to move sensitive user data (email, real_name, discord_name) from `public.profiles` to a secure `private_profiles` table.
+- Conducted full security sweep revealing 12 vulnerabilities.
+- Prevented privilege escalation in `profiles` by restricting `role` update via RLS triggers.
+- Patched stored XSS vulnerability in `Dashboard.tsx` 3D globe tooltips.
+- Secured `unit_points` table against unauthorized deletion by restricting to admins only.
+- Added user folder ownership checks to storage bucket uploads (`hobby_photos`, `avatars`).
+- Removed hardcoded admin secrets (`TERMINUS_ROOT` password, admin email) from client bundle.
+- Prevented Matchup tampering by adding database triggers ensuring players can only modify their own score and lore.
+- Added missing `DELETE` RLS policies across `matchups`, `hobby_milestones`, `campaign_votes`, and storage buckets.
+- Added password strength validation to signup logic in `Login.tsx`.
+- Applied character limits to gallery comments in `Gallery.tsx`.
+- Improved UI/UX by removing `alert()` and `confirm()` calls across all admin and user components, replacing them with inline state messages.
+- Verified successful production build.
+
+Follow-ups:
+- User must run `supabase db push` or manually execute `20260617000001_security_audit_fixes.sql` in their Supabase dashboard to apply the final database security fixes.
+- Proceed with requested aesthetic refinements (Gothic/Brutalist framing) once security tasks are fully signed off.

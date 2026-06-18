@@ -90,14 +90,12 @@ export default function CommanderProfile() {
     const targetId = profileId || user?.id;
     if (!targetId) return;
 
-    let { data } = await supabase.from('profiles').select('*').eq('id', targetId).maybeSingle();
+    let { data } = await supabase.from('profiles').select('id, commander_name, army_faction, army_subfaction, avatar_url, army_lore, location, experience_level, role, payment_status, campaign_status, created_at, preferred_store_id').eq('id', targetId).maybeSingle();
 
     // Auto-Rescue Protocol — only for own profile
     if (!data && !profileId && user) {
       const { data: rescueData, error } = await supabase.from('profiles').upsert({
         id: user.id,
-        email: user.email,
-        role: user.email === 'omarpatel123@gmail.com' ? 'admin' : 'user',
         commander_name: user.user_metadata?.commander_name || 'Legacy Commander'
       }, { onConflict: 'id' }).select().single();
       if (!error && rescueData) data = rescueData;

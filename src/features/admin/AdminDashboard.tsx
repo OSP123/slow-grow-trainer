@@ -52,10 +52,8 @@ interface EditableMatchup {
 }
 
 export default function AdminDashboard() {
-  const [email, setEmail] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [unlocked, setUnlocked] = useState(false);
-  const [code, setCode] = useState('');
 
   const [votes, setVotes] = useState<CampaignVote[]>([]);
   const [fetchingVotes, setFetchingVotes] = useState(false);
@@ -101,26 +99,22 @@ export default function AdminDashboard() {
   const ALLIANCE_ORDER: ('Imperium' | 'Chaos' | 'Xenos')[] = ['Imperium', 'Chaos', 'Xenos'];
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setEmail(data.user?.email || null);
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (data.user) {
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
+        if (profile?.role === 'admin') {
+          setIsAdmin(true);
+          fetchVotes();
+          fetchStores();
+          fetchAllMatchups();
+          fetchUnitPoints();
+          fetchUsers();
+          fetchGlobalEvents();
+        }
+      }
       setLoading(false);
     });
   }, []);
-
-  const handleUnlock = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (code === 'TERMINUS_ROOT') {
-      setUnlocked(true);
-      fetchVotes();
-      fetchStores();
-      fetchAllMatchups();
-      fetchUnitPoints();
-      fetchUsers();
-      fetchGlobalEvents();
-    } else {
-      alert('Access Denied. Incorrect Phase Code.');
-    }
-  };
 
   const fetchStores = async () => {
     const { data } = await supabase.from('game_stores').select('*').order('name');
@@ -165,20 +159,29 @@ export default function AdminDashboard() {
     setFetchingUsers(true);
     const { data: profilesData, error } = await supabase
       .from('profiles')
-      .select('id, location, experience_level, army_faction, commander_name, payment_status, role, discord_name, real_name, campaign_status')
+      .select('id, location, experience_level, army_faction, commander_name, payment_status, role, campaign_status, private_profiles(discord_name, real_name, email)')
       .order('commander_name');
 
+    if (error) {
+      setUserMessage('Error fetching users: ' + JSON.stringify(error));
+    }
     if (!error && profilesData) {
       const { data: milestonesData } = await supabase
         .from('hobby_milestones')
         .select('user_id, milestone_step');
 
-      const merged = profilesData.map(p => ({
-        ...p,
-        hobby_milestones: (milestonesData || [])
-          .filter(m => m.user_id === p.id)
-          .map(m => ({ milestone_step: m.milestone_step }))
-      }));
+      const merged = profilesData.map((p: any) => {
+        const priv = Array.isArray(p.private_profiles) ? p.private_profiles[0] : p.private_profiles;
+        return {
+          ...p,
+          discord_name: priv?.discord_name || '',
+          real_name: priv?.real_name || '',
+          email: priv?.email || '',
+          hobby_milestones: (milestonesData || [])
+            .filter(m => m.user_id === p.id)
+            .map(m => ({ milestone_step: m.milestone_step }))
+        };
+      });
       setUsers(merged);
     }
     setFetchingUsers(false);
@@ -218,11 +221,12 @@ export default function AdminDashboard() {
 
   const executeConfirmAction = async () => {
     if (!confirmAction) return;
+    setUserMessage('');
     const newStatus = confirmAction.type === 'remove' ? 'removed' : confirmAction.type === 'pause' ? 'paused' : 'active';
     const { error } = await supabase.from('profiles').update({ campaign_status: newStatus }).eq('id', confirmAction.userId);
     
     if (error) {
-      alert('Error updating user status. Ensure the SQL migration for campaign_status has been run.');
+      setUserMessage('Error updating user status. Ensure the SQL migration for campaign_status has been run.');
     } else {
       fetchUsers();
     }
@@ -239,6 +243,7 @@ export default function AdminDashboard() {
 
   const commitMatches = async () => {
     if (generatedMatches.length === 0) return;
+    setMatchupMessage('');
     setCommittingMatches(true);
     const payload = generatedMatches.map(m => ({ 
       p1_id: m.p1.id, 
@@ -248,11 +253,11 @@ export default function AdminDashboard() {
     }));
     const { error } = await supabase.from('matchups').insert(payload);
     if (!error) {
-      alert('Matchups actively committed to the Ledger!');
+      setMatchupMessage('Matchups actively committed to the Ledger!');
       setGeneratedMatches([]);
       fetchAllMatchups();
     } else {
-      alert('Error committing Matchups.');
+      setMatchupMessage('Error committing Matchups.');
     }
     setCommittingMatches(false);
   };
@@ -419,37 +424,24 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteUnitPoint = async (id: string) => {
-    if (!window.confirm('Are you sure you want to remove this unit from the point registry?')) return;
+    setUPMessage('');
     const { error } = await supabase.from('unit_points').delete().eq('id', id);
     if (!error) {
       fetchUnitPoints();
       refreshRegistry();
+      setUPMessage('Unit deleted from registry.');
+    } else {
+      setUPMessage('Error deleting unit from registry.');
     }
   };
 
   if (loading) return <div style={{ textAlign: 'center', marginTop: '4rem' }}>Interrogating Machine Spirit...</div>;
 
-  if (email !== 'omarpatel123@gmail.com') {
+  if (!isAdmin) {
     return (
       <div className="card" style={{ maxWidth: '600px', margin: '4rem auto', textAlign: 'center', border: '1px solid red' }}>
         <h2 style={{ color: 'red' }}>UNAUTHORIZED: Clearance Denied</h2>
         <p>This path exists strictly for root-level simulation overrides.</p>
-      </div>
-    );
-  }
-
-  if (!unlocked) {
-    return (
-      <div className="card" style={{ maxWidth: '400px', margin: '4rem auto' }}>
-        <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Root Admin Gateway</h2>
-        <form onSubmit={handleUnlock} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div>
-            <label htmlFor="code">Security Code</label>
-            <input id="code" type="password" placeholder="Enter Admin Override Code" value={code}
-              onChange={e => setCode(e.target.value)} required style={{ width: '100%', boxSizing: 'border-box' }} />
-          </div>
-          <button type="submit" className="btn primary">Unlock Root Access</button>
-        </form>
       </div>
     );
   }
@@ -632,6 +624,12 @@ export default function AdminDashboard() {
         <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1.5rem' }}>
           Manage entry fees and review registered commanders.
         </p>
+        
+        {userMessage && (
+          <div style={{ padding: '1rem', marginBottom: '1rem', border: '1px solid #ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '4px' }}>
+            {userMessage}
+          </div>
+        )}
 
         {fetchingUsers ? (
           <p>Awaiting Astropathic Relay...</p>

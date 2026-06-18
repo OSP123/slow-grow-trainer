@@ -83,7 +83,11 @@ export default function Login() {
     e.preventDefault();
     playClickSound();
     setMessage('');
-    const { error } = await supabase.auth.signUp({ 
+    if (password.length < 8 || !/\d/.test(password)) {
+      setMessage('Password must be at least 8 characters long and contain at least one number.');
+      return;
+    }
+    const { error } = await supabase.auth.signUp({  
       email, 
       password,
       options: {

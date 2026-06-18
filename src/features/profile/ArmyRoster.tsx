@@ -44,6 +44,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
   const [units, setUnits] = useState<ArmyUnit[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadingUnitId, setUploadingUnitId] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState('');
   const [editingUnitId, setEditingUnitId] = useState<string | null>(null);
 
   // Add unit form
@@ -215,6 +216,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
   const handleUploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>, unit: ArmyUnit) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setUploadError('');
     setUploadingUnitId(unit.id);
 
     const fileExt = file.name.split('.').pop();
@@ -223,7 +225,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
     const { error: uploadError } = await supabase.storage.from('unit_photos').upload(filePath, file, { upsert: true });
 
     if (uploadError) {
-      alert('Error uploading photo: ' + uploadError.message);
+      setUploadError('Error uploading photo: ' + uploadError.message);
       setUploadingUnitId(null);
       return;
     }
@@ -235,7 +237,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
     if (!updateError) {
       setUnits(prev => prev.map(u => u.id === unit.id ? { ...u, image_url: publicData.publicUrl } : u));
     } else {
-      alert('Failed to save image URL to unit.');
+      setUploadError('Failed to save image URL to unit.');
     }
     setUploadingUnitId(null);
   };
@@ -507,6 +509,9 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                             {uploadingUnitId === u.id ? 'Uploading...' : (u.image_url ? 'Replace' : 'Upload')}
                             <input type="file" accept="image/*" onChange={(e) => handleUploadPhoto(e, u)} disabled={uploadingUnitId === u.id} style={{ display: 'none' }} />
                           </label>
+                          {uploadError && uploadingUnitId === u.id && (
+                            <div style={{ color: '#ef4444', fontSize: '0.7rem', marginTop: '4px' }}>{uploadError}</div>
+                          )}
                         </div>
                       )}
                       {isOwner && (!u.faction || !unitsByFaction[u.faction]?.includes(u.unit_name)) && (

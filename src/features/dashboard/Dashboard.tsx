@@ -395,25 +395,6 @@ export default function Dashboard() {
               const el = document.createElement('div');
               const root = createRoot(el);
               
-              const tooltipContent = d.warlord ? `
-                <div style="display: flex; gap: 1rem; align-items: flex-start;">
-                  ${d.avatar ? `<img src="${d.avatar}" style="width: 50px; height: 50px; border-radius: 4px; border: 1px solid ${d.color}; object-fit: cover;" />` : ''}
-                  <div>
-                    <span style="color: #ccc; display: block; margin-bottom: 2px; font-size: 0.8em; text-transform: uppercase; letter-spacing: 1px;">Warlord</span>
-                    <strong style="color: #fff; display: block; margin-bottom: 4px; font-size: 1.1em;">${d.warlord}</strong>
-                    <span style="color: ${d.color}; display: block; margin-bottom: 4px; font-size: 0.9em; font-weight: bold;">${d.controllingFaction}</span>
-                  </div>
-                </div>
-                ${d.lore ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); color: #999; font-size: 0.85em; font-style: italic; max-width: 250px; white-space: normal;">"${d.lore.substring(0, 100)}${d.lore.length > 100 ? '...' : ''}"</div>` : ''}
-                ${(d.p1Lore || d.p2Lore) ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2); max-width: 280px; white-space: normal; display: flex; flex-direction: column; gap: 8px;">
-                  <strong style="color: #fff; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px;">Battle Reports</strong>
-                  ${d.p1Lore ? `<div style="font-size: 0.85em;"><strong style="color: ${d.winnerId === d.p1Id ? d.color : '#999'};">${d.p1Name}:</strong> <i style="color: #ccc;">"${d.p1Lore.substring(0, 120)}${d.p1Lore.length > 120 ? '...' : ''}"</i></div>` : ''}
-                  ${d.p2Lore ? `<div style="font-size: 0.85em;"><strong style="color: ${d.winnerId === d.p2Id ? d.color : '#999'};">${d.p2Name}:</strong> <i style="color: #ccc;">"${d.p2Lore.substring(0, 120)}${d.p2Lore.length > 120 ? '...' : ''}"</i></div>` : ''}
-                </div>` : ''}
-              ` : `
-                <span style="color: #ccc; display: block; font-style: italic;">Core staging area. No direct warlord control.</span>
-              `;
-
               const Icon = d.Icon;
               // Sub-sectors are smaller and use Target icon
               const boxSize = d.isBase ? '32px' : '20px';
@@ -483,7 +464,44 @@ export default function Dashboard() {
                     <i style={{ color: '#aaa', fontSize: '0.85em', maxWidth: '250px', display: 'block', whiteSpace: 'normal', marginBottom: '12px' }}>
                       "{d.narrative}"
                     </i>
-                    <div dangerouslySetInnerHTML={{ __html: tooltipContent }} />
+                    {d.warlord ? (
+                      <div>
+                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                          {d.avatar && (
+                            <img src={d.avatar} alt="" style={{ width: '50px', height: '50px', borderRadius: '4px', border: `1px solid ${d.color}`, objectFit: 'cover' }} />
+                          )}
+                          <div>
+                            <span style={{ color: '#ccc', display: 'block', marginBottom: '2px', fontSize: '0.8em', textTransform: 'uppercase', letterSpacing: '1px' }}>Warlord</span>
+                            <strong style={{ color: '#fff', display: 'block', marginBottom: '4px', fontSize: '1.1em' }}>{d.warlord}</strong>
+                            <span style={{ color: d.color, display: 'block', marginBottom: '4px', fontSize: '0.9em', fontWeight: 'bold' }}>{d.controllingFaction}</span>
+                          </div>
+                        </div>
+                        {d.lore && (
+                          <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.1)', color: '#999', fontSize: '0.85em', fontStyle: 'italic', maxWidth: '250px', whiteSpace: 'normal' }}>
+                            "{d.lore.substring(0, 100)}{d.lore.length > 100 ? '...' : ''}"
+                          </div>
+                        )}
+                        {(d.p1Lore || d.p2Lore) && (
+                          <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.2)', maxWidth: '280px', whiteSpace: 'normal', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <strong style={{ color: '#fff', fontSize: '0.85em', textTransform: 'uppercase', letterSpacing: '1px' }}>Battle Reports</strong>
+                            {d.p1Lore && (
+                              <div style={{ fontSize: '0.85em' }}>
+                                <strong style={{ color: d.winnerId === d.p1Id ? d.color : '#999' }}>{d.p1Name}:</strong>{' '}
+                                <i style={{ color: '#ccc' }}>"{d.p1Lore.substring(0, 120)}{d.p1Lore.length > 120 ? '...' : ''}"</i>
+                              </div>
+                            )}
+                            {d.p2Lore && (
+                              <div style={{ fontSize: '0.85em' }}>
+                                <strong style={{ color: d.winnerId === d.p2Id ? d.color : '#999' }}>{d.p2Name}:</strong>{' '}
+                                <i style={{ color: '#ccc' }}>"{d.p2Lore.substring(0, 120)}{d.p2Lore.length > 120 ? '...' : ''}"</i>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <span style={{ color: '#ccc', display: 'block', fontStyle: 'italic' }}>Core staging area. No direct warlord control.</span>
+                    )}
                   </div>
                 </div>
               );
