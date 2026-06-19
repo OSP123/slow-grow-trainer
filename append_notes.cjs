@@ -3,10 +3,11 @@ const date = new Date().toISOString().split('T')[0];
 const entry = `
 Date: ${date}
 Tasks:
-  - Fixed a bug where commanders removed via the admin panel still appeared in the Dashboard (War Effort Area). Filtered removed/paused profiles securely using case-insensitive status checks.
-  - Filtered removed/paused commander profiles from globe mappings, narratives, and match wins.
+  - Created a database migration (20260617000000_secure_private_profiles.sql) to move email, real_name, and discord_name out of the public profiles table.
+  - Implemented strict RLS on the new private_profiles table to protect sensitive user information from unauthorized access.
+  - Updated the Admin Dashboard to fetch the private information via a join, ensuring the admin panel continues to function seamlessly.
 
 Follow-ups:
-  - None
+  - User needs to run the migration script against their live Supabase instance.
 `;
 fs.appendFileSync('notes.md', entry);

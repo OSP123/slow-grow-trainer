@@ -6,7 +6,13 @@ import { supabase } from '../../supabaseClient';
 vi.mock('../../supabaseClient', () => ({
   supabase: {
     auth: { getUser: vi.fn() },
-    from: vi.fn(),
+    from: vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({ data: null, error: null })
+        })
+      })
+    }),
   },
 }));
 
@@ -55,6 +61,7 @@ const mockFromUnlocked = (table: string) => {
   if (table === 'profiles') {
     const chainable = Promise.resolve({ data: [{ id: '1', commander_name: 'Test', payment_status: false }], error: null }) as any;
     chainable.eq = vi.fn().mockReturnValue(chainable);
+    chainable.single = vi.fn().mockResolvedValue({ data: { role: 'admin' }, error: null });
     chainable.order = vi.fn().mockReturnValue(chainable);
     return {
       select: vi.fn().mockReturnValue(chainable),
@@ -69,37 +76,32 @@ describe('AdminDashboard (RBAC)', () => {
     vi.clearAllMocks();
   });
 
-  it('rejects users without the root admin email', async () => {
+  it('rejects users without the admin role', async () => {
     (supabase.auth.getUser as import('vitest').Mock).mockResolvedValue({
-      data: { user: { email: 'standard_commander@admin.com' } }
+      data: { user: { id: 'user_123', email: 'standard_commander@admin.com' } }
     });
+    // Mock profiles select to return role: 'user'
+    const chainable = Promise.resolve({ data: { role: 'user' }, error: null }) as any;
+    chainable.single = vi.fn().mockResolvedValue({ data: { role: 'user' }, error: null });
+    chainable.eq = vi.fn().mockReturnValue(chainable);
+    
+    (supabase.from as import('vitest').Mock).mockReturnValue({
+      select: vi.fn().mockReturnValue(chainable)
+    });
+
     render(<AdminDashboard />);
     await waitFor(() => {
       expect(screen.getByText(/UNAUTHORIZED: Clearance Denied/i)).toBeInTheDocument();
     });
   });
 
-  it('presents the security gateway to the root email', async () => {
+  it('reveals the admin dashboard when the user has the admin role', async () => {
     (supabase.auth.getUser as import('vitest').Mock).mockResolvedValue({
-      data: { user: { email: 'omarpatel123@gmail.com' } }
-    });
-    render(<AdminDashboard />);
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText(/Enter Admin Override Code/i)).toBeInTheDocument();
-    });
-  });
-
-  it('reveals the matchup management panel after unlocking', async () => {
-    (supabase.auth.getUser as import('vitest').Mock).mockResolvedValue({
-      data: { user: { email: 'omarpatel123@gmail.com' } }
+      data: { user: { id: 'admin_123', email: 'omarpatel123@gmail.com' } }
     });
     (supabase.from as import('vitest').Mock).mockImplementation(mockFromUnlocked);
 
     render(<AdminDashboard />);
-
-    await waitFor(() => screen.getByPlaceholderText(/Enter Admin Override Code/i));
-    fireEvent.change(screen.getByPlaceholderText(/Enter Admin Override Code/i), { target: { value: 'TERMINUS_ROOT' } });
-    fireEvent.click(screen.getByRole('button', { name: /Unlock Root Access/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/Matchup Command Override/i)).toBeInTheDocument();

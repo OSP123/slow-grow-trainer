@@ -6,7 +6,8 @@ export interface UnitRegistryEntry {
   faction: string;
   unit_name: string;
   base_points: number;
-  cost_tiers?: { models: number; points: number }[];
+  cost_tiers?: { models: number; points: number; escalation?: string | null }[];
+  wargear_options?: { name: string; points: number }[];
 }
 
 export function useUnitRegistry() {
@@ -27,7 +28,7 @@ export function useUnitRegistry() {
     while (hasMore) {
       const { data, error: fetchError } = await supabase
         .from('unit_points')
-        .select('id, faction, unit_name, base_points, cost_tiers')
+        .select('id, faction, unit_name, base_points, cost_tiers, wargear_options')
         .order('faction', { ascending: true })
         .order('unit_name', { ascending: true })
         .range(offset, offset + limit - 1);

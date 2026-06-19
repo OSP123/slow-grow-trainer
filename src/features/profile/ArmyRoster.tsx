@@ -55,7 +55,9 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
   const [points, setPoints] = useState<number | string>('');
   const [pointsLookedUp, setPointsLookedUp] = useState(false); // true if auto-filled from DB
   const [notes, setNotes] = useState('');
-  const [availableCostTiers, setAvailableCostTiers] = useState<{models: number, points: number}[]>([]);
+  const [availableCostTiers, setAvailableCostTiers] = useState<{models: number, points: number, escalation?: string | null}[]>([]);
+  const [escalationWarning, setEscalationWarning] = useState<string | null>(null);
+  const [wargearOptions, setWargearOptions] = useState<{name: string, points: number}[]>([]);
   const [addingUnit, setAddingUnit] = useState(false);
   const [formMessage, setFormMessage] = useState('');
 
@@ -90,25 +92,52 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
     setAvailableCostTiers([]);
   };
 
-  const lookupUnitPoints = async (unitName: string, faction: string) => {
+  const lookupUnitPoints = async (unitName: string, faction: string, skipId: string | null = null) => {
     if (!unitName || !faction) return;
     
     const unitDef = rawRegistry.find(u => u.faction === faction && u.unit_name === unitName);
     
     if (unitDef) {
+      setWargearOptions(unitDef.wargear_options || []);
+
       if (unitDef.cost_tiers && unitDef.cost_tiers.length > 0) {
-        setAvailableCostTiers(unitDef.cost_tiers);
-        setModelCount(unitDef.cost_tiers[0].models);
-        setPoints(unitDef.cost_tiers[0].points);
+        // Calculate how many copies exist in roster already
+        const existingCopies = units.filter(u => u.faction === faction && u.unit_name === unitName && u.id !== skipId).length;
+        
+        // Find which escalation tier applies
+        let activeEscalation = null;
+        if (existingCopies >= 3 && unitDef.cost_tiers.some(t => t.escalation === '4th+')) activeEscalation = '4th+';
+        else if (existingCopies >= 2 && unitDef.cost_tiers.some(t => t.escalation === '3rd+')) activeEscalation = '3rd+';
+        else if (existingCopies >= 1 && unitDef.cost_tiers.some(t => t.escalation === '2nd+')) activeEscalation = '2nd+';
+
+        let applicableTiers = unitDef.cost_tiers.filter(t => t.escalation === activeEscalation);
+        if (applicableTiers.length === 0) {
+          applicableTiers = unitDef.cost_tiers.filter(t => t.escalation == null);
+        }
+
+        setAvailableCostTiers(applicableTiers);
+        if (applicableTiers.length > 0) {
+          setModelCount(applicableTiers[0].models);
+          setPoints(applicableTiers[0].points);
+        }
         setPointsLookedUp(true);
+
+        if (activeEscalation) {
+          setEscalationWarning(`Escalated cost (${activeEscalation} copy)`);
+        } else {
+          setEscalationWarning(null);
+        }
       } else if (unitDef.base_points != null) {
         setAvailableCostTiers([]);
         setPoints(unitDef.base_points);
         setPointsLookedUp(true);
+        setEscalationWarning(null);
       }
     } else {
       setAvailableCostTiers([]);
+      setWargearOptions([]);
       setPointsLookedUp(false);
+      setEscalationWarning(null);
     }
   };
 
@@ -176,6 +205,8 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
     setNotes('');
     setEditingUnitId(null);
     setAvailableCostTiers([]);
+    setEscalationWarning(null);
+    setWargearOptions([]);
   };
 
   const handleEditUnit = (unit: ArmyUnit) => {
@@ -191,10 +222,35 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
     
     // Hydrate available cost tiers if it's a known unit
     const unitDef = rawRegistry.find(u => u.faction === unit.faction && u.unit_name === unit.unit_name);
-    if (unitDef && unitDef.cost_tiers && unitDef.cost_tiers.length > 0) {
-      setAvailableCostTiers(unitDef.cost_tiers);
+    if (unitDef) {
+      setWargearOptions(unitDef.wargear_options || []);
+      if (unitDef.cost_tiers && unitDef.cost_tiers.length > 0) {
+        // Calculate existing copies excluding this one
+        const existingCopies = units.filter(u => u.faction === unit.faction && u.unit_name === unit.unit_name && u.id !== unit.id).length;
+        let activeEscalation = null;
+        if (existingCopies >= 3 && unitDef.cost_tiers.some(t => t.escalation === '4th+')) activeEscalation = '4th+';
+        else if (existingCopies >= 2 && unitDef.cost_tiers.some(t => t.escalation === '3rd+')) activeEscalation = '3rd+';
+        else if (existingCopies >= 1 && unitDef.cost_tiers.some(t => t.escalation === '2nd+')) activeEscalation = '2nd+';
+
+        let applicableTiers = unitDef.cost_tiers.filter(t => t.escalation === activeEscalation);
+        if (applicableTiers.length === 0) {
+          applicableTiers = unitDef.cost_tiers.filter(t => t.escalation == null);
+        }
+        setAvailableCostTiers(applicableTiers);
+        
+        if (activeEscalation) {
+          setEscalationWarning(`Escalated cost (${activeEscalation} copy)`);
+        } else {
+          setEscalationWarning(null);
+        }
+      } else {
+        setAvailableCostTiers([]);
+        setEscalationWarning(null);
+      }
     } else {
       setAvailableCostTiers([]);
+      setWargearOptions([]);
+      setEscalationWarning(null);
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -312,7 +368,7 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                       setSelectedUnit(val);
                       setPointsLookedUp(false);
                       if (val) {
-                        lookupUnitPoints(val, selectedFaction);
+                        lookupUnitPoints(val, selectedFaction, editingUnitId);
                       }
                     }}
                     style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
@@ -404,6 +460,11 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                   style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box',
                     borderColor: pointsLookedUp ? 'var(--theme-accent)' : undefined }}
                 />
+                {escalationWarning && (
+                  <div style={{ fontSize: '0.75rem', color: '#ffb300', marginTop: '4px' }}>
+                    ⚠️ {escalationWarning}
+                  </div>
+                )}
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: 'var(--theme-fg-muted)' }}>Notes (optional)</label>
@@ -413,6 +474,14 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
                   placeholder="e.g. Magnetized, Proxied, Custom conversion..."
                   style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
                 />
+                {wargearOptions.length > 0 && (
+                  <div style={{ fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginTop: '4px', lineHeight: '1.2' }}>
+                    <strong style={{ color: 'var(--theme-fg)' }}>Wargear: </strong>
+                    {wargearOptions.map((wg, idx) => (
+                      <span key={idx}>{wg.name} (+{wg.points} pts){idx < wargearOptions.length - 1 ? ', ' : ''}</span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

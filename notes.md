@@ -790,4 +790,27 @@ Tasks:
 
 Follow-ups:
 - User must run `supabase db push` or manually execute `20260617000001_security_audit_fixes.sql` in their Supabase dashboard to apply the final database security fixes.
-- Proceed with requested aesthetic refinements (Gothic/Brutalist framing) once security tasks are fully signed off.
+
+Date: 2026-06-18
+Tasks:
+- Investigated and resolved Admin Dashboard `private_profiles` empty query issue (caused by stale PostgREST schema cache and delayed Vercel frontend deployment).
+- Added new FAQ entry explicitly allowing 3DP detachments in sub-2K games.
+- Built `parse_munitorum_v6.cjs` to ingest the latest Munitorum Field Manual PDF (`eng_11-02...`).
+- Fixed previous MFM parser regressions by properly capturing multiple model `cost_tiers` directly from the text dump, preventing data loss when users select unit sizes in the Army Roster.
+- Generated updated `seed_units.sql` containing all 1370 official units with their corresponding model count cost tiers.
+- Pushed frontend FAQ update and parser scripts to `main` branch on GitHub for live deployment.
+- Completed Gothic/Brutalist Aesthetic refinement.
+
+- User must run the newly generated `seed_units.sql` in their Supabase SQL editor to update the live unit points dictionary.
+
+Date: 2026-06-18
+Tasks:
+- Parsed new 11th Edition Munitorum Field Manual (React Server Components HTML layout).
+- Implemented `parse_mfm_html.cjs` using Cheerio to extract unit escalation tiers and wargear options.
+- Updated `unit_points` table schema to include `wargear_options` JSONB column.
+- Pushed updated 11th Edition points to live Supabase database via Supabase CLI query.
+- Updated frontend `ArmyRoster.tsx` to automatically calculate escalating points costs based on duplicate units in the roster.
+- Updated `ArmyRoster.tsx` to render wargear point costs.
+
+Follow-ups:
+- Check back with the user regarding the email verification issue.
