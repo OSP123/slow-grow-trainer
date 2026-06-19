@@ -91,7 +91,6 @@ export default function Login() {
       email, 
       password,
       options: {
-        emailRedirectTo: window.location.origin,
         data: {
           real_name: realName,
           commander_name: cmdName,

@@ -814,3 +814,12 @@ Tasks:
 
 Follow-ups:
 - Check back with the user regarding the email verification issue.
+
+Date: 2026-06-18
+Tasks:
+- Fixed unused fireEvent import causing TypeScript strict-mode build failure on Render
+- Fixed case-sensitive unit counting bug where 'Tempestus Scions' didn't match 'TEMPESTUS SCIONS' for point tier escalations
+- Wrote and executed a backend sync script that successfully retroactively updated the point values and escalation tiers for 40 existing units across all user rosters
+Follow-ups:
+- Assist with setting up custom SMTP provider to resolve email verification limits if the user requests it
+- Generated fix_caps_and_sync.sql to fix ALL CAPS unit names and bypass RLS to sync points
