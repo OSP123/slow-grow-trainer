@@ -823,3 +823,5 @@ Tasks:
 Follow-ups:
 - Assist with setting up custom SMTP provider to resolve email verification limits if the user requests it
 - Generated fix_caps_and_sync.sql to fix ALL CAPS unit names and bypass RLS to sync points
+- Removed hardcoded emailRedirectTo from Login.tsx to fix silent Supabase email failure after Render deployment
+- Updated SUBFACTIONS_MAP in warhammer40k.ts with comprehensive subfactions for all armies so the registration dropdown populates correctly

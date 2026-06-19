@@ -523,31 +523,74 @@ export const SUBFACTIONS_MAP: Record<string, string[]> = {
   "Space Marines": [
     "Ultramarines", "Blood Angels", "Dark Angels", "Space Wolves", 
     "Black Templars", "Deathwatch", "Grey Knights", "Imperial Fists", 
-    "Iron Hands", "Raven Guard", "Salamanders", "White Scars"
+    "Iron Hands", "Raven Guard", "Salamanders", "White Scars", "Custom Chapter"
   ],
+  "Blood Angels": ["Flesh Tearers", "Lamenters", "Carmine Blades"],
+  "Dark Angels": ["Angels of Absolution", "Angels of Redemption", "Angels of Vengeance"],
+  "Space Wolves": ["Blackmanes", "Bloodmaws", "Deathwolves", "Ironwolves"],
   "Chaos Space Marines": [
     "Emperor's Children", "Black Legion", "Iron Warriors", 
-    "Night Lords", "Word Bearers", "Alpha Legion"
+    "Night Lords", "Word Bearers", "Alpha Legion", "Red Corsairs", "Creations of Bile"
   ],
+  "Death Guard": [
+    "Harbingers", "The Inexorable", "Mortarion's Anvil", "The Wretched", 
+    "Poxmongers", "The Ferrymen", "Mortarion's Chosen Sons"
+  ],
+  "Thousand Sons": [
+    "Cult of Mutation", "Cult of Prophecy", "Cult of Time", "Cult of Scheming", 
+    "Cult of Magic", "Cult of Knowledge", "Cult of Change", "Cult of Duplicity", "Cult of Manipulation"
+  ],
+  "World Eaters": ["Disciples of the Red Angel"],
   "Orks": [
     "Goffs", "Bad Moons", "Evil Sunz", "Snakebites", 
     "Deathskulls", "Blood Axes", "Freebooterz"
   ],
   "Tyranids": [
     "Hive Fleet Leviathan", "Hive Fleet Kraken", "Hive Fleet Behemoth", 
-    "Hive Fleet Jormungandr", "Hive Fleet Hydra", "Hive Fleet Kronos"
+    "Hive Fleet Jormungandr", "Hive Fleet Hydra", "Hive Fleet Kronos", "Hive Fleet Gorgon"
   ],
   "Necrons": [
     "Szarekhan Dynasty", "Sautekh Dynasty", "Mephrit Dynasty", 
-    "Novokh Dynasty", "Nephrekh Dynasty"
+    "Novokh Dynasty", "Nephrekh Dynasty", "Nihilakh Dynasty"
   ],
   "Astra Militarum": [
-    "Cadian", "Catachan", "Krieg", "Tallarn", "Armageddon Steel Legion", "Tanith"
+    "Cadian", "Catachan", "Krieg", "Tallarn", "Armageddon Steel Legion", "Tanith", "Valhallan", "Vostroyan", "Tempestus Scions"
   ],
   "Aeldari": [
     "Biel-Tan", "Ulthwé", "Saim-Hann", "Iyanden", "Alaitoc", "Ynnari"
   ],
+  "Drukhari": [
+    "Kabal of the Black Heart", "Kabal of the Poisoned Tongue", "Kabal of the Obsidian Rose", "Kabal of the Flayed Skull",
+    "Cult of Strife", "Cult of the Cursed Blade", "Cult of the Red Grief",
+    "Prophets of Flesh", "The Dark Creed", "Coven of Twelve"
+  ],
   "T'au Empire": [
-    "T'au Sept", "Farsight Enclaves", "Vior'la Sept", "Sa'cea Sept", "Dal'yth Sept"
+    "T'au Sept", "Farsight Enclaves", "Vior'la Sept", "Sa'cea Sept", "Dal'yth Sept", "Bork'an Sept", "Ke'lshan Sept"
+  ],
+  "Adepta Sororitas": [
+    "Order of Our Martyred Lady", "Order of the Valorous Heart", "Order of the Bloody Rose", 
+    "Order of the Ebon Chalice", "Order of the Argent Shroud", "Order of the Sacred Rose"
+  ],
+  "Adeptus Mechanicus": [
+    "Mars", "Lucius", "Agripinaa", "Stygies VIII", "Graia", "Metalica", "Ryza"
+  ],
+  "Adeptus Custodes": [
+    "Shadowkeepers", "Aquilan Shield", "Dread Host", "Solar Watch", "Emissaries Imperatus"
+  ],
+  "Genestealer Cults": [
+    "Cult of the Four-Armed Emperor", "The Pauper Princes", "The Hivecult", 
+    "The Bladed Cog", "The Rusted Claw", "The Twisted Helix"
+  ],
+  "Leagues of Votann": [
+    "Greater Thurian League", "Ymyr Conglomerate", "Kronus Hegemony", 
+    "Trans-Hyperian Alliance", "Urani-Surtr Regulates"
+  ],
+  "Imperial Knights": [
+    "House Terryn", "House Griffith", "House Hawkshroud", "House Cadmus", 
+    "House Mortan", "House Krast", "House Vulker", "House Taranis", "House Raven"
+  ],
+  "Chaos Knights": [
+    "House Lucaris", "House Herpetrax", "House Khomentis", "House Korvax", 
+    "House Vextrix", "House Khymere"
   ]
 };
