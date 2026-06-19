@@ -95,14 +95,18 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
   const lookupUnitPoints = async (unitName: string, faction: string, skipId: string | null = null) => {
     if (!unitName || !faction) return;
     
-    const unitDef = rawRegistry.find(u => u.faction === faction && u.unit_name === unitName);
+    const unitDef = rawRegistry.find(u => u.faction === faction && u.unit_name.toLowerCase() === unitName.toLowerCase());
     
     if (unitDef) {
       setWargearOptions(unitDef.wargear_options || []);
 
       if (unitDef.cost_tiers && unitDef.cost_tiers.length > 0) {
         // Calculate how many copies exist in roster already
-        const existingCopies = units.filter(u => u.faction === faction && u.unit_name === unitName && u.id !== skipId).length;
+        const existingCopies = units.filter(u => 
+          u.faction === faction && 
+          u.unit_name.toLowerCase() === unitName.toLowerCase() && 
+          u.id !== skipId
+        ).length;
         
         // Find which escalation tier applies
         let activeEscalation = null;
@@ -221,12 +225,16 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
     setFormMessage('');
     
     // Hydrate available cost tiers if it's a known unit
-    const unitDef = rawRegistry.find(u => u.faction === unit.faction && u.unit_name === unit.unit_name);
+    const unitDef = rawRegistry.find(u => u.faction === unit.faction && u.unit_name.toLowerCase() === unit.unit_name.toLowerCase());
     if (unitDef) {
       setWargearOptions(unitDef.wargear_options || []);
       if (unitDef.cost_tiers && unitDef.cost_tiers.length > 0) {
         // Calculate existing copies excluding this one
-        const existingCopies = units.filter(u => u.faction === unit.faction && u.unit_name === unit.unit_name && u.id !== unit.id).length;
+        const existingCopies = units.filter(u => 
+          u.faction === unit.faction && 
+          u.unit_name.toLowerCase() === unit.unit_name.toLowerCase() && 
+          u.id !== unit.id
+        ).length;
         let activeEscalation = null;
         if (existingCopies >= 3 && unitDef.cost_tiers.some(t => t.escalation === '4th+')) activeEscalation = '4th+';
         else if (existingCopies >= 2 && unitDef.cost_tiers.some(t => t.escalation === '3rd+')) activeEscalation = '3rd+';
