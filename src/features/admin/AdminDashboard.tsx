@@ -159,7 +159,7 @@ export default function AdminDashboard() {
     setFetchingUsers(true);
     const { data: profilesData, error } = await supabase
       .from('profiles')
-      .select('id, location, experience_level, army_faction, commander_name, payment_status, role, campaign_status, private_profiles(discord_name, real_name, email)')
+      .select('id, location, experience_level, army_faction, commander_name, discord_name, payment_status, role, campaign_status, private_profiles(real_name, email)')
       .order('commander_name');
 
     if (error) {
@@ -174,7 +174,7 @@ export default function AdminDashboard() {
         const priv = Array.isArray(p.private_profiles) ? p.private_profiles[0] : p.private_profiles;
         return {
           ...p,
-          discord_name: priv?.discord_name || '',
+          discord_name: p.discord_name || priv?.discord_name || '',
           real_name: priv?.real_name || '',
           email: priv?.email || '',
           hobby_milestones: (milestonesData || [])

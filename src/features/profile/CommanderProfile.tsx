@@ -54,6 +54,7 @@ export interface ProfileData {
   location?: string;
   army_faction?: string;
   army_subfaction?: string;
+  discord_name?: string;
   preferred_store_id?: string;
   warlord_name?: string;
   warlord_traits?: string[];
@@ -75,6 +76,7 @@ export default function CommanderProfile() {
   const [location, setLocation] = useState('');
   const [faction, setFaction] = useState('');
   const [subfaction, setSubfaction] = useState('');
+  const [discordName, setDiscordName] = useState('');
   const [storeId, setStoreId] = useState('');
   const [gameStores, setGameStores] = useState<{ id: string, name: string }[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -90,7 +92,7 @@ export default function CommanderProfile() {
     const targetId = profileId || user?.id;
     if (!targetId) return;
 
-    let { data } = await supabase.from('profiles').select('id, commander_name, army_faction, army_subfaction, avatar_url, army_lore, location, experience_level, role, payment_status, campaign_status, created_at, preferred_store_id').eq('id', targetId).maybeSingle();
+    let { data } = await supabase.from('profiles').select('id, commander_name, discord_name, army_faction, army_subfaction, avatar_url, army_lore, location, experience_level, role, payment_status, campaign_status, created_at, preferred_store_id').eq('id', targetId).maybeSingle();
 
     // Auto-Rescue Protocol — only for own profile
     if (!data && !profileId && user) {
@@ -106,6 +108,7 @@ export default function CommanderProfile() {
       setLore(data.army_lore || '');
       setAvatarUrl(data.avatar_url || '');
       setCommanderName(data.commander_name || '');
+      setDiscordName(data.discord_name || '');
       setLocation(data.location || '');
       setFaction(data.army_faction || '');
       setSubfaction(data.army_subfaction || '');
@@ -169,13 +172,13 @@ export default function CommanderProfile() {
     e.preventDefault();
     if (!profile) return;
     const { error } = await supabase.from('profiles').update({
-      commander_name: commanderName, location, army_faction: faction, army_subfaction: subfaction,
+      commander_name: commanderName, discord_name: discordName, location, army_faction: faction, army_subfaction: subfaction,
       preferred_store_id: storeId || null
     }).eq('id', profile.id);
     if (error) setMessage('Failed to lock taxonomy updates.');
     else { 
       setMessage('Commander metadata archived.'); 
-      setProfile({ ...profile, commander_name: commanderName, location, army_faction: faction, army_subfaction: subfaction, preferred_store_id: storeId });
+      setProfile({ ...profile, commander_name: commanderName, discord_name: discordName, location, army_faction: faction, army_subfaction: subfaction, preferred_store_id: storeId });
       setEditMode(false); 
     }
   };
@@ -227,6 +230,11 @@ export default function CommanderProfile() {
         <div style={{ flex: 1 }}>
           <h2 style={{ margin: '0 0 0.25rem 0', fontSize: '1.5rem' }}>
             Commander {profile.commander_name || 'Classified'}
+            {profile.discord_name && (
+              <span style={{ marginLeft: '0.75rem', fontSize: '1rem', color: 'var(--theme-fg-muted)', fontWeight: 'normal' }}>
+                ({profile.discord_name})
+              </span>
+            )}
             {profileId && !isOwner && (
               <span style={{ marginLeft: '0.75rem', fontSize: '0.7rem', color: 'var(--theme-fg-muted)', fontWeight: 'normal', letterSpacing: '1px', textTransform: 'uppercase' }}>
                 Viewing Profile
@@ -313,6 +321,10 @@ export default function CommanderProfile() {
                     <input type="text" value={commanderName} onChange={e => setCommanderName(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} required />
                   </div>
                   <div>
+                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.85rem' }}>Discord Name</label>
+                    <input type="text" value={discordName} onChange={e => setDiscordName(e.target.value)} placeholder="Username#1234" style={{ width: '100%', boxSizing: 'border-box' }} />
+                  </div>
+                  <div>
                     <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.85rem' }}>Location</label>
                     <input type="text" value={location} onChange={e => setLocation(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} required />
                   </div>
@@ -342,6 +354,7 @@ export default function CommanderProfile() {
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 {[
+                  { label: 'Discord', value: profile.discord_name },
                   { label: 'Location', value: profile.location },
                   { label: 'Core Faction', value: profile.army_faction },
                   { label: 'Subfaction', value: profile.army_subfaction },

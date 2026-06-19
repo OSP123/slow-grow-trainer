@@ -43,7 +43,7 @@ export default function Gallery() {
   async function fetchGallery() {
     const { data, error } = await supabase
       .from('army_units')
-      .select('id, unit_name, image_url, created_at, profiles!inner(commander_name)')
+      .select('id, unit_name, image_url, created_at, profiles!inner(commander_name, discord_name)')
       .not('image_url', 'is', null)
       .order('created_at', { ascending: false });
       
@@ -57,7 +57,7 @@ export default function Gallery() {
     // Comments
     const { data: cData } = await supabase
       .from('gallery_comments')
-      .select('id, comment, created_at, user_id, profiles!inner(commander_name)')
+      .select('id, comment, created_at, user_id, profiles!inner(commander_name, discord_name)')
       .eq('unit_id', unitId)
       .order('created_at', { ascending: true });
     
@@ -188,9 +188,14 @@ export default function Gallery() {
               <div style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <strong style={{ display: 'block', fontSize: '1.1rem', marginBottom: '4px' }}>{img.unit_name}</strong>
-                  <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--theme-accent)' }}>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)' }}>
                     {(Array.isArray(img.profiles) ? img.profiles[0]?.commander_name : img.profiles?.commander_name) || 'Unknown Commander'}
-                  </span>
+                    {((Array.isArray(img.profiles) ? img.profiles[0]?.discord_name : img.profiles?.discord_name)) && (
+                      <span style={{ marginLeft: '4px', opacity: 0.7 }}>
+                        ({Array.isArray(img.profiles) ? img.profiles[0]?.discord_name : img.profiles?.discord_name})
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div style={{ color: 'var(--theme-fg-muted)', display: 'flex', gap: '0.5rem' }}>
                   <MessageSquare size={18} />
@@ -241,6 +246,11 @@ export default function Gallery() {
                 <h3 style={{ margin: '0 0 0.25rem 0' }}>{selectedImage.unit_name}</h3>
                 <div style={{ fontSize: '0.85rem', color: 'var(--theme-accent)' }}>
                   Painted by {(Array.isArray(selectedImage.profiles) ? selectedImage.profiles[0]?.commander_name : selectedImage.profiles?.commander_name) || 'Unknown Commander'}
+                  {((Array.isArray(selectedImage.profiles) ? selectedImage.profiles[0]?.discord_name : selectedImage.profiles?.discord_name)) && (
+                    <span style={{ marginLeft: '6px', fontSize: '0.85rem', opacity: 0.7 }}>
+                      ({Array.isArray(selectedImage.profiles) ? selectedImage.profiles[0]?.discord_name : selectedImage.profiles?.discord_name})
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -284,9 +294,14 @@ export default function Gallery() {
                   comments.map(c => (
                     <div key={c.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                        <strong style={{ fontSize: '0.85rem', color: 'var(--theme-accent)' }}>
+                        <span style={{ fontWeight: 'bold', color: 'var(--theme-accent)' }}>
                           {(Array.isArray(c.profiles) ? c.profiles[0]?.commander_name : c.profiles?.commander_name) || 'Unknown'}
-                        </strong>
+                          {((Array.isArray(c.profiles) ? c.profiles[0]?.discord_name : c.profiles?.discord_name)) && (
+                            <span style={{ color: 'var(--theme-fg-muted)', fontWeight: 'normal', marginLeft: '4px' }}>
+                              ({Array.isArray(c.profiles) ? c.profiles[0]?.discord_name : c.profiles?.discord_name})
+                            </span>
+                          )}
+                        </span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <span style={{ fontSize: '0.7rem', color: 'var(--theme-fg-muted)' }}>
                             {new Date(c.created_at).toLocaleDateString()}

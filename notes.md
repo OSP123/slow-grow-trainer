@@ -825,3 +825,36 @@ Follow-ups:
 - Generated fix_caps_and_sync.sql to fix ALL CAPS unit names and bypass RLS to sync points
 - Removed hardcoded emailRedirectTo from Login.tsx to fix silent Supabase email failure after Render deployment
 - Updated SUBFACTIONS_MAP in warhammer40k.ts with comprehensive subfactions for all armies so the registration dropdown populates correctly
+Date: 2026-06-18
+Tasks:
+- Fixed subfaction dropdown in registration missing Adepta Sororitas and others by comprehensively mapping 10th edition subfactions in warhammer40k.ts.
+- Fixed divergent Space Marine chapters (Blood Angels, Dark Angels, Space Wolves, Deathwatch, Black Templars) unable to select generic Space Marine units in the roster UI.
+Follow-ups:
+- Confirm with user if they'd like to provide specific divergent point overrides (like the +10 pts for Blood Angels Assault Intercessors) or manually override them in the UI.
+
+
+Date: 2026-06-18
+Tasks:
+- Created a robust custom parser to extract the divergent Space Marine unit points directly from Next.js flight payloads in the HTML offline files.
+- Generated seed_divergent_units.sql containing 578 mapped divergent points (including the 95pt Assault Intercessors with Jump Packs for Blood Angels).
+Follow-ups:
+- User needs to run seed_divergent_units.sql in their Supabase dashboard.
+
+
+Date: 2026-06-18
+Tasks:
+- Killed hanging background tasks and local dev servers to free up memory and processes.
+- Cleaned up the root directory by moving roughly 60 old temporary parsing scripts, test scripts, and outdated SQL files into the `scratch/` directory.
+Follow-ups:
+- None.
+
+
+Date: 2026-06-18
+Tasks:
+- Created migrate_discord_name.sql to move discord_name back to the public profiles table so that it can be displayed publicly.
+- Updated CommanderProfile.tsx to allow users to edit and save their Discord name.
+- Updated Dashboard.tsx, Gallery.tsx, and CommanderProfile.tsx to correctly display the Discord name next to the commander name.
+Follow-ups:
+- User needs to run migrate_discord_name.sql in their Supabase dashboard to apply the schema changes.
+
+

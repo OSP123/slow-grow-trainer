@@ -98,7 +98,7 @@ export default function Dashboard() {
       try {
         const { data: matchups, error } = await supabase
           .from('matchups')
-          .select('theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, army_faction, avatar_url, army_lore, campaign_status), p2_profile:profiles!p2_id(commander_name, army_faction, avatar_url, army_lore, campaign_status)')
+          .select('theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, discord_name, army_faction, avatar_url, army_lore, campaign_status), p2_profile:profiles!p2_id(commander_name, discord_name, army_faction, avatar_url, army_lore, campaign_status)')
           .in('game_result', ['P1_WIN', 'P2_WIN', 'p1_win', 'p2_win']);
 
         if (error) {
@@ -260,8 +260,8 @@ export default function Dashboard() {
                 lore: winnerProfile.army_lore,
                 p1Lore: match.p1_lore,
                 p2Lore: match.p2_lore,
-                p1Name: p1Profile?.commander_name || 'Commander',
-                p2Name: p2Profile?.commander_name || 'Commander',
+                p1Name: p1Profile?.commander_name ? `${p1Profile.commander_name}${p1Profile.discord_name ? ` (${p1Profile.discord_name})` : ''}` : 'Commander',
+                p2Name: p2Profile?.commander_name ? `${p2Profile.commander_name}${p2Profile.discord_name ? ` (${p2Profile.discord_name})` : ''}` : 'Commander',
                 winnerId: isP1Win ? match.p1_id : (isP2Win ? match.p2_id : null),
                 p1Id: match.p1_id,
                 p2Id: match.p2_id
@@ -279,7 +279,7 @@ export default function Dashboard() {
         try {
           const { data: cmdrs } = await supabase
             .from('profiles')
-            .select('id, commander_name, army_faction, army_subfaction, avatar_url, army_lore, campaign_status')
+            .select('id, commander_name, discord_name, army_faction, army_subfaction, avatar_url, army_lore, campaign_status')
             .order('commander_name', { ascending: true });
             
           if (cmdrs) {
@@ -548,7 +548,10 @@ export default function Dashboard() {
                     )}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.2rem', color: 'var(--theme-fg)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cmd.commander_name || 'Classified'}</h3>
+                    <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.2rem', color: 'var(--theme-fg)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {cmd.commander_name || 'Classified'}
+                      {cmd.discord_name && <span style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', marginLeft: '0.5rem', fontWeight: 'normal' }}>({cmd.discord_name})</span>}
+                    </h3>
                     <div style={{ fontSize: '0.8rem', color: 'var(--theme-accent)', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {cmd.army_faction || 'Unknown Faction'}
                       {cmd.army_subfaction ? ` - ${cmd.army_subfaction}` : ''}
