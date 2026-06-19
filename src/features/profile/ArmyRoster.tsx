@@ -76,11 +76,18 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
     fetchRoster();
   }, [profileId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Unit list for the selected faction, filtered by search
+  // Divergent Space Marine chapters that also have access to standard Space Marine units
+  const divergentChapters = ['Blood Angels', 'Dark Angels', 'Space Wolves', 'Black Templars', 'Deathwatch'];
+
+  // Unit list for the selected faction, filtered by search, including generic Space Marines for divergent chapters
   const availableUnits: string[] = selectedFaction
-    ? (unitsByFaction[selectedFaction] ?? []).filter(u =>
-        u.toLowerCase().includes(unitSearch.toLowerCase())
-      )
+    ? [
+        ...(unitsByFaction[selectedFaction] ?? []),
+        ...(divergentChapters.includes(selectedFaction) ? (unitsByFaction['Space Marines'] ?? []) : [])
+      ]
+        .filter((u, index, self) => self.indexOf(u) === index) // deduplicate
+        .filter(u => u.toLowerCase().includes(unitSearch.toLowerCase()))
+        .sort()
     : [];
 
   const handleFactionChange = (f: string) => {
@@ -95,15 +102,18 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
   const lookupUnitPoints = async (unitName: string, faction: string, skipId: string | null = null) => {
     if (!unitName || !faction) return;
     
-    const unitDef = rawRegistry.find(u => u.faction === faction && u.unit_name.toLowerCase() === unitName.toLowerCase());
-    
+    let unitDef = rawRegistry.find(u => u.faction === faction && u.unit_name.toLowerCase() === unitName.toLowerCase());
+    if (!unitDef && ['Blood Angels', 'Dark Angels', 'Space Wolves', 'Black Templars', 'Deathwatch'].includes(faction)) {
+      unitDef = rawRegistry.find(u => u.faction === 'Space Marines' && u.unit_name.toLowerCase() === unitName.toLowerCase());
+    }
+
     if (unitDef) {
       setWargearOptions(unitDef.wargear_options || []);
 
       if (unitDef.cost_tiers && unitDef.cost_tiers.length > 0) {
         // Calculate how many copies exist in roster already
         const existingCopies = units.filter(u => 
-          u.faction === faction && 
+          (u.faction === faction || u.faction === 'Space Marines') && 
           u.unit_name.toLowerCase() === unitName.toLowerCase() && 
           u.id !== skipId
         ).length;
@@ -225,13 +235,17 @@ export default function ArmyRoster({ profileId, isOwner }: Props) {
     setFormMessage('');
     
     // Hydrate available cost tiers if it's a known unit
-    const unitDef = rawRegistry.find(u => u.faction === unit.faction && u.unit_name.toLowerCase() === unit.unit_name.toLowerCase());
+    let unitDef = rawRegistry.find(u => u.faction === unit.faction && u.unit_name.toLowerCase() === unit.unit_name.toLowerCase());
+    if (!unitDef && ['Blood Angels', 'Dark Angels', 'Space Wolves', 'Black Templars', 'Deathwatch'].includes(unit.faction || '')) {
+      unitDef = rawRegistry.find(u => u.faction === 'Space Marines' && u.unit_name.toLowerCase() === unit.unit_name.toLowerCase());
+    }
+
     if (unitDef) {
       setWargearOptions(unitDef.wargear_options || []);
       if (unitDef.cost_tiers && unitDef.cost_tiers.length > 0) {
         // Calculate existing copies excluding this one
         const existingCopies = units.filter(u => 
-          u.faction === unit.faction && 
+          (u.faction === unit.faction || u.faction === 'Space Marines') && 
           u.unit_name.toLowerCase() === unit.unit_name.toLowerCase() && 
           u.id !== unit.id
         ).length;
