@@ -58,6 +58,9 @@ export default function AdminDashboard() {
   const [votes, setVotes] = useState<CampaignVote[]>([]);
   const [fetchingVotes, setFetchingVotes] = useState(false);
 
+  const [campaignState, setCampaignState] = useState<any>(null);
+  const [campaignMessage, setCampaignMessage] = useState('');
+
   const [generatedMatches, setGeneratedMatches] = useState<MatchPair[]>([]);
   const [committingMatches, setCommittingMatches] = useState(false);
 
@@ -110,6 +113,7 @@ export default function AdminDashboard() {
           fetchUnitPoints();
           fetchUsers();
           fetchGlobalEvents();
+          fetchCampaignState();
         }
       }
       setLoading(false);
@@ -119,6 +123,22 @@ export default function AdminDashboard() {
   const fetchStores = async () => {
     const { data } = await supabase.from('game_stores').select('*').order('name');
     if (data) setStores(data);
+  };
+
+  const fetchCampaignState = async () => {
+    const { data } = await supabase.from('campaign_state').select('*').single();
+    if (data) setCampaignState(data);
+  };
+
+  const handleUpdateCampaign = async (field: string, value: number) => {
+    setCampaignMessage('');
+    const { error } = await supabase.from('campaign_state').update({ [field]: value }).eq('id', 1);
+    if (!error) {
+      setCampaignMessage(`Successfully updated ${field}.`);
+      fetchCampaignState();
+    } else {
+      setCampaignMessage('Error updating campaign state: ' + error.message);
+    }
   };
 
   const fetchGlobalEvents = async () => {
@@ -474,6 +494,56 @@ export default function AdminDashboard() {
       )}
 
       <h1 style={{ marginBottom: '1rem' }}>Administration Override Station</h1>
+
+      {/* ── CAMPAIGN ENGINE CONTROLS ── */}
+      <div className="card" style={{ marginBottom: '2rem', border: '1px solid var(--theme-accent)' }}>
+        <h2 style={{ marginBottom: '0.5rem', color: 'var(--theme-accent)' }}>Global Campaign Engine</h2>
+        <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1.5rem' }}>
+          Control the progression of the narrative escalation campaign on Vespera Prime.
+        </p>
+
+        {campaignMessage && (
+          <div style={{ marginBottom: '1rem', padding: '0.75rem', border: '1px solid var(--theme-accent)', color: 'var(--theme-accent)', fontSize: '0.85rem' }}>
+            {campaignMessage}
+          </div>
+        )}
+
+        {campaignState ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)' }}>Current Month (1-5)</label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input 
+                  type="number" 
+                  min={1} max={5} 
+                  value={campaignState.current_month} 
+                  readOnly 
+                  style={{ width: '80px', textAlign: 'center', backgroundColor: 'var(--theme-bg)' }} 
+                />
+                <button onClick={() => handleUpdateCampaign('current_month', Math.max(1, campaignState.current_month - 1))} className="btn secondary">-</button>
+                <button onClick={() => handleUpdateCampaign('current_month', Math.min(5, campaignState.current_month + 1))} className="btn secondary">+</button>
+              </div>
+            </div>
+            
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)' }}>Escalation Points Limit</label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input 
+                  type="number" 
+                  step={50}
+                  value={campaignState.points_limit} 
+                  readOnly 
+                  style={{ width: '100px', textAlign: 'center', backgroundColor: 'var(--theme-bg)' }} 
+                />
+                <button onClick={() => handleUpdateCampaign('points_limit', campaignState.points_limit - 50)} className="btn secondary">-</button>
+                <button onClick={() => handleUpdateCampaign('points_limit', campaignState.points_limit + 50)} className="btn secondary">+</button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <p style={{ color: 'var(--theme-fg-muted)' }}>Campaign state not initialized.</p>
+        )}
+      </div>
 
       {/* ── MATCHUP MANAGEMENT ── */}
       <div className="card" style={{ marginBottom: '2rem' }}>

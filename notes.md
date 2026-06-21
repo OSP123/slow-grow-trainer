@@ -858,3 +858,14 @@ Follow-ups:
 - User needs to run migrate_discord_name.sql in their Supabase dashboard to apply the schema changes.
 
 
+
+Date: 2026-06-21
+Tasks:
+- Re-generated map images for the 6 territories without faction forces.
+- Updated Dashboard.tsx to display new map images below the globe UI and added influence bars.
+- Added Votann Resources conditionally rendered section to Dashboard.
+- Added global Campaign Engine controls to AdminDashboard.tsx (month and points limits).
+
+Follow-ups:
+- None
+

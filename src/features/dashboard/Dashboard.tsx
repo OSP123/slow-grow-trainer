@@ -8,12 +8,12 @@ import { FACTIONS } from '../../data/warhammer40k';
 import { getTransformUrl } from '../../utils/imageCompression';
 
 const THEATRES_OF_WAR = [
-  { name: 'Hive Primus', lat: 15, lng: 20, narrative: 'The planetary capital and primary stronghold.', Icon: Castle, image: 'hive_primus.jpg' }, // Africa
-  { name: 'The Ash Wastes', lat: 25, lng: 10, narrative: 'Scorched deserts holding vital Promethium pipelines.', Icon: Mountain, image: 'the_ash_wastes.jpg' }, // Sahara, Africa
-  { name: 'Magma Forges', lat: 45, lng: 60, narrative: 'Heavy industrial sector controlled by the Mechanicus.', Icon: Factory, image: 'magma_forges.jpg' }, // Kazakhstan/Russia
-  { name: 'Orbital Tether', lat: -10, lng: -55, narrative: 'The only reliable way off this rock.', Icon: Satellite, image: 'orbital_tether.jpg' }, // Brazil, South America
-  { name: 'The Sump', lat: -25, lng: 135, narrative: 'Deep underhive slums infested with mutants.', Icon: Skull, image: 'the_sump.jpg' }, // Central Australia
-  { name: 'Rad-Zone Gamma', lat: 60, lng: -110, narrative: 'Irradiated badlands where ancient weapons sleep.', Icon: Biohazard, image: 'rad_zone_gamma.jpg' } // Northern Canada
+  { name: 'The Hive Spires', lat: 15, lng: 20, narrative: 'The planetary capital and primary stronghold. Imperium forces try to hold order.', Icon: Castle, mapImage: 'map_hive_spires.png' }, 
+  { name: 'The Ash Wastes', lat: 25, lng: 10, narrative: 'Rad-soaked, toxic wastelands home to nomadic human tribes.', Icon: Mountain, mapImage: 'map_ash_wastes.png' }, 
+  { name: 'The Magma Forges', lat: 45, lng: 60, narrative: 'Enormous Adeptus Mechanicus structures built directly over deep crust fissures.', Icon: Factory, mapImage: 'map_magma_forges.png' }, 
+  { name: 'Orbital Defense Grid', lat: -10, lng: -55, narrative: 'Space elevators and massive macro-cannon batteries that secure the skies.', Icon: Satellite, mapImage: 'map_orbital_defense.png' }, 
+  { name: 'The Sump Ruins', lat: -25, lng: 135, narrative: 'Pockmarked blast craters thousands of feet deep dating back to the Horus Heresy.', Icon: Skull, mapImage: 'map_sump_ruins.png' }, 
+  { name: 'The Toxic Oceans', lat: 60, lng: -110, narrative: 'Chemical-soup seas vital for cooling the planet\'s massive industrial sectors.', Icon: Biohazard, mapImage: 'map_toxic_oceans.png' } 
 ];
 
 const FACTION_COLORS = {
@@ -44,6 +44,9 @@ export default function Dashboard() {
   const [selectedTheatre, setSelectedTheatre] = useState<any>(null);
   const [activeEvents, setActiveEvents] = useState<any[]>([]);
   const [commanders, setCommanders] = useState<any[]>([]);
+  const [campaignState, setCampaignState] = useState<any>(null);
+  const [territoryStats, setTerritoryStats] = useState<any[]>([]);
+  const [currentUserFaction, setCurrentUserFaction] = useState<string>('');
   const globeEl = useRef<any>(null);
 
   const [activeTheme, setActiveTheme] = useState(document.body.getAttribute('data-theme') || 'imperium');
@@ -96,6 +99,18 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchEffort() {
       try {
+        const { data: cState } = await supabase.from('campaign_state').select('*').single();
+        if (cState) setCampaignState(cState);
+
+        const { data: terrs } = await supabase.from('territories').select('*');
+        if (terrs) setTerritoryStats(terrs);
+
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase.from('profiles').select('army_faction').eq('id', user.id).single();
+          if (profile) setCurrentUserFaction(profile.army_faction);
+        }
+
         const { data: matchups, error } = await supabase
           .from('matchups')
           .select('theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, discord_name, army_faction, avatar_url, army_lore, campaign_status), p2_profile:profiles!p2_id(commander_name, discord_name, army_faction, avatar_url, army_lore, campaign_status)')
@@ -253,7 +268,7 @@ export default function Dashboard() {
                 Icon: Target, // Use a distinct 'Target' icon for sub-sectors to differentiate from the Base
                 isBase: false,
                 color,
-                image: baseTheatre.image,
+                mapImage: baseTheatre.mapImage,
                 controllingFaction: winnerProfile.army_faction,
                 warlord: winnerProfile.commander_name,
                 avatar: winnerProfile.avatar_url,
@@ -320,6 +335,45 @@ export default function Dashboard() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      
+      {campaignState && campaignState.current_month === 5 && (
+        <div style={{ padding: '1.5rem', background: 'linear-gradient(to right, rgba(239, 68, 68, 0.3), transparent)', borderLeft: '4px solid #ef4444', borderRadius: '4px', border: '1px solid #ef4444', animation: 'pulse 2s infinite' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <span style={{ color: '#ef4444', fontSize: '1.5rem' }}>⚠️</span>
+            <h3 style={{ margin: 0, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '2px' }}>CRITICAL ALERT // SYSTEM DEFENSES COLLAPSING</h3>
+          </div>
+          <p style={{ color: '#fff', fontSize: '1.1rem', margin: 0, lineHeight: 1.5 }}>
+            Vespera Promethium supply lines have been permanently severed. Planetary fuel reserves are depleted. Elite relief fleets are ordered to abandon surface operations. Mass evacuation protocols initiated. All functional assets must immediately reallocate to Segmentum Sector Hive World: Armageddon. God-Emperor protect us.
+          </p>
+        </div>
+      )}
+
+      {campaignState && (
+        <div className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', border: '1px solid var(--theme-accent)', background: 'var(--theme-bg-secondary)' }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: '1.5rem', color: 'var(--theme-accent)' }}>Campaign Month {campaignState.current_month}</h2>
+            <div style={{ fontSize: '0.9rem', color: 'var(--theme-fg-muted)' }}>Escalation Points Limit: {campaignState.points_limit}pts</div>
+          </div>
+          <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--theme-fg)', textTransform: 'uppercase' }}>
+            {campaignState.current_month === 1 && 'The Ash Storm Whispers'}
+            {campaignState.current_month === 2 && 'Breaching the Perimeter'}
+            {campaignState.current_month === 3 && 'The Toxic Torrent'}
+            {campaignState.current_month === 4 && 'The Siege of Vespera'}
+            {campaignState.current_month === 5 && 'The Final Doomsday'}
+          </div>
+        </div>
+      )}
+
+      {currentUserFaction === 'Leagues of Votann' && campaignState && (
+        <div className="card" style={{ marginBottom: '1rem', border: '1px solid #eab308', background: 'linear-gradient(to right, rgba(234, 179, 8, 0.1), transparent)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+            <Factory color="#eab308" />
+            <h3 style={{ color: '#eab308', margin: 0 }}>Votann Resource Securement</h3>
+          </div>
+          <p style={{ margin: 0, color: 'var(--theme-fg)' }}>Raw materials and Promethium extracted: <strong style={{ fontSize: '1.25rem', color: '#eab308' }}>{campaignState.votann_resources_secured} Units</strong></p>
+        </div>
+      )}
+
       {activeEvents.filter(e => !e.theatre_name).map(evt => (
         <div key={evt.id} style={{ padding: '1.5rem', background: 'linear-gradient(to right, rgba(168, 85, 247, 0.2), transparent)', borderLeft: '4px solid #a855f7', borderRadius: '4px', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
@@ -435,6 +489,10 @@ export default function Dashboard() {
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedTheatre(d);
+                      // Scroll to territory details
+                      setTimeout(() => {
+                        document.getElementById('territory-details')?.scrollIntoView({ behavior: 'smooth' });
+                      }, 100);
                     }}
                   >
                     <div style={{ position: 'absolute', width: lineSize, height: '2px', background: d.color, top: '50%', left: '-5px', transform: 'translateY(-50%)', opacity: 0.7 }}></div>
@@ -580,38 +638,100 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Theatre Detail Modal */}
+      {/* Territory Detail Panel below Globe */}
       {selectedTheatre && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem', backdropFilter: 'blur(5px)' }} onClick={() => setSelectedTheatre(null)}>
-          <div style={{ background: 'var(--theme-bg-secondary)', border: `1px solid ${selectedTheatre.color}`, borderRadius: '8px', maxWidth: '600px', width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }} onClick={e => e.stopPropagation()}>
-            <button onClick={() => setSelectedTheatre(null)} style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.5)', border: 'none', color: '#fff', fontSize: '1.5rem', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', zIndex: 10, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>×</button>
-            
-            {/* Image header */}
-            <div style={{ height: '220px', width: '100%', background: `linear-gradient(to bottom, transparent, var(--theme-bg-secondary)), url(/images/theatres/${selectedTheatre.image || selectedTheatre.name.toLowerCase().replace(/[^a-z0-9]/g, '_') + '.png'}) center/cover, #222`, borderBottom: `2px solid ${selectedTheatre.color}` }}>
-              <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'flex-end', padding: '1.5rem', background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }}>
-                <h3 style={{ margin: 0, fontSize: '2rem', color: selectedTheatre.color, textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>{selectedTheatre.name}</h3>
-              </div>
+        <div className="card" style={{ marginTop: '0rem', borderTop: `4px solid ${selectedTheatre.color}` }} id="territory-details">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h2 style={{ fontSize: '2.5rem', color: selectedTheatre.color, margin: 0, textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>{selectedTheatre.name}</h2>
+            <button onClick={() => setSelectedTheatre(null)} className="btn secondary" style={{ padding: '0.5rem 1rem' }}>Close Dashboard</button>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'start' }}>
+            {/* Map image side */}
+            <div>
+              <div style={{ width: '100%', height: '400px', backgroundImage: `url(/images/${selectedTheatre.mapImage})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '8px', border: `2px solid ${selectedTheatre.color}`, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }} />
             </div>
 
-            <div style={{ padding: '1.5rem' }}>
-              <i style={{ color: '#aaa', fontSize: '1rem', display: 'block', marginBottom: '1.5rem' }}>"{selectedTheatre.narrative}"</i>
+            {/* Stats side */}
+            <div>
+              <p style={{ fontStyle: 'italic', color: '#ccc', marginBottom: '2rem', fontSize: '1.1rem', lineHeight: 1.6 }}>"{selectedTheatre.narrative}"</p>
               
-              {activeEvents.filter(e => e.theatre_name === selectedTheatre.name).map(evt => (
-                <div key={evt.id} style={{ marginBottom: '1.5rem', padding: '1rem', background: 'linear-gradient(to right, rgba(168, 85, 247, 0.2), transparent)', borderLeft: '4px solid #a855f7', borderRadius: '4px', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                    <span style={{ color: '#a855f7', fontSize: '1.25rem' }}>⚠️</span>
-                    <h4 style={{ margin: 0, color: '#a855f7', textTransform: 'uppercase', letterSpacing: '1px' }}>Local Effect: {evt.title}</h4>
-                  </div>
-                  <p style={{ color: '#fff', fontSize: '0.95rem', margin: 0, lineHeight: 1.5 }}>
-                    {evt.description}
-                  </p>
+              {/* Influence Bars based on `territories` db data */}
+              {territoryStats.find(t => t.name === selectedTheatre.name) && (
+                <div style={{ marginBottom: '2rem', padding: '1.5rem', backgroundColor: 'var(--theme-bg)', borderRadius: '8px', border: '1px solid var(--theme-border)' }}>
+                  <h3 style={{ margin: '0 0 1rem 0', color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '1px' }}>Territory Influence</h3>
+                  {(() => {
+                    const t = territoryStats.find(t => t.name === selectedTheatre.name);
+                    return (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
+                            <span style={{ color: FACTION_COLORS.imperium }}>Imperium Control</span>
+                            <span>{t.imperium_control}%</span>
+                          </div>
+                          <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
+                            <div style={{ width: `${t.imperium_control}%`, height: '100%', background: FACTION_COLORS.imperium, transition: 'width 0.5s ease-out' }}></div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
+                            <span style={{ color: FACTION_COLORS.chaos }}>Warp Corruption</span>
+                            <span>{t.chaos_corruption}%</span>
+                          </div>
+                          <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
+                            <div style={{ width: `${t.chaos_corruption}%`, height: '100%', background: FACTION_COLORS.chaos, transition: 'width 0.5s ease-out' }}></div>
+                          </div>
+                        </div>
+                        
+                        {t.ork_foothold > 0 && (
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
+                              <span style={{ color: FACTION_COLORS.xenos }}>Ork Foothold</span>
+                              <span>{t.ork_foothold}%</span>
+                            </div>
+                            <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
+                              <div style={{ width: `${t.ork_foothold}%`, height: '100%', background: FACTION_COLORS.xenos, transition: 'width 0.5s ease-out' }}></div>
+                            </div>
+                          </div>
+                        )}
+                        {t.tau_foothold > 0 && (
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
+                              <span style={{ color: FACTION_COLORS.xenos }}>T'au Foothold</span>
+                              <span>{t.tau_foothold}%</span>
+                            </div>
+                            <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
+                              <div style={{ width: `${t.tau_foothold}%`, height: '100%', background: FACTION_COLORS.xenos, transition: 'width 0.5s ease-out' }}></div>
+                            </div>
+                          </div>
+                        )}
+                        {t.aeldari_foothold > 0 && (
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
+                              <span style={{ color: FACTION_COLORS.xenos }}>Aeldari Foothold</span>
+                              <span>{t.aeldari_foothold}%</span>
+                            </div>
+                            <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
+                              <div style={{ width: `${t.aeldari_foothold}%`, height: '100%', background: FACTION_COLORS.xenos, transition: 'width 0.5s ease-out' }}></div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
-              ))}
-              
+              )}
+
+              {/* Battle Reports for the chosen area */}
               {selectedTheatre.warlord ? (
                 <>
-                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem', padding: '1rem', background: 'rgba(0,0,0,0.3)', borderRadius: '6px' }}>
-                    {selectedTheatre.avatar && <img src={selectedTheatre.avatar} alt="Warlord" style={{ width: '64px', height: '64px', borderRadius: '4px', border: `1px solid ${selectedTheatre.color}`, objectFit: 'cover' }} />}
+                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem', padding: '1rem', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', border: `1px solid ${selectedTheatre.color}` }}>
+                    {selectedTheatre.avatar ? (
+                      <img src={selectedTheatre.avatar} alt="Warlord" style={{ width: '64px', height: '64px', borderRadius: '4px', border: `1px solid ${selectedTheatre.color}`, objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: '64px', height: '64px', borderRadius: '4px', border: `1px solid ${selectedTheatre.color}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Target color={selectedTheatre.color} /></div>
+                    )}
                     <div>
                       <span style={{ color: '#ccc', display: 'block', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Controlling Warlord</span>
                       <strong style={{ color: '#fff', display: 'block', fontSize: '1.25rem' }}>{selectedTheatre.warlord}</strong>
@@ -627,7 +747,7 @@ export default function Dashboard() {
 
                   {(selectedTheatre.p1Lore || selectedTheatre.p2Lore) && (
                     <div>
-                      <h4 style={{ color: '#fff', textTransform: 'uppercase', letterSpacing: '1px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>Battle Reports</h4>
+                      <h4 style={{ color: '#fff', textTransform: 'uppercase', letterSpacing: '1px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>Sector Battle Reports</h4>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {selectedTheatre.p1Lore && (
                           <div style={{ padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '6px' }}>
@@ -646,7 +766,7 @@ export default function Dashboard() {
                   )}
                 </>
               ) : (
-                <div style={{ color: '#ccc', fontStyle: 'italic', textAlign: 'center', padding: '2rem' }}>
+                <div style={{ color: '#ccc', fontStyle: 'italic', textAlign: 'center', padding: '2rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
                   Core staging area. No direct warlord control established.
                 </div>
               )}
