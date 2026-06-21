@@ -59,6 +59,25 @@ export default function Briefing() {
 
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h3 style={{ color: 'var(--theme-accent)', marginBottom: '1rem', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>
+          Dynamic Campaign Mechanics
+        </h3>
+        <p style={{ lineHeight: '1.6', marginBottom: '1rem' }}>
+          The planetary map features <strong>6 key Territories</strong>. As you play games and log battle reports, the outcome directly affects the control of the territory your match took place in:
+        </p>
+        <ul style={{ paddingLeft: '1.5rem', lineHeight: '1.6', marginBottom: '1rem' }}>
+          <li><strong>Imperium Wins:</strong> Increase Imperium Control and push back Chaos Corruption.</li>
+          <li><strong>Chaos Wins:</strong> Increase Chaos Corruption and lower Imperium Control.</li>
+          <li><strong>Xenos Wins (Orks, T'au, Aeldari/Drukhari):</strong> Increase their respective faction footholds in that region.</li>
+          <li><strong>T'au Empire vs Chaos:</strong> A T'au win against Chaos forces actively reduces Chaos Corruption in the sector (representing the neutralization of warp rituals).</li>
+          <li><strong>Leagues of Votann:</strong> Winning any match secures critical resources for the Ancestor Cores. Winning in industrial sectors (The Magma Forges or The Sump Ruins) yields bonus resources!</li>
+        </ul>
+        <p style={{ lineHeight: '1.6' }}>
+          The Campaign Engine automatically recalculates influence percentages the moment both players verify the match.
+        </p>
+      </div>
+
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <h3 style={{ color: 'var(--theme-accent)', marginBottom: '1rem', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>
           Getting Started
         </h3>
         <ol style={{ paddingLeft: '1.5rem', lineHeight: '2' }}>

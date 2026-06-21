@@ -869,3 +869,11 @@ Tasks:
 Follow-ups:
 - None
 
+
+Date: 2026-06-21
+Tasks:
+- Re-generated the Hive Spires and Orbital Defense Relay map assets to have a much darker, gritty, grimdark aesthetic.
+- Appended the Dynamic Campaign Mechanics section to the Field Manual (Briefing.tsx) detailing influence shifts and Votann extra rules.
+- Relocated the Territory Detail Panel in Dashboard.tsx to sit directly beneath the interactive Globe.
+Follow-ups:
+- None

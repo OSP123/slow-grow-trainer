@@ -570,6 +570,64 @@ export default function Dashboard() {
         )}
       </div>
 
+      {/* Territory Detail Panel below Globe */}
+      {selectedTheatre && (
+        <div className="card" style={{ marginTop: '0rem', borderTop: `4px solid ${selectedTheatre.color}` }} id="territory-details">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h2 style={{ fontSize: '2.5rem', color: selectedTheatre.color, margin: 0, textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>{selectedTheatre.name}</h2>
+            <button onClick={() => setSelectedTheatre(null)} className="btn secondary" style={{ padding: '0.5rem 1rem' }}>Close Dashboard</button>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'start' }}>
+            {/* Map image side */}
+            <div>
+              <div style={{ width: '100%', height: '400px', backgroundImage: `url(/images/${selectedTheatre.mapImage})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '8px', border: `2px solid ${selectedTheatre.color}`, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }} />
+            </div>
+
+            {/* Stats side */}
+            <div>
+              <p style={{ fontStyle: 'italic', color: '#ccc', marginBottom: '2rem', fontSize: '1.1rem', lineHeight: 1.6 }}>"{selectedTheatre.narrative}"</p>
+              
+              {/* Influence Bars based on `territories` db data */}
+              {territoryStats.find(t => t.name === selectedTheatre.name) && (
+                <div style={{ marginBottom: '2rem', padding: '1.5rem', backgroundColor: 'var(--theme-bg)', borderRadius: '8px', border: '1px solid var(--theme-border)' }}>
+                  <h3 style={{ margin: '0 0 1rem 0', color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '1px' }}>Territory Influence</h3>
+                  {(() => {
+                    const t = territoryStats.find(t => t.name === selectedTheatre.name);
+                    return (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
+                            <span style={{ color: FACTION_COLORS.imperium }}>Imperium Control</span>
+                            <span>{t.imperium_control}%</span>
+                          </div>
+                          <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
+                            <div style={{ width: `${t.imperium_control}%`, height: '100%', background: FACTION_COLORS.imperium, transition: 'width 0.5s ease-out' }}></div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
+                            <span style={{ color: FACTION_COLORS.chaos }}>Warp Corruption</span>
+                            <span>{t.chaos_corruption}%</span>
+                          </div>
+                          <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
+                            <div style={{ width: `${t.chaos_corruption}%`, height: '100%', background: FACTION_COLORS.chaos, transition: 'width 0.5s ease-out' }}></div>
+                          </div>
+                        </div>
+                        
+                        {t.ork_foothold > 0 && (
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
+                              <span style={{ color: FACTION_COLORS.xenos }}>Ork Foothold</span>
+                              <span>{t.ork_foothold}%</span>
+                            </div>
+                            <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
+                              <div style={{ width: `${t.ork_foothold}%`, height: '100%', background: FACTION_COLORS.xenos, transition: 'width 0.5s ease-out' }}></div>
+                            </div>
+                          </div>
+                        )}
+
       <div className="card">
         <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', borderBottom: '2px solid var(--theme-border)', paddingBottom: '0.5rem', color: 'var(--theme-accent)' }}>Forces Deployed</h2>
         {sortedFactions.length === 0 ? (
@@ -638,63 +696,6 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Territory Detail Panel below Globe */}
-      {selectedTheatre && (
-        <div className="card" style={{ marginTop: '0rem', borderTop: `4px solid ${selectedTheatre.color}` }} id="territory-details">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h2 style={{ fontSize: '2.5rem', color: selectedTheatre.color, margin: 0, textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>{selectedTheatre.name}</h2>
-            <button onClick={() => setSelectedTheatre(null)} className="btn secondary" style={{ padding: '0.5rem 1rem' }}>Close Dashboard</button>
-          </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'start' }}>
-            {/* Map image side */}
-            <div>
-              <div style={{ width: '100%', height: '400px', backgroundImage: `url(/images/${selectedTheatre.mapImage})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '8px', border: `2px solid ${selectedTheatre.color}`, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }} />
-            </div>
-
-            {/* Stats side */}
-            <div>
-              <p style={{ fontStyle: 'italic', color: '#ccc', marginBottom: '2rem', fontSize: '1.1rem', lineHeight: 1.6 }}>"{selectedTheatre.narrative}"</p>
-              
-              {/* Influence Bars based on `territories` db data */}
-              {territoryStats.find(t => t.name === selectedTheatre.name) && (
-                <div style={{ marginBottom: '2rem', padding: '1.5rem', backgroundColor: 'var(--theme-bg)', borderRadius: '8px', border: '1px solid var(--theme-border)' }}>
-                  <h3 style={{ margin: '0 0 1rem 0', color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '1px' }}>Territory Influence</h3>
-                  {(() => {
-                    const t = territoryStats.find(t => t.name === selectedTheatre.name);
-                    return (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
-                            <span style={{ color: FACTION_COLORS.imperium }}>Imperium Control</span>
-                            <span>{t.imperium_control}%</span>
-                          </div>
-                          <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
-                            <div style={{ width: `${t.imperium_control}%`, height: '100%', background: FACTION_COLORS.imperium, transition: 'width 0.5s ease-out' }}></div>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
-                            <span style={{ color: FACTION_COLORS.chaos }}>Warp Corruption</span>
-                            <span>{t.chaos_corruption}%</span>
-                          </div>
-                          <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
-                            <div style={{ width: `${t.chaos_corruption}%`, height: '100%', background: FACTION_COLORS.chaos, transition: 'width 0.5s ease-out' }}></div>
-                          </div>
-                        </div>
-                        
-                        {t.ork_foothold > 0 && (
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
-                              <span style={{ color: FACTION_COLORS.xenos }}>Ork Foothold</span>
-                              <span>{t.ork_foothold}%</span>
-                            </div>
-                            <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
-                              <div style={{ width: `${t.ork_foothold}%`, height: '100%', background: FACTION_COLORS.xenos, transition: 'width 0.5s ease-out' }}></div>
-                            </div>
-                          </div>
-                        )}
                         {t.tau_foothold > 0 && (
                           <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
