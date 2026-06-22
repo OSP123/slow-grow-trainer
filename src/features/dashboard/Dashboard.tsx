@@ -8,12 +8,12 @@ import { FACTIONS } from '../../data/warhammer40k';
 import { getTransformUrl } from '../../utils/imageCompression';
 
 const THEATRES_OF_WAR = [
-  { name: 'The Hive Spires', lat: 15, lng: 20, narrative: 'The planetary capital and primary stronghold. Imperium forces try to hold order.', Icon: Castle, mapImage: 'map_hive_spires.png' }, 
-  { name: 'The Ash Wastes', lat: 25, lng: 10, narrative: 'Rad-soaked, toxic wastelands home to nomadic human tribes.', Icon: Mountain, mapImage: 'map_ash_wastes.png' }, 
-  { name: 'The Magma Forges', lat: 45, lng: 60, narrative: 'Enormous Adeptus Mechanicus structures built directly over deep crust fissures.', Icon: Factory, mapImage: 'map_magma_forges.png' }, 
-  { name: 'Orbital Defense Grid', lat: -10, lng: -55, narrative: 'Space elevators and massive macro-cannon batteries that secure the skies.', Icon: Satellite, mapImage: 'map_orbital_defense.png' }, 
-  { name: 'The Sump Ruins', lat: -25, lng: 135, narrative: 'Pockmarked blast craters thousands of feet deep dating back to the Horus Heresy.', Icon: Skull, mapImage: 'map_sump_ruins.png' }, 
-  { name: 'The Toxic Oceans', lat: 60, lng: -110, narrative: 'Chemical-soup seas vital for cooling the planet\'s massive industrial sectors.', Icon: Biohazard, mapImage: 'map_toxic_oceans.png' } 
+  { name: 'The Hive Spires', lat: 15, lng: 20, narrative: "The administrative and population hubs of the planet. Imperium forces try to hold order, while Chaos cults plot assassinations and T'au operatives spark citizen rebellions in the lower tiers.", Icon: Castle, mapImage: 'map_hive_spires.png' }, 
+  { name: 'The Ash Wastes', lat: 25, lng: 10, narrative: "Rad-soaked, toxic wastelands home to nomadic human tribes. Space Marines and Astra Militarum launch purges to maintain control, while T'au stealth cadres work to win over the nomadic outcasts.", Icon: Mountain, mapImage: 'map_ash_wastes.png' }, 
+  { name: 'The Magma Forges', lat: 45, lng: 60, narrative: "Enormous Adeptus Mechanicus structures built directly over deep crust fissures. AdMech forces defend the vital promethium extraction manufactorums, while Ork scrap-looters and Leagues of Votann mining operations attempt to strip and dismantle the heavy infrastructure.", Icon: Factory, mapImage: 'map_magma_forges.png' }, 
+  { name: 'Orbital Defense Grid', lat: -10, lng: -55, narrative: "Space elevators and massive macro-cannon batteries that secure the skies. Aeldari strike teams and other attackers target this network to blind the Imperial fleet and trap the surface defenders, while the Imperium fights desperately to keep the grid online.", Icon: Satellite, mapImage: 'map_orbital_defense.png' }, 
+  { name: 'The Sump Ruins', lat: -25, lng: 135, narrative: "Pockmarked blast craters thousands of feet deep dating back to the Horus Heresy. Thousand Sons and Chaos Daemons utilize these cursed depths to enact dark warp rituals, while Necrons slowly awaken from deep tombs buried beneath the ancient battlefields.", Icon: Skull, mapImage: 'map_sump_ruins.png' }, 
+  { name: 'The Toxic Oceans', lat: 60, lng: -110, narrative: "Chemical-soup seas vital for cooling the planet's massive industrial sectors. This territory serves as the prime staging ground for brutal naval-style beachhead assaults, amphibious landings, and efforts to purge mutated sea horrors.", Icon: Biohazard, mapImage: 'map_toxic_oceans.png' } 
 ];
 
 const FACTION_COLORS = {
