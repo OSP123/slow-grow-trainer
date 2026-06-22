@@ -115,11 +115,15 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchEffort() {
       try {
-        const { data: cState } = await supabase.from('campaign_state').select('*').single();
-        if (cState) setCampaignState(cState);
+        try {
+          const { data: cState } = await supabase.from('campaign_state').select('*').single();
+          if (cState) setCampaignState(cState);
+        } catch (err) {}
 
-        const { data: terrs } = await supabase.from('territories').select('*');
-        if (terrs) setTerritoryStats(terrs);
+        try {
+          const { data: terrs } = await supabase.from('territories').select('*');
+          if (terrs) setTerritoryStats(terrs);
+        } catch (err) {}
 
         try {
           const { data: locations } = await supabase.from('map_locations').select('*');
@@ -132,15 +136,35 @@ export default function Dashboard() {
           if (profile) setCurrentUserFaction(profile.army_faction);
         }
 
-        const { data: matchups, error } = await supabase
+        let matchups: any[] | null = null;
+        let matchupsError = false;
+
+        // Try matchups with private_profiles join
+        const { data: matchupsData, error } = await supabase
           .from('matchups')
           .select('theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, army_faction, avatar_url, army_lore, campaign_status, private_profiles(discord_name)), p2_profile:profiles!p2_id(commander_name, army_faction, avatar_url, army_lore, campaign_status, private_profiles(discord_name))')
           .in('game_result', ['P1_WIN', 'P2_WIN', 'p1_win', 'p2_win']);
 
-        if (error) {
-          console.error("Error fetching matchups:", error);
+        if (!error && matchupsData) {
+          matchups = matchupsData;
+        } else {
+          // Fallback: try without private_profiles join
+          const { data: matchupsFallback, error: fallbackErr } = await supabase
+            .from('matchups')
+            .select('theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, army_faction, avatar_url, army_lore, campaign_status), p2_profile:profiles!p2_id(commander_name, army_faction, avatar_url, army_lore, campaign_status)')
+            .in('game_result', ['P1_WIN', 'P2_WIN', 'p1_win', 'p2_win']);
+
+          if (!fallbackErr && matchupsFallback) {
+            matchups = matchupsFallback;
+          } else {
+            console.error("Error fetching matchups:", error || fallbackErr);
+            matchupsError = true;
+          }
+        }
+
+        if (matchupsError || !matchups) {
           setTheatres(THEATRES_OF_WAR.map(t => ({ ...t, isBase: true, color: '#ef4444' })));
-          return;
+          // Don't return — still need to fetch commanders below
         }
 
         if (matchups) {
@@ -313,10 +337,24 @@ export default function Dashboard() {
           if (eventData) setActiveEvents(eventData);
         } catch (err) {}
         try {
-          const { data: cmdrs } = await supabase
+          let cmdrs: any[] | null = null;
+          
+          // Try with deployment columns first (requires migration)
+          const { data: cmdrsWithDeploy, error: deployErr } = await supabase
             .from('profiles')
             .select('id, commander_name, army_faction, army_subfaction, avatar_url, army_lore, campaign_status, deployed_theatre, deployed_location_id, private_profiles(discord_name)')
             .order('commander_name', { ascending: true });
+          
+          if (!deployErr && cmdrsWithDeploy) {
+            cmdrs = cmdrsWithDeploy;
+          } else {
+            // Fallback: query without deployment columns for production where migration hasn't run
+            const { data: cmdrsFallback } = await supabase
+              .from('profiles')
+              .select('id, commander_name, army_faction, army_subfaction, avatar_url, army_lore, campaign_status, private_profiles(discord_name)')
+              .order('commander_name', { ascending: true });
+            cmdrs = cmdrsFallback;
+          }
             
           if (cmdrs) {
             setCommanders(cmdrs.filter(c => {
