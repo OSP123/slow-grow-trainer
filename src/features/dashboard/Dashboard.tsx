@@ -886,11 +886,9 @@ export default function Dashboard() {
                     )}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.2rem', color: 'var(--theme-fg)', display: 'flex', alignItems: 'center' }}>
-                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
-                        {cmd.commander_name || 'Classified'}
-                      </span>
-                      {cmd.discord_name && <span style={{ flexShrink: 0, fontSize: '0.8rem', color: 'var(--theme-fg-muted)', marginLeft: '0.5rem', fontWeight: 'normal' }}>({cmd.discord_name})</span>}
+                    <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.2rem', color: 'var(--theme-fg)', wordBreak: 'break-word' }}>
+                      {cmd.commander_name || 'Classified'}
+                      {cmd.discord_name && <span style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', marginLeft: '0.5rem', fontWeight: 'normal' }}>({cmd.discord_name})</span>}
                     </h3>
                     <div style={{ fontSize: '0.8rem', color: 'var(--theme-accent)', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {cmd.army_faction || 'Unknown Faction'}
