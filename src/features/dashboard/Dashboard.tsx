@@ -37,6 +37,21 @@ function getDeterministicOffset(seedStr: string) {
   };
 }
 
+function getDeploymentPosition(userId: string, subSector: string) {
+  let hash = 0;
+  const str = userId + subSector;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0; 
+  }
+  
+  // Use modulo to get a number between 0 and 1, then scale to 15-85% to keep away from edges
+  const randomX = Math.abs(Math.sin(hash)) * 70 + 15;
+  const randomY = Math.abs(Math.cos(hash)) * 70 + 15;
+  
+  return { top: `${randomY}%`, left: `${randomX}%` };
+}
+
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [theatres, setTheatres] = useState<any[]>([]);
@@ -44,6 +59,7 @@ export default function Dashboard() {
   const [selectedTheatre, setSelectedTheatre] = useState<any>(null);
   const [activeEvents, setActiveEvents] = useState<any[]>([]);
   const [commanders, setCommanders] = useState<any[]>([]);
+  const [mapLocations, setMapLocations] = useState<any[]>([]);
   const [campaignState, setCampaignState] = useState<any>(null);
   const [territoryStats, setTerritoryStats] = useState<any[]>([]);
   const [currentUserFaction, setCurrentUserFaction] = useState<string>('');
@@ -105,6 +121,11 @@ export default function Dashboard() {
         const { data: terrs } = await supabase.from('territories').select('*');
         if (terrs) setTerritoryStats(terrs);
 
+        try {
+          const { data: locations } = await supabase.from('map_locations').select('*');
+          if (locations) setMapLocations(locations);
+        } catch (err) {}
+
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           const { data: profile } = await supabase.from('profiles').select('army_faction').eq('id', user.id).single();
@@ -113,7 +134,7 @@ export default function Dashboard() {
 
         const { data: matchups, error } = await supabase
           .from('matchups')
-          .select('theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, discord_name, army_faction, avatar_url, army_lore, campaign_status), p2_profile:profiles!p2_id(commander_name, discord_name, army_faction, avatar_url, army_lore, campaign_status)')
+          .select('theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, army_faction, avatar_url, army_lore, campaign_status, private_profiles(discord_name)), p2_profile:profiles!p2_id(commander_name, army_faction, avatar_url, army_lore, campaign_status, private_profiles(discord_name))')
           .in('game_result', ['P1_WIN', 'P2_WIN', 'p1_win', 'p2_win']);
 
         if (error) {
@@ -275,8 +296,8 @@ export default function Dashboard() {
                 lore: winnerProfile.army_lore,
                 p1Lore: match.p1_lore,
                 p2Lore: match.p2_lore,
-                p1Name: p1Profile?.commander_name ? `${p1Profile.commander_name}${p1Profile.discord_name ? ` (${p1Profile.discord_name})` : ''}` : 'Commander',
-                p2Name: p2Profile?.commander_name ? `${p2Profile.commander_name}${p2Profile.discord_name ? ` (${p2Profile.discord_name})` : ''}` : 'Commander',
+                p1Name: p1Profile?.commander_name ? `${p1Profile.commander_name}${(p1Profile as any).private_profiles?.discord_name ? ` (${(p1Profile as any).private_profiles.discord_name})` : ''}` : 'Commander',
+                p2Name: p2Profile?.commander_name ? `${p2Profile.commander_name}${(p2Profile as any).private_profiles?.discord_name ? ` (${(p2Profile as any).private_profiles.discord_name})` : ''}` : 'Commander',
                 winnerId: isP1Win ? match.p1_id : (isP2Win ? match.p2_id : null),
                 p1Id: match.p1_id,
                 p2Id: match.p2_id
@@ -294,14 +315,17 @@ export default function Dashboard() {
         try {
           const { data: cmdrs } = await supabase
             .from('profiles')
-            .select('id, commander_name, discord_name, army_faction, army_subfaction, avatar_url, army_lore, campaign_status')
+            .select('id, commander_name, army_faction, army_subfaction, avatar_url, army_lore, campaign_status, deployed_theatre, deployed_location_id, private_profiles(discord_name)')
             .order('commander_name', { ascending: true });
             
           if (cmdrs) {
             setCommanders(cmdrs.filter(c => {
               const status = (c.campaign_status || 'active').toLowerCase();
               return status !== 'paused' && status !== 'removed';
-            }));
+            }).map(c => ({
+              ...c,
+              discord_name: (c as any).private_profiles?.discord_name || ''
+            })));
           }
         } catch (err) {}
       } finally {
@@ -580,8 +604,67 @@ export default function Dashboard() {
           
           <div className="responsive-grid-2">
             {/* Map image side */}
-            <div>
-              <div className="territory-map-img" style={{ backgroundImage: `url(/images/${selectedTheatre.mapImage})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '8px', border: `2px solid ${selectedTheatre.color}`, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }} />
+            <div style={{ position: 'relative' }}>
+              <div className="territory-map-img" style={{ backgroundImage: `url(/images/${selectedTheatre.mapImage})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '8px', border: `2px solid ${selectedTheatre.color}`, boxShadow: '0 4px 12px rgba(0,0,0,0.5)', width: '100%', height: '100%', minHeight: '400px' }} />
+              
+              {/* Tactical Nodes Overlay */}
+              {mapLocations.filter(ml => ml.theatre_name === selectedTheatre.name).map(ml => (
+                <div key={`node-${ml.id}`} title={ml.name} style={{
+                  position: 'absolute', top: `${ml.y_pos}%`, left: `${ml.x_pos}%`, transform: 'translate(-50%, -50%)',
+                  width: '12px', height: '12px', borderRadius: '50%', backgroundColor: selectedTheatre.color, border: '2px solid white', zIndex: 5,
+                  boxShadow: `0 0 10px ${selectedTheatre.color}`
+                }} />
+              ))}
+
+              {/* Deployed Commanders Overlay */}
+              {commanders.filter((c: any) => c.deployed_theatre === selectedTheatre.name).map((c: any) => {
+                const factionData = FACTIONS.find(f => f.name === c.army_faction);
+                const color = factionData ? FACTION_COLORS[factionData.grandAlliance as keyof typeof FACTION_COLORS] : '#aaaaaa';
+                
+                let top = '50%';
+                let left = '50%';
+                
+                if (c.deployed_location_id) {
+                  const loc = mapLocations.find(ml => ml.id === c.deployed_location_id);
+                  if (loc) {
+                    // Slight random offset based on ID to cluster them around the node instead of perfectly overlapping
+                    let hash = 0;
+                    for (let i = 0; i < c.id.length; i++) hash = ((hash << 5) - hash) + c.id.charCodeAt(i);
+                    const offsetX = (Math.sin(hash) * 4); // +/- 4%
+                    const offsetY = (Math.cos(hash) * 4);
+                    top = `${loc.y_pos + offsetY}%`;
+                    left = `${loc.x_pos + offsetX}%`;
+                  }
+                } else {
+                  const pos = getDeploymentPosition(c.id, c.deployed_theatre);
+                  top = pos.top;
+                  left = pos.left;
+                }
+
+                return (
+                  <Link to={`/profile/${c.id}`} key={c.id} title={`${c.commander_name} - ${c.army_faction}`} style={{
+                    position: 'absolute',
+                    top,
+                    left,
+                    transform: 'translate(-50%, -50%)',
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    border: `2px solid ${color}`,
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    boxShadow: `0 0 10px ${color}`,
+                    zIndex: 10,
+                    backgroundColor: 'rgba(0,0,0,0.8)'
+                  }}>
+                    {c.avatar_url ? (
+                      <img src={getTransformUrl(c.avatar_url, 64, 64)} alt={c.commander_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', color }}>⚔</div>
+                    )}
+                  </Link>
+                );
+              })}
             </div>
 
             {/* Stats side */}

@@ -88,6 +88,14 @@ export default function AdminDashboard() {
   const [userMessage, setUserMessage] = useState('');
   const [confirmAction, setConfirmAction] = useState<{ type: 'pause' | 'resume' | 'remove', userId: string, userName: string } | null>(null);
 
+  // Map Editor
+  const [mapLocations, setMapLocations] = useState<any[]>([]);
+  const [fetchingMaps, setFetchingMaps] = useState(false);
+  const [selectedMapEditorTheatre, setSelectedMapEditorTheatre] = useState('');
+  const [newMapLocationName, setNewMapLocationName] = useState('');
+  const [newMapLocationPos, setNewMapLocationPos] = useState<{x: number, y: number} | null>(null);
+  const [mapMessage, setMapMessage] = useState('');
+
   // Unit Points management
   const { unitsByFaction, refreshRegistry } = useUnitRegistry();
   const [unitPoints, setUnitPoints] = useState<UnitPoint[]>([]);
@@ -114,11 +122,51 @@ export default function AdminDashboard() {
           fetchUsers();
           fetchGlobalEvents();
           fetchCampaignState();
+          fetchMapLocations();
         }
       }
       setLoading(false);
     });
   }, []);
+
+  const fetchMapLocations = async () => {
+    setFetchingMaps(true);
+    const { data } = await supabase.from('map_locations').select('*').order('created_at', { ascending: false });
+    if (data) setMapLocations(data);
+    setFetchingMaps(false);
+  };
+
+  const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setNewMapLocationPos({ x, y });
+    setNewMapLocationName('');
+  };
+
+  const handleSaveMapLocation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMapLocationPos || !selectedMapEditorTheatre || !newMapLocationName) return;
+    const { error } = await supabase.from('map_locations').insert({
+      theatre_name: selectedMapEditorTheatre,
+      name: newMapLocationName,
+      x_pos: newMapLocationPos.x,
+      y_pos: newMapLocationPos.y
+    });
+    if (error) {
+      setMapMessage('Error: ' + error.message);
+    } else {
+      setMapMessage('Location saved successfully.');
+      setNewMapLocationPos(null);
+      setNewMapLocationName('');
+      fetchMapLocations();
+    }
+  };
+
+  const handleDeleteMapLocation = async (id: string) => {
+    await supabase.from('map_locations').delete().eq('id', id);
+    fetchMapLocations();
+  };
 
   const fetchStores = async () => {
     const { data } = await supabase.from('game_stores').select('*').order('name');
@@ -226,6 +274,8 @@ export default function AdminDashboard() {
       army_faction: editingUser.army_faction,
       location: editingUser.location,
       experience_level: editingUser.experience_level,
+      deployed_location_id: editingUser.deployed_location_id || null,
+      deployed_theatre: editingUser.deployed_theatre || null,
     }).eq('id', editingUser.id);
     if (error) {
       setUserMessage('Error: ' + error.message);
@@ -688,6 +738,115 @@ export default function AdminDashboard() {
         )}
       </div>
 
+      {/* ── MAP EDITOR ── */}
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <h2>Interactive Map Editor</h2>
+        <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1rem' }}>
+          Define precise tactical points on the territory maps. Click on the map to drop a pin, then name it. You can deploy commanders directly to these locations.
+        </p>
+
+        {mapMessage && (
+          <div style={{ marginBottom: '1rem', padding: '0.75rem', border: '1px solid var(--theme-accent)', color: 'var(--theme-accent)', fontSize: '0.85rem' }}>
+            {mapMessage}
+          </div>
+        )}
+
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px' }}>Select Theatre of War to Edit</label>
+          <select value={selectedMapEditorTheatre} onChange={e => { setSelectedMapEditorTheatre(e.target.value); setNewMapLocationPos(null); }} style={{ padding: '0.5rem', width: '300px' }}>
+            <option value="">-- Choose Theatre --</option>
+            <option value="The Hive Spires">The Hive Spires</option>
+            <option value="The Magma Forges">The Magma Forges</option>
+            <option value="The Sump Ruins">The Sump Ruins</option>
+            <option value="The Ash Wastes">The Ash Wastes</option>
+            <option value="The Toxic Oceans">The Toxic Oceans</option>
+            <option value="Orbital Defense Grid">Orbital Defense Grid</option>
+          </select>
+        </div>
+
+        {selectedMapEditorTheatre && (
+          <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 500px' }}>
+              {(() => {
+                const imgMap: any = {
+                  'The Hive Spires': 'map_hive_spires.png',
+                  'The Magma Forges': 'map_magma_forges.png',
+                  'The Sump Ruins': 'map_sump_ruins.png',
+                  'The Ash Wastes': 'map_ash_wastes.png',
+                  'The Toxic Oceans': 'map_toxic_oceans.png',
+                  'Orbital Defense Grid': 'map_orbital_defense.png'
+                };
+                return (
+                  <div 
+                    onClick={handleMapClick}
+                    style={{ 
+                      position: 'relative', 
+                      width: '100%', 
+                      paddingBottom: '60%', 
+                      backgroundImage: `url(/images/${imgMap[selectedMapEditorTheatre]})`, 
+                      backgroundSize: 'cover', 
+                      backgroundPosition: 'center', 
+                      borderRadius: '8px', 
+                      border: '2px solid var(--theme-border)', 
+                      cursor: 'crosshair',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.5)' 
+                    }}
+                  >
+                    {mapLocations.filter(ml => ml.theatre_name === selectedMapEditorTheatre).map(ml => (
+                      <div key={ml.id} title={ml.name} style={{
+                        position: 'absolute', top: `${ml.y_pos}%`, left: `${ml.x_pos}%`, transform: 'translate(-50%, -50%)',
+                        width: '16px', height: '16px', borderRadius: '50%', backgroundColor: 'var(--theme-accent)', border: '2px solid white', zIndex: 5
+                      }} />
+                    ))}
+                    
+                    {newMapLocationPos && (
+                      <div style={{
+                        position: 'absolute', top: `${newMapLocationPos.y}%`, left: `${newMapLocationPos.x}%`, transform: 'translate(-50%, -50%)',
+                        width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#ef4444', border: '2px solid white', zIndex: 10,
+                        boxShadow: '0 0 10px #ef4444'
+                      }} />
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+            
+            <div style={{ flex: '1 1 300px' }}>
+              {newMapLocationPos ? (
+                <form onSubmit={handleSaveMapLocation} className="card" style={{ padding: '1.5rem', backgroundColor: 'var(--theme-bg-secondary)' }}>
+                  <h3 style={{ marginTop: 0 }}>Save New Location</h3>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)' }}>X: {newMapLocationPos.x.toFixed(2)}%, Y: {newMapLocationPos.y.toFixed(2)}%</p>
+                  <input type="text" placeholder="Location Name (e.g. Sector Alpha)" value={newMapLocationName} onChange={e => setNewMapLocationName(e.target.value)} required style={{ width: '100%', padding: '0.75rem', marginBottom: '1rem', boxSizing: 'border-box' }} />
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button type="submit" className="btn primary">Save Location</button>
+                    <button type="button" onClick={() => setNewMapLocationPos(null)} className="btn secondary">Cancel</button>
+                  </div>
+                </form>
+              ) : (
+                <div style={{ padding: '1rem', border: '1px dashed var(--theme-border)', borderRadius: '8px', color: 'var(--theme-fg-muted)', textAlign: 'center' }}>
+                  Click anywhere on the map to drop a new tactical pin.
+                </div>
+              )}
+
+              <div style={{ marginTop: '2rem' }}>
+                <h3>Registered Locations</h3>
+                {fetchingMaps ? <p>Loading...</p> : (
+                  <ul style={{ listStyle: 'none', padding: 0 }}>
+                    {mapLocations.filter(ml => ml.theatre_name === selectedMapEditorTheatre).length === 0 && <span style={{ color: 'var(--theme-fg-muted)' }}>No locations defined for this theatre.</span>}
+                    {mapLocations.filter(ml => ml.theatre_name === selectedMapEditorTheatre).map(ml => (
+                      <li key={ml.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', borderBottom: '1px solid var(--theme-border)' }}>
+                        <span>{ml.name}</span>
+                        <button onClick={() => handleDeleteMapLocation(ml.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.75rem' }}>Delete</button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* ── CAMPAIGN ROSTER & PAYMENTS ── */}
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h2 style={{ marginBottom: '0.5rem' }}>Campaign Roster & Payments</h2>
@@ -714,6 +873,7 @@ export default function AdminDashboard() {
                 <th style={{ padding: '0.5rem' }}>Discord</th>
                 <th style={{ padding: '0.5rem' }}>Faction</th>
                 <th style={{ padding: '0.5rem' }}>Location</th>
+                <th style={{ padding: '0.5rem' }}>Deployment</th>
                 <th style={{ padding: '0.5rem' }}>Milestones Reached</th>
                 <th style={{ padding: '0.5rem', textAlign: 'center' }}>Payment Status</th>
                 <th style={{ padding: '0.5rem' }}>Actions</th>
@@ -733,6 +893,7 @@ export default function AdminDashboard() {
                     <td style={{ padding: '0.5rem', color: 'var(--theme-fg-muted)' }}>{u.discord_name || '—'}</td>
                     <td style={{ padding: '0.5rem' }}>{u.army_faction || '—'}</td>
                     <td style={{ padding: '0.5rem', color: 'var(--theme-fg-muted)' }}>{u.location || '—'}</td>
+                    <td style={{ padding: '0.5rem', color: 'var(--theme-accent)', fontWeight: 'bold' }}>{u.deployed_theatre || 'Undeployed'}</td>
                     <td style={{ padding: '0.5rem', fontSize: '0.75rem' }}>
                       {u.hobby_milestones && u.hobby_milestones.length > 0 ? (
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
@@ -813,6 +974,29 @@ export default function AdminDashboard() {
                               <option value="experienced">Experienced</option>
                             </select>
                           </div>
+                          <div style={{ flex: '1 1 150px' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px' }}>Deployment</label>
+                            <select value={editingUser.deployed_theatre || ''} onChange={e => setEditingUser({ ...editingUser, deployed_theatre: e.target.value, deployed_location_id: null })} style={{ width: '100%', padding: '0.5rem' }}>
+                              <option value="">Undeployed</option>
+                              <option value="The Hive Spires">The Hive Spires</option>
+                              <option value="The Magma Forges">The Magma Forges</option>
+                              <option value="The Sump Ruins">The Sump Ruins</option>
+                              <option value="The Ash Wastes">The Ash Wastes</option>
+                              <option value="The Toxic Oceans">The Toxic Oceans</option>
+                              <option value="Orbital Defense Grid">Orbital Defense Grid</option>
+                            </select>
+                          </div>
+                          {editingUser.deployed_theatre && (
+                            <div style={{ flex: '1 1 150px' }}>
+                              <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '4px' }}>Specific Location</label>
+                              <select value={editingUser.deployed_location_id || ''} onChange={e => setEditingUser({ ...editingUser, deployed_location_id: e.target.value || null })} style={{ width: '100%', padding: '0.5rem' }}>
+                                <option value="">Random Deployment (Scattered)</option>
+                                {mapLocations.filter(ml => ml.theatre_name === editingUser.deployed_theatre).map(ml => (
+                                  <option key={ml.id} value={ml.id}>{ml.name}</option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
                           <div style={{ display: 'flex', gap: '0.5rem' }}>
                             <button type="submit" className="btn primary" style={{ padding: '0.5rem 1rem' }}>Save</button>
                             <button type="button" onClick={() => setEditingUserId(null)} className="btn secondary" style={{ padding: '0.5rem 1rem' }}>Cancel</button>

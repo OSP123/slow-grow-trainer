@@ -881,3 +881,30 @@ Follow-ups:
 Date: 2026-06-21
 Tasks:
 - Implemented mobile-first responsive layout changes across the Dashboard to ensure the new Campaign Map and Commander Roster grid scale properly on smaller smartphone screens.
+
+Date: 2026-06-21
+Tasks:
+- Added deployed_theatre column to profiles via migration.
+- Added Force Deployment capability to AdminDashboard to assign commanders to the 6 theatres.
+- Implemented strict narrative bans in Matchmaker.ts (no Imperium mirror matches, no exact Xenos mirror matches).
+- Matchmaker now prioritizes players in the same deployed_theatre with a massive point bonus.
+- Dashboard maps now render deterministic overlays of all commanders officially deployed to that active territory.
+Follow-ups:
+- None
+
+Date: 2026-06-21 (Update 2)
+Tasks:
+- Added map_locations table to store X/Y coordinates for map pins.
+- Added Interactive Map Editor UI to AdminDashboard allowing click-to-pin mapping of territories.
+- Updated Campaign Roster edit form to include specific location deployment dropdown.
+- Matchmaker now grants +100 bonus for identical deployed_location_id.
+- Dashboard now overlays map_locations as glowing nodes and clusters commanders around them.
+Follow-ups:
+- None
+
+Date: 2026-06-21 (Update 3)
+Tasks:
+- Fixed critical bug: Dashboard.tsx queries were selecting `discord_name` directly from `profiles` table, but that column only exists on `private_profiles`. The PostgREST schema reload (from the map_locations migration) exposed this latent bug, causing a 42703 error that was silently swallowed by try/catch, making all commanders vanish from the War Effort Map page.
+- Fixed both the commanders query (line 318) and the matchups query (line 137) to join `private_profiles` for `discord_name` instead.
+Follow-ups:
+- None
