@@ -865,7 +865,8 @@ export default function AdminDashboard() {
         ) : users.length === 0 ? (
           <p style={{ color: 'var(--theme-fg-muted)' }}>No commanders registered yet.</p>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+          <div style={{ overflowX: 'auto', paddingBottom: '0.5rem' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid var(--theme-border)', textAlign: 'left' }}>
                 <th style={{ padding: '0.5rem' }}>Commander</th>
@@ -983,7 +984,7 @@ export default function AdminDashboard() {
                               <option value="The Sump Ruins">The Sump Ruins</option>
                               <option value="The Ash Wastes">The Ash Wastes</option>
                               <option value="The Toxic Oceans">The Toxic Oceans</option>
-                              <option value="Orbital Defense Grid">Orbital Defense Grid</option>
+                              <option value="Orbital Relay Station">Orbital Relay Station</option>
                             </select>
                           </div>
                           {editingUser.deployed_theatre && (
@@ -1009,7 +1010,8 @@ export default function AdminDashboard() {
                 </React.Fragment>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         )}
       </div>
 
