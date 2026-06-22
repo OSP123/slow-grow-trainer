@@ -148,17 +148,27 @@ export default function Dashboard() {
         if (!error && matchupsData) {
           matchups = matchupsData;
         } else {
-          // Fallback: try without private_profiles join
+          // Fallback: try without private_profiles join, selecting discord_name directly from profiles
           const { data: matchupsFallback, error: fallbackErr } = await supabase
             .from('matchups')
-            .select('theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, army_faction, avatar_url, army_lore, campaign_status), p2_profile:profiles!p2_id(commander_name, army_faction, avatar_url, army_lore, campaign_status)')
+            .select('theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, discord_name, army_faction, avatar_url, army_lore, campaign_status), p2_profile:profiles!p2_id(commander_name, discord_name, army_faction, avatar_url, army_lore, campaign_status)')
             .in('game_result', ['P1_WIN', 'P2_WIN', 'p1_win', 'p2_win']);
 
           if (!fallbackErr && matchupsFallback) {
             matchups = matchupsFallback;
           } else {
-            console.error("Error fetching matchups:", error || fallbackErr);
-            matchupsError = true;
+            // Ultimate fallback without discord_name at all just in case
+            const { data: matchupsUlt } = await supabase
+              .from('matchups')
+              .select('theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, army_faction, avatar_url, army_lore, campaign_status), p2_profile:profiles!p2_id(commander_name, army_faction, avatar_url, army_lore, campaign_status)')
+              .in('game_result', ['P1_WIN', 'P2_WIN', 'p1_win', 'p2_win']);
+              
+            if (matchupsUlt) {
+              matchups = matchupsUlt;
+            } else {
+              console.error("Error fetching matchups:", error || fallbackErr);
+              matchupsError = true;
+            }
           }
         }
 
@@ -348,12 +358,22 @@ export default function Dashboard() {
           if (!deployErr && cmdrsWithDeploy) {
             cmdrs = cmdrsWithDeploy;
           } else {
-            // Fallback: query without deployment columns for production where migration hasn't run
-            const { data: cmdrsFallback } = await supabase
+            // Fallback: try selecting discord_name directly from profiles (how it is in production)
+            const { data: cmdrsFallback, error: fallbackErr } = await supabase
               .from('profiles')
-              .select('id, commander_name, army_faction, army_subfaction, avatar_url, army_lore, campaign_status, private_profiles(discord_name)')
+              .select('id, commander_name, discord_name, army_faction, army_subfaction, avatar_url, army_lore, campaign_status')
               .order('commander_name', { ascending: true });
-            cmdrs = cmdrsFallback;
+              
+            if (!fallbackErr && cmdrsFallback) {
+              cmdrs = cmdrsFallback;
+            } else {
+              // Ultimate fallback: without discord_name at all
+              const { data: cmdrsUlt } = await supabase
+                .from('profiles')
+                .select('id, commander_name, army_faction, army_subfaction, avatar_url, army_lore, campaign_status')
+                .order('commander_name', { ascending: true });
+              cmdrs = cmdrsUlt;
+            }
           }
             
           if (cmdrs) {
@@ -362,7 +382,7 @@ export default function Dashboard() {
               return status !== 'paused' && status !== 'removed';
             }).map(c => ({
               ...c,
-              discord_name: (c as any).private_profiles?.discord_name || ''
+              discord_name: c.discord_name || ((c as any).private_profiles?.discord_name) || ''
             })));
           }
         } catch (err) {}
