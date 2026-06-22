@@ -578,10 +578,10 @@ export default function Dashboard() {
             <button onClick={() => setSelectedTheatre(null)} className="btn secondary" style={{ padding: '0.5rem 1rem' }}>Close Dashboard</button>
           </div>
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'start' }}>
+          <div className="responsive-grid-2">
             {/* Map image side */}
             <div>
-              <div style={{ width: '100%', height: '400px', backgroundImage: `url(/images/${selectedTheatre.mapImage})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '8px', border: `2px solid ${selectedTheatre.color}`, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }} />
+              <div className="territory-map-img" style={{ backgroundImage: `url(/images/${selectedTheatre.mapImage})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '8px', border: `2px solid ${selectedTheatre.color}`, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }} />
             </div>
 
             {/* Stats side */}
@@ -652,7 +652,7 @@ export default function Dashboard() {
         {commanders.length === 0 ? (
           <p style={{ color: 'var(--theme-fg-muted)' }}>No active commanders registered.</p>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
             {commanders.map(cmd => (
               <div key={cmd.id} style={{ backgroundColor: 'var(--theme-bg-secondary)', borderRadius: '6px', border: '1px solid var(--theme-border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', padding: '1rem', borderBottom: '1px solid var(--theme-border)', alignItems: 'center', gap: '1rem', backgroundColor: 'rgba(0,0,0,0.2)' }}>

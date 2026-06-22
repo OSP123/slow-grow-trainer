@@ -877,3 +877,7 @@ Tasks:
 - Relocated the Territory Detail Panel in Dashboard.tsx to sit directly beneath the interactive Globe.
 Follow-ups:
 - None
+
+Date: 2026-06-21
+Tasks:
+- Implemented mobile-first responsive layout changes across the Dashboard to ensure the new Campaign Map and Commander Roster grid scale properly on smaller smartphone screens.
