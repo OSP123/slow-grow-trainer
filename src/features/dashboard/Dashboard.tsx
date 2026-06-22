@@ -769,73 +769,6 @@ export default function Dashboard() {
                           </div>
                         )}
 
-      <div className="card">
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', borderBottom: '2px solid var(--theme-border)', paddingBottom: '0.5rem', color: 'var(--theme-accent)' }}>Forces Deployed</h2>
-        {sortedFactions.length === 0 ? (
-          <p style={{ color: 'var(--theme-fg-muted)' }}>No forces currently deployed.</p>
-        ) : (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-            {sortedFactions.map(([faction, count]) => (
-              <div key={faction} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: 'var(--theme-bg)', padding: '0.75rem 1.25rem', borderRadius: '8px', border: '1px solid var(--theme-border)' }}>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontWeight: 'bold', color: 'var(--theme-fg)' }}>{faction}</span>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--theme-fg-muted)' }}>{count} Commander{count !== 1 ? 's' : ''}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="card">
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', borderBottom: '2px solid var(--theme-border)', paddingBottom: '0.5rem', color: 'var(--theme-accent)' }}>Sector Command Roster</h2>
-        
-        {commanders.length === 0 ? (
-          <p style={{ color: 'var(--theme-fg-muted)' }}>No active commanders registered.</p>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-            {commanders.map(cmd => (
-              <div key={cmd.id} style={{ backgroundColor: 'var(--theme-bg-secondary)', borderRadius: '6px', border: '1px solid var(--theme-border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ display: 'flex', padding: '1rem', borderBottom: '1px solid var(--theme-border)', alignItems: 'center', gap: '1rem', backgroundColor: 'rgba(0,0,0,0.2)' }}>
-                  <div style={{ width: '60px', height: '60px', borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--theme-bg)', flexShrink: 0, border: '2px solid var(--theme-accent)' }}>
-                    {cmd.avatar_url ? (
-                      <img src={getTransformUrl(cmd.avatar_url, 120, 60)} alt={cmd.commander_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>⚔</div>
-                    )}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.2rem', color: 'var(--theme-fg)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {cmd.commander_name || 'Classified'}
-                      {cmd.discord_name && <span style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', marginLeft: '0.5rem', fontWeight: 'normal' }}>({cmd.discord_name})</span>}
-                    </h3>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--theme-accent)', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {cmd.army_faction || 'Unknown Faction'}
-                      {cmd.army_subfaction ? ` - ${cmd.army_subfaction}` : ''}
-                    </div>
-                  </div>
-                </div>
-                
-                <div style={{ padding: '1rem', flex: 1 }}>
-                  <div style={{ fontSize: '0.9rem', color: 'var(--theme-fg-muted)', fontStyle: 'italic', lineHeight: 1.5 }}>
-                    {cmd.army_lore ? (
-                      `"${cmd.army_lore.substring(0, 150)}${cmd.army_lore.length > 150 ? '...' : ''}"`
-                    ) : (
-                      "No narrative chronicles recorded for this commander."
-                    )}
-                  </div>
-                </div>
-                
-                <div style={{ padding: '1rem', paddingTop: 0 }}>
-                  <Link to={`/profile/${cmd.id}`} className="btn secondary" style={{ width: '100%', textAlign: 'center', display: 'block', boxSizing: 'border-box' }}>
-                    View Full Dossier
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
                         {t.tau_foothold > 0 && (
                           <div>
@@ -916,6 +849,75 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      <div className="card">
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', borderBottom: '2px solid var(--theme-border)', paddingBottom: '0.5rem', color: 'var(--theme-accent)' }}>Forces Deployed</h2>
+        {sortedFactions.length === 0 ? (
+          <p style={{ color: 'var(--theme-fg-muted)' }}>No forces currently deployed.</p>
+        ) : (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+            {sortedFactions.map(([faction, count]) => (
+              <div key={faction} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: 'var(--theme-bg)', padding: '0.75rem 1.25rem', borderRadius: '8px', border: '1px solid var(--theme-border)' }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontWeight: 'bold', color: 'var(--theme-fg)' }}>{faction}</span>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--theme-fg-muted)' }}>{count} Commander{count !== 1 ? 's' : ''}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', borderBottom: '2px solid var(--theme-border)', paddingBottom: '0.5rem', color: 'var(--theme-accent)' }}>Sector Command Roster</h2>
+        
+        {commanders.length === 0 ? (
+          <p style={{ color: 'var(--theme-fg-muted)' }}>No active commanders registered.</p>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+            {commanders.map(cmd => (
+              <div key={cmd.id} style={{ backgroundColor: 'var(--theme-bg-secondary)', borderRadius: '6px', border: '1px solid var(--theme-border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', padding: '1rem', borderBottom: '1px solid var(--theme-border)', alignItems: 'center', gap: '1rem', backgroundColor: 'rgba(0,0,0,0.2)' }}>
+                  <div style={{ width: '60px', height: '60px', borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--theme-bg)', flexShrink: 0, border: '2px solid var(--theme-accent)' }}>
+                    {cmd.avatar_url ? (
+                      <img src={getTransformUrl(cmd.avatar_url, 120, 60)} alt={cmd.commander_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>⚔</div>
+                    )}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.2rem', color: 'var(--theme-fg)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {cmd.commander_name || 'Classified'}
+                      {cmd.discord_name && <span style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', marginLeft: '0.5rem', fontWeight: 'normal' }}>({cmd.discord_name})</span>}
+                    </h3>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--theme-accent)', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {cmd.army_faction || 'Unknown Faction'}
+                      {cmd.army_subfaction ? ` - ${cmd.army_subfaction}` : ''}
+                    </div>
+                  </div>
+                </div>
+                
+                <div style={{ padding: '1rem', flex: 1 }}>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--theme-fg-muted)', fontStyle: 'italic', lineHeight: 1.5 }}>
+                    {cmd.army_lore ? (
+                      `"${cmd.army_lore.substring(0, 150)}${cmd.army_lore.length > 150 ? '...' : ''}"`
+                    ) : (
+                      "No narrative chronicles recorded for this commander."
+                    )}
+                  </div>
+                </div>
+                
+                <div style={{ padding: '1rem', paddingTop: 0 }}>
+                  <Link to={`/profile/${cmd.id}`} className="btn secondary" style={{ width: '100%', textAlign: 'center', display: 'block', boxSizing: 'border-box' }}>
+                    View Full Dossier
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }

@@ -10,14 +10,14 @@ describe('Matchmaker Simulation Algorithm Engine', () => {
     
     const results = generateMatchups(pool);
     expect(results).toHaveLength(1);
-    expect(results[0].score).toBe(18); // 10 (location) + 5 (exp) + 3 (different faction)
+    expect(results[0].score).toBe(35); // 10 (location) + 5 (exp) + 20 (attacker vs defender)
   });
 
   it('correctly prioritizes tighter geographic groupings over differing parameters', () => {
     const pool: CommanderProfile[] = [
       { id: '1', location: 'Seattle', experience_level: 'beginner', army_faction: 'Orks', commander_name: 'Target Player' },
-      { id: '2', location: 'New York', experience_level: 'beginner', army_faction: 'Space Marines', commander_name: 'Weaker Geospatial Match' }, // Score: 0 + 5 + 3 = 8
-      { id: '3', location: 'Seattle', experience_level: 'expert', army_faction: 'Orks', commander_name: 'Strong Geospatial Match' }, // Score: 10 + 0 + 0 = 10
+      { id: '2', location: 'New York', experience_level: 'beginner', army_faction: 'Tyranids', commander_name: 'Weaker Geospatial Match' }, // Score: 0 (loc) + 5 (exp) + 0 (alliance) = 5
+      { id: '3', location: 'Seattle', experience_level: 'expert', army_faction: 'Tyranids', commander_name: 'Strong Geospatial Match' }, // Score: 10 (loc) + 0 (exp) + 0 (alliance) = 10
     ];
     
     // Mock Math.random to make the pop order deterministic

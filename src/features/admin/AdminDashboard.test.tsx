@@ -58,6 +58,16 @@ const mockFromUnlocked = (table: string) => {
       delete: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
     };
   }
+  if (table === 'campaign_state') {
+    return {
+      select: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: null, error: null }) })
+    };
+  }
+  if (table === 'map_locations') {
+    return {
+      select: vi.fn().mockReturnValue({ order: vi.fn().mockResolvedValue({ data: [], error: null }) })
+    };
+  }
   if (table === 'profiles') {
     const chainable = Promise.resolve({ data: [{ id: '1', commander_name: 'Test', payment_status: false }], error: null }) as any;
     chainable.eq = vi.fn().mockReturnValue(chainable);

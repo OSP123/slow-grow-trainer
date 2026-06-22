@@ -8,6 +8,8 @@ const createMockChain = (resolvedValue: any) => {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     in: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    single: vi.fn().mockResolvedValue(resolvedValue),
     maybeSingle: vi.fn().mockReturnThis(),
     then: (resolve: any) => Promise.resolve(resolvedValue).then(resolve)
   };
@@ -17,6 +19,9 @@ const createMockChain = (resolvedValue: any) => {
 vi.mock('../../supabaseClient', () => ({
   supabase: {
     from: vi.fn(),
+    auth: {
+      getUser: vi.fn().mockResolvedValue({ data: { user: null } })
+    }
   },
 }));
 

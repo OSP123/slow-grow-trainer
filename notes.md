@@ -908,3 +908,19 @@ Tasks:
 - Fixed both the commanders query (line 318) and the matchups query (line 137) to join `private_profiles` for `discord_name` instead.
 Follow-ups:
 - None
+
+Date: 2026-06-21 (Update 4)
+Tasks:
+- Fixed production crash: campaign_state and territories tables don't exist on production Supabase. Their queries (especially campaign_state with .single()) were throwing inside the outer try block, causing execution to jump to `finally` and skip the commanders fetch entirely.
+- Wrapped campaign_state, territories, and map_locations queries in individual try/catches.
+- Added fallback commanders query (without deployed_theatre/deployed_location_id columns) for when migration hasn't been applied to production yet.
+- Added fallback matchups query (without private_profiles join) and removed the early `return` that was blocking commander loading.
+Follow-ups:
+- Run migrations on production Supabase to add deployment columns and map_locations table
+
+Date: 2026-06-21 (Update 5)
+Tasks:
+- Realized the previous fallback strategy failed because production `profiles` *does* have a `discord_name` column, so `private_profiles` join was failing due to either RLS or table absence.
+- Pushed ultimate fallback queries for both matchups and commanders that directly select `discord_name` from `profiles` as it was originally built, bypassing the failed `private_profiles` join altogether.
+Follow-ups:
+- Verify production deployment restores commanders on the dashboard.
