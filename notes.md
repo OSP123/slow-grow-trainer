@@ -934,3 +934,42 @@ Tasks:
 - Updated Crucible of Champions interface, Supabase profile select query, DatasheetBuilder inputs, and DatasheetViewer displays to support Points and Unit Keywords.
 Follow-ups:
 - None
+
+Date: 2026-06-27 (Update 2)
+Tasks:
+- Built TacticalSectorMap component using clean SVG vector polygons and CRT scanlines to replace AI territory artwork on the War Effort Map.
+- Implemented individual lore-accurate coloring for all 8 Xenos factions (Orks, Necrons, Tyranids, T'au Empire, Aeldari, Drukhari, Leagues of Votann, Genestealer Cults) alongside Imperium and Chaos megafaction colors.
+- Integrated TacticalSectorMap into Dashboard.tsx territory detail view, updating globe pins and foothold progress bars to respect unique Xenos colors.
+Follow-ups:
+- None
+
+Date: 2026-06-27 (Update 3)
+Tasks:
+- Rewrote TacticalSectorMap component to fix critical issues: same shapes for every theatre, polygons not filling viewport, hover-only interaction broken on mobile.
+- Each of the 6 theatres now has its own unique sector layout with lore-appropriate names (e.g. The Hive Spires has Upper Spire/Administratum/Hab Blocks/Underhive/Transit Conduits/Sewer Networks).
+- Sector polygons now tile edge-to-edge filling the full 800x500 SVG viewport with zero gaps.
+- Changed interaction from hover-only to tap/click (works on mobile). Hover still works as a convenience on desktop.
+- Moved telemetry readout from a floating overlay (blocked content on mobile) to a panel below the map.
+- Added 10 new tests covering unique theatre sectors, tap interaction, toggle deselect, polygon count, and fallback sectors.
+Follow-ups:
+- Visual verification needed on mobile device to confirm tap behavior feels right.
+
+Date: 2026-06-27 (Update 4)
+Tasks:
+- Replaced arbitrary polygon approach with a proper flat-top hex grid (25 hexes, 7 columns × 3-4 rows, r=75) that tiles edge-to-edge across the 800x500 SVG viewport.
+- Each of the 6 theatres now has a unique sector assignment pattern grouping adjacent hexes into named territories (e.g. Hive Spires groups top hexes into Upper Spire, bottom into Sewer Networks).
+- Hex grid with coordinate labels (col.row) gives an authentic wargaming tactical display feel.
+- Interaction remains tap/click for mobile with hover as desktop convenience. Detail panel below the map.
+- 12 tests covering: faction colors, unique sectors per theatre, tap/click, toggle deselect, 25-polygon count, coordinate labels, all 6 theatres verified, fallback sectors.
+Follow-ups:
+- Visual verification needed on mobile device to confirm hex grid looks and feels right.
+
+Date: 2026-06-27 (Update 5)
+Tasks:
+- Completely redesigned `TacticalSectorMap.tsx` away from flat edge-to-edge geometric diagrams toward distinctive, organic landmass/fortress silhouettes centered in an Auspex holographic display.
+- Each of the 6 theatres now features a unique structural footprint (Pyramidal Spire Fortress, Sprawling Canyon Island, Heavy Industrial Refinery, Orbital Star Hub, Shattered Crater, and Offshore Archipelago).
+- Within each territory silhouette, the 5 sectors explicitly correspond to the 5 escalation rounds (Round 1: 400 pts through Round 5: 2000 pts), visually linked by escalation progression vectors.
+- Added rich SVG styling: glowing cybernetic drop shadows (`filter="url(#sectorGlow)"`), internal topographical wireframe contours, corner targeting brackets, coordinate grids, and an animated radar sweep.
+- All 64 automated tests pass and production build compiles cleanly.
+Follow-ups:
+- User verification required to see if this Auspex holographic display direction successfully captures the unique, premium aesthetic envisioned without relying on AI art.

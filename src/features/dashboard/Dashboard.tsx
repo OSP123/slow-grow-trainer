@@ -6,6 +6,7 @@ import Globe from 'react-globe.gl';
 import { Castle, Factory, Satellite, Skull, Biohazard, Mountain, Target } from 'lucide-react';
 import { FACTIONS } from '../../data/warhammer40k';
 import { getTransformUrl } from '../../utils/imageCompression';
+import TacticalSectorMap, { getFactionColor } from '../../components/TacticalSectorMap';
 
 const THEATRES_OF_WAR = [
   { name: 'The Hive Spires', lat: 15, lng: 20, narrative: "The administrative and population hubs of the planet. Imperium forces try to hold order, while Chaos cults plot assassinations and T'au operatives spark citizen rebellions in the lower tiers.", Icon: Castle, mapImage: 'map_hive_spires.png' }, 
@@ -305,7 +306,7 @@ export default function Dashboard() {
               if (!winnerProfile) return;
 
               const factionData = FACTIONS.find(f => f.name === winnerProfile.army_faction);
-              const color = factionData ? FACTION_COLORS[factionData.grandAlliance as keyof typeof FACTION_COLORS] : '#aaaaaa';
+              const color = getFactionColor(winnerProfile.army_faction, factionData?.grandAlliance);
 
               let p1Profile: any = match.p1_profile;
               if (Array.isArray(p1Profile)) p1Profile = p1Profile[0];
@@ -663,7 +664,7 @@ export default function Dashboard() {
           <div className="responsive-grid-2">
             {/* Map image side */}
             <div style={{ position: 'relative' }}>
-              <div className="territory-map-img" style={{ backgroundImage: `url(/images/${selectedTheatre.mapImage})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '8px', border: `2px solid ${selectedTheatre.color}`, boxShadow: '0 4px 12px rgba(0,0,0,0.5)', width: '100%', height: '100%', minHeight: '400px' }} />
+              <TacticalSectorMap theatre={selectedTheatre} commanders={commanders} mapLocations={mapLocations} />
               
               {/* Tactical Nodes Overlay */}
               {mapLocations.filter(ml => ml.theatre_name === selectedTheatre.name).map(ml => (
@@ -677,7 +678,7 @@ export default function Dashboard() {
               {/* Deployed Commanders Overlay */}
               {commanders.filter((c: any) => c.deployed_theatre === selectedTheatre.name).map((c: any) => {
                 const factionData = FACTIONS.find(f => f.name === c.army_faction);
-                const color = factionData ? FACTION_COLORS[factionData.grandAlliance as keyof typeof FACTION_COLORS] : '#aaaaaa';
+                const color = getFactionColor(c.army_faction, factionData?.grandAlliance);
                 
                 let top = '50%';
                 let left = '50%';
@@ -760,11 +761,11 @@ export default function Dashboard() {
                         {t.ork_foothold > 0 && (
                           <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
-                              <span style={{ color: FACTION_COLORS.xenos }}>Ork Foothold</span>
+                              <span style={{ color: getFactionColor('Orks') }}>Ork Foothold</span>
                               <span>{t.ork_foothold}%</span>
                             </div>
                             <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
-                              <div style={{ width: `${t.ork_foothold}%`, height: '100%', background: FACTION_COLORS.xenos, transition: 'width 0.5s ease-out' }}></div>
+                              <div style={{ width: `${t.ork_foothold}%`, height: '100%', background: getFactionColor('Orks'), transition: 'width 0.5s ease-out' }}></div>
                             </div>
                           </div>
                         )}
@@ -773,22 +774,22 @@ export default function Dashboard() {
                         {t.tau_foothold > 0 && (
                           <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
-                              <span style={{ color: FACTION_COLORS.xenos }}>T'au Foothold</span>
+                              <span style={{ color: getFactionColor("T'au Empire") }}>T'au Foothold</span>
                               <span>{t.tau_foothold}%</span>
                             </div>
                             <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
-                              <div style={{ width: `${t.tau_foothold}%`, height: '100%', background: FACTION_COLORS.xenos, transition: 'width 0.5s ease-out' }}></div>
+                              <div style={{ width: `${t.tau_foothold}%`, height: '100%', background: getFactionColor("T'au Empire"), transition: 'width 0.5s ease-out' }}></div>
                             </div>
                           </div>
                         )}
                         {t.aeldari_foothold > 0 && (
                           <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
-                              <span style={{ color: FACTION_COLORS.xenos }}>Aeldari Foothold</span>
+                              <span style={{ color: getFactionColor('Aeldari') }}>Aeldari Foothold</span>
                               <span>{t.aeldari_foothold}%</span>
                             </div>
                             <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
-                              <div style={{ width: `${t.aeldari_foothold}%`, height: '100%', background: FACTION_COLORS.xenos, transition: 'width 0.5s ease-out' }}></div>
+                              <div style={{ width: `${t.aeldari_foothold}%`, height: '100%', background: getFactionColor('Aeldari'), transition: 'width 0.5s ease-out' }}></div>
                             </div>
                           </div>
                         )}
