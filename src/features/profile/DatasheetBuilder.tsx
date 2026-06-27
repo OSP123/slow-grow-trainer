@@ -86,15 +86,27 @@ export default function DatasheetBuilder({ profile, setProfile, datasheetIndex, 
         <button type="button" onClick={onRemove} style={{ background: 'none', border: 'none', color: 'red', cursor: 'pointer', fontSize: '0.9rem' }}>Remove Champion</button>
       </div>
 
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)', fontWeight: 'bold' }}>Warlord Name</label>
-        <input 
-          type="text" 
-          value={ds.name || ''} 
-          onChange={e => updateDatasheet(d => ({ ...d, name: e.target.value }))}
-          placeholder="e.g. Captain Titus"
-          style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }}
-        />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div>
+          <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)', fontWeight: 'bold' }}>Warlord Name</label>
+          <input 
+            type="text" 
+            value={ds.name || ''} 
+            onChange={e => updateDatasheet(d => ({ ...d, name: e.target.value }))}
+            placeholder="e.g. Captain Titus"
+            style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }}
+          />
+        </div>
+        <div>
+          <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)', fontWeight: 'bold' }}>Points</label>
+          <input 
+            type="number" 
+            value={ds.points || ''} 
+            onChange={e => updateDatasheet(d => ({ ...d, points: e.target.value ? parseInt(e.target.value) : undefined }))}
+            placeholder="pts"
+            style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box', textAlign: 'center' }}
+          />
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
@@ -190,13 +202,24 @@ export default function DatasheetBuilder({ profile, setProfile, datasheetIndex, 
         ))}
       </div>
 
-      <div style={{ marginBottom: '1rem' }}>
+      <div style={{ marginBottom: '1.5rem' }}>
         <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)', fontWeight: 'bold' }}>Abilities / Rules</label>
         <textarea 
           value={ds.abilities || ''} 
           onChange={e => updateDatasheet(d => ({ ...d, abilities: e.target.value }))}
           placeholder="e.g. Leader, Deep Strike, Fights First..."
           style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box', minHeight: '80px', resize: 'vertical' }}
+        />
+      </div>
+
+      <div style={{ marginBottom: '0.5rem' }}>
+        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--theme-fg-muted)', fontWeight: 'bold' }}>Unit Keywords</label>
+        <input 
+          type="text" 
+          value={ds.keywords || ''} 
+          onChange={e => updateDatasheet(d => ({ ...d, keywords: e.target.value }))}
+          placeholder="e.g. INFANTRY, CHARACTER, IMPERIUM, ADEPTUS ASTARTES"
+          style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }}
         />
       </div>
     </div>

@@ -11,7 +11,10 @@ export default function DatasheetViewer({ datasheet }: { datasheet: CrucibleData
     <div style={{ backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: '6px', border: '1px solid var(--theme-border)', overflow: 'hidden', marginBottom: '1.5rem' }}>
       {/* Header */}
       <div style={{ backgroundColor: 'var(--theme-bg)', padding: '1rem', borderBottom: '2px solid var(--theme-accent)' }}>
-        <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.5rem', textTransform: 'uppercase' }}>{name || 'Unnamed Champion'}</h4>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
+          <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.5rem', textTransform: 'uppercase' }}>{name || 'Unnamed Champion'}</h4>
+          {datasheet.points && <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--theme-accent)', backgroundColor: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px' }}>{datasheet.points} PTS</div>}
+        </div>
         <div style={{ fontSize: '0.9rem', color: 'var(--theme-fg-muted)' }}>
           {archetype || 'No Archetype'} {specialism ? `• ${specialism}` : ''}
         </div>
@@ -114,6 +117,20 @@ export default function DatasheetViewer({ datasheet }: { datasheet: CrucibleData
           <h5 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-accent)', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.25rem' }}>Abilities</h5>
           <div style={{ fontSize: '0.9rem', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
             {abilities}
+          </div>
+        </div>
+      )}
+
+      {/* Unit Keywords */}
+      {datasheet.keywords && (
+        <div style={{ padding: '0 1rem 1rem 1rem' }}>
+          <h5 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-accent)', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.25rem' }}>Keywords</h5>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.25rem' }}>
+            {datasheet.keywords.split(',').map((kw, i) => (
+              <span key={i} style={{ padding: '2px 8px', backgroundColor: 'var(--theme-bg)', border: '1px solid var(--theme-border)', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {kw.trim()}
+              </span>
+            ))}
           </div>
         </div>
       )}

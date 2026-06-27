@@ -924,3 +924,13 @@ Tasks:
 - Pushed ultimate fallback queries for both matchups and commanders that directly select `discord_name` from `profiles` as it was originally built, bypassing the failed `private_profiles` join altogether.
 Follow-ups:
 - Verify production deployment restores commanders on the dashboard.
+
+Date: 2026-06-27
+Tasks:
+- Made desktop sidebar sticky with overflow-y: auto in App.css to prevent commander profile widget cutoff on small viewports.
+- Added CampaignQuests component integration directly into Briefing.tsx (Strategic Briefing / Field Manual) when logged in.
+- Added Campaign Directives Chronicle progression grid at top of CampaignQuests.tsx showing sealed/active/locked status tags.
+- Added responsive CSS classes to App.css to render CampaignTimeline vertically on mobile screens <= 600px, preventing milestone clipping.
+- Updated Crucible of Champions interface, Supabase profile select query, DatasheetBuilder inputs, and DatasheetViewer displays to support Points and Unit Keywords.
+Follow-ups:
+- None

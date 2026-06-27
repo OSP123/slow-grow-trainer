@@ -1,6 +1,22 @@
+import { useState, useEffect } from 'react';
 import CampaignTimeline from '../../components/CampaignTimeline';
+import CampaignQuests from '../../components/CampaignQuests';
+import { supabase } from '../../supabaseClient';
+import type { ProfileData } from '../profile/CommanderProfile';
 
 export default function Briefing() {
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        supabase.from('profiles').select('id, commander_name, army_faction, army_lore, location').eq('id', user.id).maybeSingle().then(({ data }) => {
+          if (data) setProfile(data);
+        });
+      }
+    });
+  }, []);
+
   return (
     <div style={{ paddingBottom: '4rem' }}>
       <div style={{ marginBottom: '2rem', borderBottom: '1px solid var(--theme-border)', paddingBottom: '1rem' }}>
@@ -9,6 +25,10 @@ export default function Briefing() {
       </div>
 
       <CampaignTimeline />
+
+      {profile && (
+        <CampaignQuests profile={profile} isOwner={true} />
+      )}
 
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h3 style={{ color: 'var(--theme-accent)', marginBottom: '1rem', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>

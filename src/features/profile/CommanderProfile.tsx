@@ -38,6 +38,8 @@ export interface CrucibleDatasheet {
   name: string;
   archetype?: string;
   specialism?: string;
+  points?: number;
+  keywords?: string;
   abilities?: string;
   stats?: {
     m: string; t: string; sv: string; invuln: string; w: string; ld: string; oc: string;
@@ -92,7 +94,7 @@ export default function CommanderProfile() {
     const targetId = profileId || user?.id;
     if (!targetId) return;
 
-    let { data } = await supabase.from('profiles').select('id, commander_name, discord_name, army_faction, army_subfaction, avatar_url, army_lore, location, experience_level, role, payment_status, campaign_status, created_at, preferred_store_id').eq('id', targetId).maybeSingle();
+    let { data } = await supabase.from('profiles').select('id, commander_name, discord_name, army_faction, army_subfaction, avatar_url, army_lore, location, experience_level, role, payment_status, campaign_status, created_at, preferred_store_id, crucible_datasheets').eq('id', targetId).maybeSingle();
 
     // Auto-Rescue Protocol — only for own profile
     if (!data && !profileId && user) {
@@ -431,7 +433,7 @@ export default function CommanderProfile() {
                     if (error) setMessage('Error: ' + error.message);
                     else setMessage('Champions updated successfully.');
                   } catch (err: any) {
-                    setMessage('Database schema update pending for Datasheet features.');
+                    setMessage('Error saving datasheets: ' + (err?.message || 'Unknown database error'));
                   }
                 }}>
                   {(profile.crucible_datasheets || []).map((ds, idx) => (

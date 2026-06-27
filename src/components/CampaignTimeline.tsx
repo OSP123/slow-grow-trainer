@@ -71,60 +71,28 @@ export default function CampaignTimeline() {
       )}
 
       {/* Visual Timeline */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'flex-start',
-        position: 'relative',
-        marginTop: '2rem',
-        overflowX: 'auto',
-        paddingBottom: '1rem'
-      }}>
-        {/* Horizontal Line */}
-        <div style={{
-          position: 'absolute',
-          top: '20px',
-          left: '5%',
-          right: '5%',
-          height: '2px',
-          backgroundColor: 'var(--theme-border)',
-          zIndex: 0
-        }} />
+      <div className="timeline-container">
+        {/* Connecting Line */}
+        <div className="timeline-line" />
 
         {timelineSteps.map((step, i) => (
-          <div key={i} style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            zIndex: 1, 
-            width: '16.66%',
-            minWidth: '100px',
-            opacity: step.current ? 1 : 0.6
-          }}>
-            <div style={{ 
-              width: '40px', 
-              height: '40px', 
-              borderRadius: '50%', 
+          <div key={i} className="timeline-step" style={{ opacity: step.current ? 1 : 0.6 }}>
+            <div className="timeline-step-circle" style={{ 
               backgroundColor: step.current ? 'var(--theme-accent)' : 'var(--theme-bg-secondary)',
               border: `2px solid ${step.current ? 'var(--theme-accent)' : 'var(--theme-border)'}`,
-              color: step.current ? 'var(--theme-bg)' : 'var(--theme-fg)',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              fontWeight: 'bold',
-              fontSize: '0.8rem',
-              marginBottom: '0.75rem',
-              transition: 'all 0.3s ease'
+              color: step.current ? 'var(--theme-bg)' : 'var(--theme-fg)'
             }}>
               {step.pts}
             </div>
-            {step.current && (
-              <div style={{ fontSize: '0.65rem', backgroundColor: 'var(--theme-accent)', color: 'var(--theme-bg)', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>
-                We Are Here
-              </div>
-            )}
-            <div style={{ fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '2px', color: step.current ? 'var(--theme-fg)' : 'var(--theme-fg-muted)' }}>{step.label}</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--theme-fg-muted)' }}>{step.sub}</div>
+            <div>
+              {step.current && (
+                <div style={{ fontSize: '0.65rem', backgroundColor: 'var(--theme-accent)', color: 'var(--theme-bg)', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px', display: 'inline-block' }}>
+                  We Are Here
+                </div>
+              )}
+              <div style={{ fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '2px', color: step.current ? 'var(--theme-fg)' : 'var(--theme-fg-muted)' }}>{step.label}</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--theme-fg-muted)' }}>{step.sub}</div>
+            </div>
           </div>
         ))}
       </div>

@@ -70,13 +70,47 @@ export default function CampaignQuests({ profile, isOwner }: { profile: ProfileD
     return Math.min(100, Math.floor((gamesPlayed / nextPhase.requiredGames) * 100));
   };
 
+  const isPhaseCompleted = (idx: number) => {
+    if (idx === 0) return !isEnlistmentPhase || currentPhaseIndex > 0;
+    return idx <= currentPhaseIndex && (idx < phases.length - 1 || !nextPhase);
+  };
+
   if (!isOwner && currentPhaseIndex === phases.length - 1) return null; // hide for others if done
 
   return (
     <div className="card" style={{ marginBottom: '1.5rem', border: '1px solid var(--theme-accent)' }}>
-      <h3 style={{ margin: '0 0 1rem 0', color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', justifyContent: 'space-between' }}>
+      {/* Campaign Phase Progression Chronicle */}
+      <div style={{ marginBottom: '1.5rem', paddingBottom: '1.25rem', borderBottom: '1px solid var(--theme-border)' }}>
+        <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--theme-fg-muted)', marginBottom: '0.75rem' }}>
+          Campaign Directives Chronicle (Quests Completed)
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.5rem' }}>
+          {phases.map((p, idx) => {
+            const done = isPhaseCompleted(idx);
+            const isActive = !done && (idx === 0 || isPhaseCompleted(idx - 1));
+            return (
+              <div key={p.name} style={{
+                padding: '0.5rem', borderRadius: '4px', fontSize: '0.75rem',
+                backgroundColor: done ? 'rgba(34, 197, 94, 0.1)' : isActive ? 'rgba(234, 179, 8, 0.1)' : 'rgba(0, 0, 0, 0.15)',
+                border: `1px solid ${done ? '#22c55e' : isActive ? '#eab308' : 'var(--theme-border)'}`,
+                opacity: done || isActive ? 1 : 0.5
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem', fontWeight: 'bold', color: done ? '#22c55e' : isActive ? '#eab308' : 'var(--theme-fg-muted)' }}>
+                  <span>{done ? '✓ SEALED' : isActive ? '▸ ACTIVE' : '🔒 LOCKED'}</span>
+                  <span>{p.targetPts > 0 ? `${p.targetPts} PTS` : 'ENLIST'}</span>
+                </div>
+                <div style={{ color: 'var(--theme-fg)', fontWeight: isActive ? 'bold' : 'normal', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {p.name}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <h3 style={{ margin: '0 0 1rem 0', color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
         <span>Active Directives: {nextPhase ? nextPhase.name : 'Campaign Concluded'}</span>
-        {nextPhase && <span style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)' }}>Current Status: {phases[currentPhaseIndex].name}</span>}
+        {nextPhase && <span style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)' }}>Current Phase: {phases[currentPhaseIndex].name}</span>}
       </h3>
 
       {isEnlistmentPhase ? (
