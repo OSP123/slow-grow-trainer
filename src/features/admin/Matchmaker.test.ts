@@ -15,25 +15,20 @@ describe('Matchmaker Simulation Algorithm Engine', () => {
 
   it('correctly prioritizes tighter geographic groupings over differing parameters', () => {
     const pool: CommanderProfile[] = [
-      { id: '1', location: 'Seattle', experience_level: 'beginner', army_faction: 'Orks', commander_name: 'Target Player' },
-      { id: '2', location: 'New York', experience_level: 'beginner', army_faction: 'Tyranids', commander_name: 'Weaker Geospatial Match' }, // Score: 0 (loc) + 5 (exp) + 0 (alliance) = 5
-      { id: '3', location: 'Seattle', experience_level: 'expert', army_faction: 'Tyranids', commander_name: 'Strong Geospatial Match' }, // Score: 10 (loc) + 0 (exp) + 0 (alliance) = 10
+      { id: '1', location: 'Seattle', experience_level: 'beginner', army_faction: 'Space Marines', commander_name: 'Target Player' },
+      { id: '2', location: 'New York', experience_level: 'beginner', army_faction: 'Tyranids', commander_name: 'Weaker Geospatial Match' },
+      { id: '3', location: 'Seattle', experience_level: 'expert', army_faction: 'Tyranids', commander_name: 'Strong Geospatial Match' },
     ];
     
-    // Mock Math.random to make the pop order deterministic
-    // We want '1' to be popped first so it pairs with '3'
     const originalRandom = Math.random;
-    Math.random = () => 0.99; // Prevents shuffling order from changing original array order
+    Math.random = () => 0.99;
     
-    // Player 1 and Player 3 should be matched definitively.
     const results = generateMatchups(pool);
     
     Math.random = originalRandom;
-    // Since unresolved order mutates based on sort(), we can assert the strongest pair was built
-    const highestScoreMatch = results.find(r => r.score === 10);
+    const highestScoreMatch = results.find(r => r.score === 30); // 10 (loc) + 20 (attacker vs defender)
     expect(highestScoreMatch).toBeDefined();
     
-    // Determine player ID array inside that matched pair
     const pairedIDs = [highestScoreMatch!.p1.id, highestScoreMatch!.p2.id];
     expect(pairedIDs).toContain('1');
     expect(pairedIDs).toContain('3');
@@ -43,10 +38,44 @@ describe('Matchmaker Simulation Algorithm Engine', () => {
     const pool: CommanderProfile[] = [
       { id: '1', location: 'Seattle', experience_level: 'beginner', army_faction: 'Space Marines', commander_name: 'P1' },
       { id: '2', location: 'Seattle', experience_level: 'beginner', army_faction: 'Orks', commander_name: 'P2' },
-      { id: '3', location: 'Seattle', experience_level: 'beginner', army_faction: 'Tyranids', commander_name: 'P3' }, // Will be implicitly bypassed or rotated out.
+      { id: '3', location: 'Seattle', experience_level: 'beginner', army_faction: 'Chaos Space Marines', commander_name: 'P3' },
     ];
 
     const results = generateMatchups(pool);
-    expect(results).toHaveLength(1); // 3 players / 2 = 1 Match pair.
+    expect(results).toHaveLength(1);
+  });
+
+  it('strictly bans exact same Xenos faction matchups (e.g. Tyranids vs Tyranids) but allows differing Xenos factions (e.g. Tyranids vs Orks)', () => {
+    const pool: CommanderProfile[] = [
+      { id: '1', location: 'Seattle', experience_level: 'beginner', army_faction: 'Tyranids', commander_name: 'Tyranid 1' },
+      { id: '2', location: 'Seattle', experience_level: 'beginner', army_faction: 'Tyranids', commander_name: 'Tyranid 2' },
+      { id: '3', location: 'Seattle', experience_level: 'beginner', army_faction: 'Orks', commander_name: 'Ork Player' },
+    ];
+
+    const results = generateMatchups(pool);
+    expect(results).toHaveLength(1);
+    // Should pair Tyranids with Orks, NEVER Tyranids vs Tyranids
+    const pairedFactions = [results[0].p1.army_faction, results[0].p2.army_faction];
+    expect(pairedFactions).toContain('Orks');
+    expect(pairedFactions).toContain('Tyranids');
+  });
+
+  it('allows Chaos vs Chaos but penalizes score so Chaos vs non-Chaos is preferred', () => {
+    const pool: CommanderProfile[] = [
+      { id: '1', location: 'Seattle', experience_level: 'beginner', army_faction: 'Chaos Space Marines', commander_name: 'Chaos 1' },
+      { id: '2', location: 'Seattle', experience_level: 'beginner', army_faction: 'Death Guard', commander_name: 'Chaos 2' },
+      { id: '3', location: 'Seattle', experience_level: 'beginner', army_faction: 'Space Marines', commander_name: 'Imperium 1' },
+    ];
+
+    const originalRandom = Math.random;
+    Math.random = () => 0.01; // deterministic sorting
+
+    const results = generateMatchups(pool);
+    Math.random = originalRandom;
+
+    expect(results).toHaveLength(1);
+    // Chaos should pair with Imperium rather than Chaos vs Chaos
+    const pairedFactions = [results[0].p1.army_faction, results[0].p2.army_faction];
+    expect(pairedFactions).toContain('Space Marines');
   });
 });

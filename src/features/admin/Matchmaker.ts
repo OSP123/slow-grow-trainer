@@ -3,13 +3,15 @@
  * 
  * Strict Bans:
  * 1. No Imperium vs Imperium.
- * 2. No Xenos vs exact same Xenos faction.
+ * 2. No Xenos vs exact same Xenos faction (e.g. Tyranids vs Tyranids is banned, but Tyranids vs Orks is allowed).
  * 
- * Priorities:
- * 1. Matching Theatre (+50 points)
- * 2. Attacker vs Defender (+20 points)
- * 3. Matching Location (+10 points)
- * 4. Matching Experience Tier (+5 points)
+ * Priorities & Penalties:
+ * 1. Matching Exact Location (+100 points)
+ * 2. Matching Theatre (+50 points)
+ * 3. Attacker vs Defender (+20 points)
+ * 4. Matching Location (+10 points)
+ * 5. Matching Experience Tier (+5 points)
+ * 6. Chaos vs Chaos (-15 points penalty so Chaos aligns against others when possible)
  */
 
 import { FACTIONS } from '../../data/warhammer40k';
@@ -60,11 +62,16 @@ export function generateMatchups(pool: CommanderProfile[]): MatchPair[] {
         continue;
       }
 
-      // Strict Ban 2: Xenos vs exact same Xenos
+      // Strict Ban 2: Xenos vs exact same Xenos faction
       if (p1Alliance === 'Xenos' && p2Alliance === 'Xenos') {
         if (p1.army_faction && p2.army_faction && p1.army_faction.toLowerCase() === p2.army_faction.toLowerCase()) {
           continue;
         }
+      }
+
+      // Rule 0: Chaos alignment preference (Chaos vs Chaos is allowed but penalized)
+      if (p1Alliance === 'Chaos' && p2Alliance === 'Chaos') {
+        matchScore -= 15;
       }
 
       // Rule 1: Theatre Proximity (+50 points)

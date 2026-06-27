@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import TacticalSectorMap, { getFactionColor } from './TacticalSectorMap';
+import TacticalSectorMap, { getFactionColor, getFactionNarrativeGoal } from './TacticalSectorMap';
 
 describe('TacticalSectorMap & Helper Tests', () => {
   describe('getFactionColor', () => {
@@ -130,6 +130,48 @@ describe('TacticalSectorMap & Helper Tests', () => {
       render(<TacticalSectorMap theatre={unknown} commanders={[]} mapLocations={[]} />);
       expect(screen.getByText('Sector Alpha')).toBeInTheDocument();
       expect(screen.getByText('Sector Epsilon')).toBeInTheDocument();
+    });
+
+    it('renders active deployments and matchups roster below the map', () => {
+      const mockMatchups = [
+        {
+          id: 'm-1',
+          status: 'active',
+          p1_id: 'cmd-1',
+          p2_id: 'cmd-2',
+          p1_profile: { commander_name: 'Ghazghkull', army_faction: 'Orks' },
+          p2_profile: { commander_name: 'Farsight', army_faction: "T'au Empire" }
+        }
+      ];
+
+      render(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} matchups={mockMatchups} />);
+      expect(screen.getByText('ACTIVE DEPLOYMENTS & MATCHUPS')).toBeInTheDocument();
+      expect(screen.getByText(/VS Farsight/)).toBeInTheDocument();
+      expect(screen.getByText(/VS Ghazghkull/)).toBeInTheDocument();
+    });
+  });
+
+  describe('getFactionNarrativeGoal', () => {
+    it('returns appropriate narrative outcomes for win/tie/loss by faction', () => {
+      expect(getFactionNarrativeGoal('Orks', 'win')).toBe('Sector Wrecked & Looted');
+      expect(getFactionNarrativeGoal('Chaos Space Marines', 'win')).toBe('Dark Ritual Completed');
+      expect(getFactionNarrativeGoal('Adeptus Astartes', 'win')).toBe('Sector Secured & Fortified');
+    });
+  });
+
+  describe('Grand Alliance grouping in active deployments', () => {
+    it('organizes deployed commanders into Imperial Forces, Chaos Forces, and Xenos Forces', () => {
+      const mockTheatre = { name: 'Test Theatre', narrative: 'Test narrative', color: '#3b82f6' };
+      const mockCommanders = [
+        { id: '1', commander_name: 'Calgar', army_faction: 'Adeptus Astartes', deployed_theatre: 'Test Theatre' },
+        { id: '2', commander_name: 'Kharn', army_faction: 'World Eaters', deployed_theatre: 'Test Theatre' },
+        { id: '3', commander_name: 'Imotekh', army_faction: 'Necrons', deployed_theatre: 'Test Theatre' }
+      ];
+
+      render(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} matchups={[]} />);
+      expect(screen.getByText(/Imperial Forces/i)).toBeInTheDocument();
+      expect(screen.getByText(/Chaos Forces/i)).toBeInTheDocument();
+      expect(screen.getByText(/Xenos Forces/i)).toBeInTheDocument();
     });
   });
 });

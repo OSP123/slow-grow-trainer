@@ -3,6 +3,21 @@ import { FACTIONS } from '../data/warhammer40k';
 
 // ─── Faction Color Helper ────────────────────────────────────────────────────
 
+export function getGrandAlliance(factionName?: string): 'Imperium' | 'Chaos' | 'Xenos' {
+  if (!factionName) return 'Imperium';
+  const found = FACTIONS.find(f => f.name === factionName);
+  if (found?.grandAlliance) {
+    const ga = found.grandAlliance.toLowerCase();
+    if (ga === 'chaos') return 'Chaos';
+    if (ga === 'xenos') return 'Xenos';
+    return 'Imperium';
+  }
+  const lower = factionName.toLowerCase();
+  if (lower.includes('chaos') || lower.includes('daemon') || lower.includes('thousand sons') || lower.includes('death guard') || lower.includes('world eaters')) return 'Chaos';
+  if (lower.includes('ork') || lower.includes('tau') || lower.includes("t'au") || lower.includes('necron') || lower.includes('tyranid') || lower.includes('aeldari') || lower.includes('drukhari') || lower.includes('votann') || lower.includes('genestealer')) return 'Xenos';
+  return 'Imperium';
+}
+
 export function getFactionColor(factionName?: string, grandAlliance?: string): string {
   if (!factionName) return '#4b5563';
   if (!grandAlliance) {
@@ -22,6 +37,41 @@ export function getFactionColor(factionName?: string, grandAlliance?: string): s
     case 'Genestealer Cults': return '#d946ef';
     default: return '#10b981';
   }
+}
+
+export function getFactionNarrativeGoal(factionName?: string, result: 'win' | 'tie' | 'loss' = 'win'): string {
+  if (!factionName) return result === 'win' ? 'Strategic Victory' : (result === 'tie' ? 'Contested Ground' : 'Tactical Retreat');
+  const lower = factionName.toLowerCase();
+  
+  if (lower.includes('ork')) {
+    return result === 'win' ? 'Sector Wrecked & Looted' : (result === 'tie' ? 'Bloody Brawling' : 'Warband Repelled');
+  }
+  if (lower.includes('chaos') || lower.includes('daemon') || lower.includes('thousand sons') || lower.includes('death guard') || lower.includes('world eaters')) {
+    return result === 'win' ? 'Dark Ritual Completed' : (result === 'tie' ? 'Warp Corruption Spreading' : 'Ritual Disrupted');
+  }
+  if (lower.includes('astartes') || lower.includes('space marine') || lower.includes('imperium') || lower.includes('guard') || lower.includes('militarum') || lower.includes('mechanicus') || lower.includes('sororitas') || lower.includes('custodes')) {
+    return result === 'win' ? 'Sector Secured & Fortified' : (result === 'tie' ? 'Stalemate at Perimeter' : 'Defensive Line Breached');
+  }
+  if (lower.includes("t'au") || lower.includes('tau')) {
+    return result === 'win' ? 'Annexed for the Greater Good' : (result === 'tie' ? 'Tactical Standoff' : 'Expansion Halted');
+  }
+  if (lower.includes('necron')) {
+    return result === 'win' ? 'Tomb Complex Awakened' : (result === 'tie' ? 'Intruders Contained' : 'Stasis Re-engaged');
+  }
+  if (lower.includes('tyranid')) {
+    return result === 'win' ? 'Biomass Harvested' : (result === 'tie' ? 'Feeder Tendrils Engaged' : 'Swarm Repelled');
+  }
+  if (lower.includes('aeldari') || lower.includes('eldar') || lower.includes('drukhari') || lower.includes('harlequin')) {
+    return result === 'win' ? 'Webway Gate Secured' : (result === 'tie' ? 'Fates Entangled' : 'Strategic Retreat');
+  }
+  if (lower.includes('votann') || lower.includes('leagues')) {
+    return result === 'win' ? 'Resource Claim Secured' : (result === 'tie' ? 'Prospecting Contested' : 'Mining Operations Halted');
+  }
+  if (lower.includes('genestealer')) {
+    return result === 'win' ? 'Uprising Triggered' : (result === 'tie' ? 'Subterranean Infiltration' : 'Cell Suppressed');
+  }
+  
+  return result === 'win' ? 'Strategic Victory' : (result === 'tie' ? 'Contested Ground' : 'Tactical Retreat');
 }
 
 // ─── Sector Definitions ──────────────────────────────────────────────────────
@@ -110,9 +160,10 @@ interface TacticalSectorMapProps {
   theatre: { name: string; narrative: string; color: string };
   commanders: any[];
   mapLocations: any[];
+  matchups?: any[];
 }
 
-export default function TacticalSectorMap({ theatre, commanders }: TacticalSectorMapProps) {
+export default function TacticalSectorMap({ theatre, commanders, matchups }: TacticalSectorMapProps) {
   const [selectedSector, setSelectedSector] = useState<number | null>(null);
 
   const deployedCommanders = commanders.filter(c => c.deployed_theatre === theatre.name);
@@ -349,6 +400,85 @@ export default function TacticalSectorMap({ theatre, commanders }: TacticalSecto
           TAP A SECTOR TO VIEW TACTICAL TELEMETRY
         </div>
       )}
+
+      {/* Active Deployments & Matchups Roster */}
+      <div style={{
+        padding: '12px 16px',
+        borderTop: `1px solid ${theatre.color || '#3b82f6'}40`,
+        background: 'rgba(7,10,18,0.95)',
+        color: '#ffffff',
+        position: 'relative', zIndex: 5
+      }}>
+        <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: theatre.color || '#3b82f6', letterSpacing: '1.5px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>ACTIVE DEPLOYMENTS & MATCHUPS</span>
+          <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 'normal' }}>// THEATRE WARFARE LOG</span>
+        </div>
+
+        {deployedCommanders.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {['Imperium', 'Chaos', 'Xenos'].map((alliance) => {
+              const group = deployedCommanders.filter((c: any) => getGrandAlliance(c.army_faction) === alliance);
+              const headerColor = '#cbd5e1';
+              const headerLabel = alliance === 'Imperium' ? 'Imperial Forces' : `${alliance} Forces`;
+
+              return (
+                <div key={alliance}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: headerColor, marginBottom: '6px', borderBottom: '1px solid rgba(255, 255, 255, 0.15)', paddingBottom: '2px' }}>
+                    {headerLabel} ({group.length})
+                  </div>
+                  {group.length > 0 ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '8px' }}>
+                      {group.map((c: any) => {
+                        const activeMatch = matchups?.find((m: any) => {
+                          const isOngoing = m.status !== 'completed' && !m.game_result;
+                          return isOngoing && (m.p1_id === c.id || m.p2_id === c.id);
+                        });
+
+                        let opponentText = 'Awaiting Opponent Assignment';
+                        if (activeMatch) {
+                          const isP1 = activeMatch.p1_id === c.id;
+                          const oppProfile = isP1 ? activeMatch.p2_profile : activeMatch.p1_profile;
+                          const opp = Array.isArray(oppProfile) ? oppProfile[0] : oppProfile;
+                          if (opp) {
+                            opponentText = `VS ${opp.commander_name || 'Commander'} (${opp.army_faction || 'Enemy Faction'})`;
+                          }
+                        }
+
+                        return (
+                          <div key={c.id} style={{
+                            padding: '8px 10px',
+                            background: 'rgba(255,255,255,0.03)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderLeft: `4px solid ${getFactionColor(c.army_faction)}`,
+                            borderRadius: '4px',
+                            display: 'flex', flexDirection: 'column', gap: '4px'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                              <span style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#f8fafc' }}>{c.commander_name}</span>
+                              <span style={{ fontSize: '0.7rem', color: getFactionColor(c.army_faction) }}>{c.army_faction}</span>
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: activeMatch ? '#fbbf24' : '#64748b', fontWeight: activeMatch ? 'bold' : 'normal' }}>
+                              {opponentText}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: '0.7rem', color: '#64748b', fontStyle: 'italic' }}>
+                      No {alliance} forces currently stationed in this sector.
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div style={{ fontSize: '0.8rem', color: '#64748b', fontStyle: 'italic' }}>
+            No commanders currently stationed in this sector.
+          </div>
+        )}
+      </div>
     </div>
   );
 }

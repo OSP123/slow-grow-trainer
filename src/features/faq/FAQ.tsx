@@ -56,6 +56,12 @@ export default function FAQ() {
               <strong>A:</strong> Yes.
             </p>
           </div>
+          <div>
+            <h4 style={{ margin: '0 0 0.5rem 0' }}>Q: What mission rules and board sizes should we use for games under 2000 points?</h4>
+            <p style={{ margin: 0, lineHeight: '1.6', fontSize: '0.9rem' }}>
+              <strong>A:</strong> At 400 points, play standard <strong>Combat Patrol</strong> missions and layouts (all official rules and layouts are available directly in the Warhammer 40k app). For Incursion-scale games (800 – 1200 points), games should be played on full-sized boards. Additionally, Games Workshop has introduced guidelines allowing you to select any single detachment regardless of detachment point (DP) restrictions at lower point levels. This means you can run your chosen detachment in 500pt/1,000pt scale games, but mixing two or more detachments is restricted until playing full 2,000+ point games.
+            </p>
+          </div>
         </div>
       </div>
     </div>

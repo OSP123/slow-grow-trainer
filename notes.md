@@ -971,5 +971,54 @@ Tasks:
 - Within each territory silhouette, the 5 sectors explicitly correspond to the 5 escalation rounds (Round 1: 400 pts through Round 5: 2000 pts), visually linked by escalation progression vectors.
 - Added rich SVG styling: glowing cybernetic drop shadows (`filter="url(#sectorGlow)"`), internal topographical wireframe contours, corner targeting brackets, coordinate grids, and an animated radar sweep.
 - All 64 automated tests pass and production build compiles cleanly.
-Follow-ups:
 - User verification required to see if this Auspex holographic display direction successfully captures the unique, premium aesthetic envisioned without relying on AI art.
+
+Date: 2026-06-27 (Update 6)
+Tasks:
+- Mapped faction battle outcomes to overarching narrative goals (e.g. Chaos win -> "Dark Ritual Completed", Orks win -> "Sector Wrecked & Looted", Imperium win -> "Sector Secured & Fortified") so players focus on narrative rather than generic win mechanics.
+- Added an "ACTIVE DEPLOYMENTS & MATCHUPS" section below the Auspex tactical map when clicking any territory on the world map. Clearly displays all stationed commanders and who they are fighting against (e.g., `⚔️ VS Abaddon (Chaos Space Marines)`).
+- Added a prominent "🎯 YOUR CURRENT CAMPAIGN MISSION" banner to the Dashboard top interface so logged-in players instantly see who their current opponent is and which war zone they are deployed to.
+- Strictly followed Test-First Development (TDD): wrote failing unit tests for `getFactionNarrativeGoal`, map matchups roster, and Dashboard mission banner before writing minimal passing code.
+- All 68 unit tests passing across the codebase and verified clean production build (`npm run build`).
+Follow-ups:
+- User verification requested to confirm if the active matchups banner and theatre deployment displays behave as desired in their environment.
+
+Date: 2026-06-27 (Update 7)
+Tasks:
+- Created helper function `getGrandAlliance` to reliably classify any faction or subfaction into its respective Grand Alliance (Imperium, Chaos, or Xenos).
+- Organized commanders under the War Effort Map (`Dashboard.tsx` Sector Command Roster) into distinct categorized sections: "Imperial Forces", "Chaos Forces", and "Xenos Forces", complete with Alliance badges and color-coded headers.
+- Organized the active deployments inside the holographic territory map (`TacticalSectorMap.tsx`) under "Imperial Forces", "Chaos Forces", and "Xenos Forces" headers as well.
+- Strictly followed Test-First Development (TDD): wrote failing unit tests in `Dashboard.test.tsx` and `TacticalSectorMap.test.tsx` before implementing the code changes.
+- All 69 unit tests passing across the codebase and verified clean production build (`npm run build`).
+Follow-ups:
+- None
+
+Date: 2026-06-27 (Update 8)
+Tasks:
+- Added a polished, comprehensive FAQ entry addressing game rules below 2000 points (Combat Patrol layouts at 400pts, full-sized boards at Incursion levels, and Games Workshop detachment selection flexibility under 2000pts).
+- Followed Test-First Development (TDD) by creating `FAQ.test.tsx` before updating `FAQ.tsx`.
+- Removed all emoji icons (`🛡️`, `👁️`, `👽`, `⚔️`) next to Grand Alliance headers and matchups in `Dashboard.tsx` and `TacticalSectorMap.tsx`.
+- Adjusted Alliance grouping styling to match the sleek tone of the application (`var(--theme-accent)` and `var(--theme-border)` in the Dashboard, `#cbd5e1` slate text in the Auspex tactical display).
+- All 71 automated unit tests passing across the codebase and verified clean production build (`npm run build`).
+Follow-ups:
+- None
+
+Date: 2026-06-27 (Update 9)
+Tasks:
+- Updated the algorithmic Matchmaker engine (`Matchmaker.ts`) to strictly enforce that Xenos factions never pair against any other Xenos faction (previously allowed differing Xenos factions).
+- Added a score penalty (-15 points) for Chaos vs Chaos matchups so that Chaos commanders are prioritized against Imperial or Xenos opponents when available, while still allowing Chaos infighting if required by the pool.
+- Built a dedicated "Manual Narrative Pairing" UI form inside the Admin Dashboard (`AdminDashboard.tsx`) under Matchmaking Engine Override.
+- Integrated interactive real-time Grand Alliance narrative alerts inside the Manual Narrative Pairing form alerting admins when pairing Imperium vs Imperium, Xenos vs Xenos, or Chaos vs Chaos.
+- Strictly adhered to Test-First Development (TDD) by adding failing tests to `Matchmaker.test.ts` and `AdminDashboard.test.tsx` prior to code implementation.
+- Verified 74 passing unit tests and a clean production build (`npm run build`).
+Follow-ups:
+- None
+
+Date: 2026-06-27 (Update 10)
+Tasks:
+- Corrected Xenos matchmaking ban rule in `Matchmaker.ts` so that Xenos factions can pair against other differing Xenos factions (e.g., Tyranids vs Orks is allowed), while strictly banning matchups between two players of the exact same Xenos faction (e.g., Tyranids vs Tyranids).
+- Updated the real-time dynamic narrative alert in `AdminDashboard.tsx` so that admins are only warned when manually pairing two commanders from the exact same Xenos faction.
+- Followed Test-First Development (TDD) by updating unit tests in `Matchmaker.test.ts` to assert that differing Xenos factions pair successfully while identical Xenos factions do not.
+- Verified all 74 automated unit tests pass and confirmed a clean production build (`npm run build`).
+Follow-ups:
+- Request user check to verify the updated Xenos pairing behavior meets expectations.

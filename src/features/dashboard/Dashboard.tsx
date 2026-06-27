@@ -6,7 +6,7 @@ import Globe from 'react-globe.gl';
 import { Castle, Factory, Satellite, Skull, Biohazard, Mountain, Target } from 'lucide-react';
 import { FACTIONS } from '../../data/warhammer40k';
 import { getTransformUrl } from '../../utils/imageCompression';
-import TacticalSectorMap, { getFactionColor } from '../../components/TacticalSectorMap';
+import TacticalSectorMap, { getFactionColor, getGrandAlliance } from '../../components/TacticalSectorMap';
 
 const THEATRES_OF_WAR = [
   { name: 'The Hive Spires', lat: 15, lng: 20, narrative: "The administrative and population hubs of the planet. Imperium forces try to hold order, while Chaos cults plot assassinations and T'au operatives spark citizen rebellions in the lower tiers.", Icon: Castle, mapImage: 'map_hive_spires.png' }, 
@@ -61,6 +61,8 @@ export default function Dashboard() {
   const [activeEvents, setActiveEvents] = useState<any[]>([]);
   const [commanders, setCommanders] = useState<any[]>([]);
   const [mapLocations, setMapLocations] = useState<any[]>([]);
+  const [allMatchups, setAllMatchups] = useState<any[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [campaignState, setCampaignState] = useState<any>(null);
   const [territoryStats, setTerritoryStats] = useState<any[]>([]);
   const [currentUserFaction, setCurrentUserFaction] = useState<string>('');
@@ -133,6 +135,7 @@ export default function Dashboard() {
 
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          setCurrentUserId(user.id);
           const { data: profile } = await supabase.from('profiles').select('army_faction').eq('id', user.id).single();
           if (profile) setCurrentUserFaction(profile.army_faction);
         }
@@ -143,8 +146,7 @@ export default function Dashboard() {
         // Try matchups with private_profiles join
         const { data: matchupsData, error } = await supabase
           .from('matchups')
-          .select('theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, army_faction, avatar_url, army_lore, campaign_status, private_profiles(discord_name)), p2_profile:profiles!p2_id(commander_name, army_faction, avatar_url, army_lore, campaign_status, private_profiles(discord_name))')
-          .in('game_result', ['P1_WIN', 'P2_WIN', 'p1_win', 'p2_win']);
+          .select('id, status, theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, army_faction, avatar_url, army_lore, campaign_status, private_profiles(discord_name)), p2_profile:profiles!p2_id(commander_name, army_faction, avatar_url, army_lore, campaign_status, private_profiles(discord_name))');
 
         if (!error && matchupsData) {
           matchups = matchupsData;
@@ -152,8 +154,7 @@ export default function Dashboard() {
           // Fallback: try without private_profiles join, selecting discord_name directly from profiles
           const { data: matchupsFallback, error: fallbackErr } = await supabase
             .from('matchups')
-            .select('theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, discord_name, army_faction, avatar_url, army_lore, campaign_status), p2_profile:profiles!p2_id(commander_name, discord_name, army_faction, avatar_url, army_lore, campaign_status)')
-            .in('game_result', ['P1_WIN', 'P2_WIN', 'p1_win', 'p2_win']);
+            .select('id, status, theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, discord_name, army_faction, avatar_url, army_lore, campaign_status), p2_profile:profiles!p2_id(commander_name, discord_name, army_faction, avatar_url, army_lore, campaign_status)');
 
           if (!fallbackErr && matchupsFallback) {
             matchups = matchupsFallback;
@@ -161,8 +162,7 @@ export default function Dashboard() {
             // Ultimate fallback without discord_name at all just in case
             const { data: matchupsUlt } = await supabase
               .from('matchups')
-              .select('theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, army_faction, avatar_url, army_lore, campaign_status), p2_profile:profiles!p2_id(commander_name, army_faction, avatar_url, army_lore, campaign_status)')
-              .in('game_result', ['P1_WIN', 'P2_WIN', 'p1_win', 'p2_win']);
+              .select('id, status, theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, army_faction, avatar_url, army_lore, campaign_status), p2_profile:profiles!p2_id(commander_name, army_faction, avatar_url, army_lore, campaign_status)');
               
             if (matchupsUlt) {
               matchups = matchupsUlt;
@@ -192,6 +192,8 @@ export default function Dashboard() {
             return true;
           });
 
+          setAllMatchups(validMatchups);
+
           const effortCount: { [theatre: string]: { Imperium: number; Chaos: number; Xenos: number } } = {};
           
           validMatchups.forEach((m: any) => {
@@ -200,7 +202,11 @@ export default function Dashboard() {
               effortCount[theatre] = { Imperium: 0, Chaos: 0, Xenos: 0 };
             }
 
-            const winnerProfile = m.game_result === 'P1_WIN' ? m.p1_profile : m.p2_profile;
+            const isP1Win = m.game_result === 'P1_WIN' || m.game_result === 'p1_win';
+            const isP2Win = m.game_result === 'P2_WIN' || m.game_result === 'p2_win';
+            if (!isP1Win && !isP2Win) return;
+
+            const winnerProfile = isP1Win ? m.p1_profile : m.p2_profile;
             
             if (winnerProfile?.army_faction) {
               const factionData = FACTIONS.find(f => f.name === winnerProfile.army_faction);
@@ -416,8 +422,40 @@ export default function Dashboard() {
 
   const sortedFactions: [string, number][] = Object.entries(factionTally).sort((a, b) => b[1] - a[1]);
 
+  const myActiveMatchup = currentUserId ? allMatchups.find(m => m.status !== 'completed' && !m.game_result && (m.p1_id === currentUserId || m.p2_id === currentUserId)) : null;
+  const isMyP1 = myActiveMatchup?.p1_id === currentUserId;
+  const myOppProfile = myActiveMatchup ? (isMyP1 ? myActiveMatchup.p2_profile : myActiveMatchup.p1_profile) : null;
+  const opp = Array.isArray(myOppProfile) ? myOppProfile[0] : myOppProfile;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      {myActiveMatchup && opp && (
+        <div className="card" style={{
+          padding: '1.25rem 1.5rem',
+          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(239, 68, 68, 0.15))',
+          border: '2px solid #3b82f6',
+          boxShadow: '0 0 20px rgba(59, 130, 246, 0.3)',
+          display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '1rem'
+        }}>
+          <div>
+            <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#3b82f6', letterSpacing: '2px', marginBottom: '4px' }}>
+              🎯 YOUR CURRENT CAMPAIGN MISSION
+            </div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span>VS {opp.commander_name || 'Commander'}</span>
+              <span style={{ fontSize: '0.85rem', color: getFactionColor(opp.army_faction), background: 'rgba(0,0,0,0.5)', padding: '2px 8px', borderRadius: '4px' }}>{opp.army_faction || 'Enemy Faction'}</span>
+            </div>
+            {myActiveMatchup.theatre_name && (
+              <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '4px' }}>
+                📍 Assigned War Zone: <strong style={{ color: '#e2e8f0' }}>{myActiveMatchup.theatre_name}</strong>
+              </div>
+            )}
+          </div>
+          <Link to="/battles" className="btn primary" style={{ padding: '0.6rem 1.25rem', textDecoration: 'none', fontWeight: 'bold' }}>
+            Report Battle Outcome →
+          </Link>
+        </div>
+      )}
       
       {campaignState && campaignState.current_month === 5 && (
         <div style={{ padding: '1.5rem', background: 'linear-gradient(to right, rgba(239, 68, 68, 0.3), transparent)', borderLeft: '4px solid #ef4444', borderRadius: '4px', border: '1px solid #ef4444', animation: 'pulse 2s infinite' }}>
@@ -664,7 +702,7 @@ export default function Dashboard() {
           <div className="responsive-grid-2">
             {/* Map image side */}
             <div style={{ position: 'relative' }}>
-              <TacticalSectorMap theatre={selectedTheatre} commanders={commanders} mapLocations={mapLocations} />
+              <TacticalSectorMap theatre={selectedTheatre} commanders={commanders} mapLocations={mapLocations} matchups={allMatchups} />
               
               {/* Tactical Nodes Overlay */}
               {mapLocations.filter(ml => ml.theatre_name === selectedTheatre.name).map(ml => (
@@ -875,46 +913,66 @@ export default function Dashboard() {
         {commanders.length === 0 ? (
           <p style={{ color: 'var(--theme-fg-muted)' }}>No active commanders registered.</p>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-            {commanders.map(cmd => (
-              <div key={cmd.id} style={{ backgroundColor: 'var(--theme-bg-secondary)', borderRadius: '6px', border: '1px solid var(--theme-border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ display: 'flex', padding: '1rem', borderBottom: '1px solid var(--theme-border)', alignItems: 'center', gap: '1rem', backgroundColor: 'rgba(0,0,0,0.2)' }}>
-                  <div style={{ width: '60px', height: '60px', borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--theme-bg)', flexShrink: 0, border: '2px solid var(--theme-accent)' }}>
-                    {cmd.avatar_url ? (
-                      <img src={getTransformUrl(cmd.avatar_url, 120, 60)} alt={cmd.commander_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>⚔</div>
-                    )}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.2rem', color: 'var(--theme-fg)', wordBreak: 'break-word' }}>
-                      {cmd.commander_name || 'Classified'}
-                      {cmd.discord_name && <span style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', marginLeft: '0.5rem', fontWeight: 'normal' }}>({cmd.discord_name})</span>}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+            {['Imperium', 'Chaos', 'Xenos'].map((alliance) => {
+              const group = commanders.filter(cmd => getGrandAlliance(cmd.army_faction) === alliance);
+              const headerLabel = alliance === 'Imperium' ? 'Imperial Forces' : `${alliance} Forces`;
+
+              return (
+                <div key={alliance}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', borderBottom: '2px solid var(--theme-border)', paddingBottom: '0.5rem' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.3rem', color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                      {headerLabel} ({group.length})
                     </h3>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--theme-accent)', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {cmd.army_faction || 'Unknown Faction'}
-                      {cmd.army_subfaction ? ` - ${cmd.army_subfaction}` : ''}
+                  </div>
+                  {group.length === 0 ? (
+                    <p style={{ color: 'var(--theme-fg-muted)', fontStyle: 'italic', fontSize: '0.9rem' }}>No {headerLabel.toLowerCase()} registered.</p>
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                      {group.map(cmd => (
+                        <div key={cmd.id} style={{ backgroundColor: 'var(--theme-bg-secondary)', borderRadius: '6px', border: '1px solid var(--theme-border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                          <div style={{ display: 'flex', padding: '1rem', borderBottom: '1px solid var(--theme-border)', alignItems: 'center', gap: '1rem', backgroundColor: 'rgba(0,0,0,0.2)' }}>
+                            <div style={{ width: '60px', height: '60px', borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--theme-bg)', flexShrink: 0, border: '2px solid var(--theme-accent)' }}>
+                              {cmd.avatar_url ? (
+                                <img src={getTransformUrl(cmd.avatar_url, 120, 60)} alt={cmd.commander_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              ) : (
+                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>⚔</div>
+                              )}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.2rem', color: 'var(--theme-fg)', wordBreak: 'break-word' }}>
+                                {cmd.commander_name || 'Classified'}
+                                {cmd.discord_name && <span style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', marginLeft: '0.5rem', fontWeight: 'normal' }}>({cmd.discord_name})</span>}
+                              </h3>
+                              <div style={{ fontSize: '0.8rem', color: 'var(--theme-accent)', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {cmd.army_faction || 'Unknown Faction'}
+                                {cmd.army_subfaction ? ` - ${cmd.army_subfaction}` : ''}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div style={{ padding: '1rem', flex: 1 }}>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--theme-fg-muted)', fontStyle: 'italic', lineHeight: 1.5 }}>
+                              {cmd.army_lore ? (
+                                `"${cmd.army_lore.substring(0, 150)}${cmd.army_lore.length > 150 ? '...' : ''}"`
+                              ) : (
+                                "No narrative chronicles recorded for this commander."
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div style={{ padding: '1rem', paddingTop: 0 }}>
+                            <Link to={`/profile/${cmd.id}`} className="btn secondary" style={{ width: '100%', textAlign: 'center', display: 'block', boxSizing: 'border-box' }}>
+                              View Full Dossier
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
+                  )}
                 </div>
-                
-                <div style={{ padding: '1rem', flex: 1 }}>
-                  <div style={{ fontSize: '0.9rem', color: 'var(--theme-fg-muted)', fontStyle: 'italic', lineHeight: 1.5 }}>
-                    {cmd.army_lore ? (
-                      `"${cmd.army_lore.substring(0, 150)}${cmd.army_lore.length > 150 ? '...' : ''}"`
-                    ) : (
-                      "No narrative chronicles recorded for this commander."
-                    )}
-                  </div>
-                </div>
-                
-                <div style={{ padding: '1rem', paddingTop: 0 }}>
-                  <Link to={`/profile/${cmd.id}`} className="btn secondary" style={{ width: '100%', textAlign: 'center', display: 'block', boxSizing: 'border-box' }}>
-                    View Full Dossier
-                  </Link>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

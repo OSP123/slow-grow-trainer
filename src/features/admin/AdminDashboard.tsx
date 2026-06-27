@@ -3,6 +3,7 @@ import { supabase } from '../../supabaseClient';
 import { generateMatchups, type MatchPair } from './Matchmaker';
 import { getFactionsGrouped } from '../../data/warhammer40k';
 import { useUnitRegistry } from '../../hooks/useUnitRegistry';
+import { getGrandAlliance } from '../../components/TacticalSectorMap';
 
 export interface UnitPoint {
   id: string;
@@ -63,6 +64,12 @@ export default function AdminDashboard() {
 
   const [generatedMatches, setGeneratedMatches] = useState<MatchPair[]>([]);
   const [committingMatches, setCommittingMatches] = useState(false);
+
+  // Manual Narrative Pairing
+  const [manualP1, setManualP1] = useState('');
+  const [manualP2, setManualP2] = useState('');
+  const [manualTheatre, setManualTheatre] = useState('');
+  const [manualMessage, setManualMessage] = useState('');
 
   const [stores, setStores] = useState<GameStore[]>([]);
   const [newStoreName, setNewStoreName] = useState('');
@@ -330,6 +337,30 @@ export default function AdminDashboard() {
       setMatchupMessage('Error committing Matchups.');
     }
     setCommittingMatches(false);
+  };
+
+  const handleCreateManualPairing = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manualP1 || !manualP2 || manualP1 === manualP2) {
+      setManualMessage('Please select two distinct commanders.');
+      return;
+    }
+    setManualMessage('');
+    const { error } = await supabase.from('matchups').insert([{
+      p1_id: manualP1,
+      p2_id: manualP2,
+      status: 'scheduled',
+      theatre_name: manualTheatre || 'The Ash Wastes - Sector Alpha'
+    }]);
+    if (!error) {
+      setManualMessage('Manual narrative pairing successfully scheduled!');
+      setManualP1('');
+      setManualP2('');
+      setManualTheatre('');
+      fetchAllMatchups();
+    } else {
+      setManualMessage('Error creating manual pairing: ' + error.message);
+    }
   };
 
   const handleAddStore = async (e: React.FormEvent) => {
@@ -1042,6 +1073,77 @@ export default function AdminDashboard() {
             </button>
           </div>
         )}
+
+        {/* Manual Narrative Pairing Form */}
+        <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--theme-border)' }}>
+          <h3 style={{ marginBottom: '0.5rem' }}>Manual Narrative Pairing</h3>
+          <p style={{ color: 'var(--theme-fg-muted)', fontSize: '0.85rem', marginBottom: '1rem' }}>
+            Assign specific commanders based on campaign narrative. Enforces Grand Alliance guidelines: Imperial forces never fight one another, and Xenos factions do not fight against the exact same Xenos faction (e.g., Tyranids vs Tyranids).
+          </p>
+          {manualMessage && (
+            <div style={{ padding: '0.75rem', marginBottom: '1rem', border: '1px solid var(--theme-accent)', color: 'var(--theme-accent)', fontSize: '0.85rem' }}>
+              {manualMessage}
+            </div>
+          )}
+          {(() => {
+            const p1Obj = users.find(u => u.id === manualP1);
+            const p2Obj = users.find(u => u.id === manualP2);
+            const p1All = p1Obj ? getGrandAlliance(p1Obj.army_faction) : null;
+            const p2All = p2Obj ? getGrandAlliance(p2Obj.army_faction) : null;
+
+            let banner = null;
+            if (p1All && p2All) {
+              if (p1All === 'Imperium' && p2All === 'Imperium') {
+                banner = <div style={{ padding: '0.5rem', marginBottom: '1rem', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: '1px solid #ef4444', fontSize: '0.85rem', borderRadius: '4px' }}>⚠️ Narrative Alert: Imperium vs Imperium detected. Campaign rules forbid Imperial infighting!</div>;
+              } else if (p1All === 'Xenos' && p2All === 'Xenos') {
+                if (p1Obj?.army_faction && p2Obj?.army_faction && p1Obj.army_faction.toLowerCase() === p2Obj.army_faction.toLowerCase()) {
+                  banner = <div style={{ padding: '0.5rem', marginBottom: '1rem', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: '1px solid #ef4444', fontSize: '0.85rem', borderRadius: '4px' }}>⚠️ Narrative Alert: Exact same Xenos faction pairing detected ({p1Obj.army_faction} vs {p2Obj.army_faction}). Campaign rules forbid identical Xenos infighting!</div>;
+                }
+              } else if (p1All === 'Chaos' && p2All === 'Chaos') {
+                banner = <div style={{ padding: '0.5rem', marginBottom: '1rem', backgroundColor: 'rgba(234, 179, 8, 0.15)', color: '#eab308', border: '1px solid #eab308', fontSize: '0.85rem', borderRadius: '4px' }}>ℹ️ Narrative Notice: Chaos vs Chaos detected. Allowed under narrative alignment guidelines.</div>;
+              }
+            }
+
+            return (
+              <>
+                {banner}
+                <form onSubmit={handleCreateManualPairing} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'flex-end' }}>
+                  <div style={{ flex: '1 1 200px' }}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Player 1</label>
+                    <select value={manualP1} onChange={e => setManualP1(e.target.value)} required style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}>
+                      <option value="">Select Commander...</option>
+                      {users.filter(u => u.campaign_status !== 'removed').map(u => (
+                        <option key={u.id} value={u.id}>{u.commander_name} ({u.army_faction || 'No Faction'})</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div style={{ flex: '1 1 200px' }}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Player 2</label>
+                    <select value={manualP2} onChange={e => setManualP2(e.target.value)} required style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}>
+                      <option value="">Select Commander...</option>
+                      {users.filter(u => u.campaign_status !== 'removed').map(u => (
+                        <option key={u.id} value={u.id}>{u.commander_name} ({u.army_faction || 'No Faction'})</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div style={{ flex: '1 1 200px' }}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Theatre of War</label>
+                    <select value={manualTheatre} onChange={e => setManualTheatre(e.target.value)} style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}>
+                      <option value="">Default (The Ash Wastes)</option>
+                      <option value="The Hive Spires">The Hive Spires</option>
+                      <option value="The Magma Forges">The Magma Forges</option>
+                      <option value="The Sump Ruins">The Sump Ruins</option>
+                      <option value="The Ash Wastes">The Ash Wastes</option>
+                      <option value="The Toxic Oceans">The Toxic Oceans</option>
+                      <option value="Orbital Relay Station">Orbital Relay Station</option>
+                    </select>
+                  </div>
+                  <button type="submit" className="btn primary" style={{ padding: '0.6rem 1.25rem' }}>Schedule Pairing</button>
+                </form>
+              </>
+            );
+          })()}
+        </div>
       </div>
 
       {/* ── SANCTIONED VENUES ── */}
