@@ -121,4 +121,31 @@ describe('AdminDashboard (RBAC)', () => {
       expect(screen.getByText(/Leman Russ/i)).toBeInTheDocument();
     });
   });
+
+  it('displays a Reinstate button for removed commanders', async () => {
+    (supabase.auth.getUser as import('vitest').Mock).mockResolvedValue({
+      data: { user: { id: 'admin_123', email: 'omarpatel123@gmail.com' } }
+    });
+    const customMockFrom = (table: string) => {
+      if (table === 'profiles') {
+        const chainable = Promise.resolve({ data: [{ id: '1', commander_name: 'Fallen Hero', campaign_status: 'removed' }], error: null }) as any;
+        chainable.eq = vi.fn().mockReturnValue(chainable);
+        chainable.single = vi.fn().mockResolvedValue({ data: { role: 'admin' }, error: null });
+        chainable.order = vi.fn().mockReturnValue(chainable);
+        return {
+          select: vi.fn().mockReturnValue(chainable),
+          update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) })
+        };
+      }
+      return mockFromUnlocked(table);
+    };
+    (supabase.from as import('vitest').Mock).mockImplementation(customMockFrom);
+
+    render(<AdminDashboard />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Fallen Hero/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Reinstate/i })).toBeInTheDocument();
+    });
+  });
 });

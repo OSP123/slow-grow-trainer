@@ -1021,4 +1021,13 @@ Tasks:
 - Followed Test-First Development (TDD) by updating unit tests in `Matchmaker.test.ts` to assert that differing Xenos factions pair successfully while identical Xenos factions do not.
 - Verified all 74 automated unit tests pass and confirmed a clean production build (`npm run build`).
 Follow-ups:
-- Request user check to verify the updated Xenos pairing behavior meets expectations.
+- None
+
+Date: 2026-06-29 (Update 11)
+Tasks:
+- Added a "Reinstate" button and confirmation modal flow inside `AdminDashboard.tsx` to restore players who were accidentally marked as "removed".
+- Reinstating a commander transitions their `campaign_status` back to `'active'`, making them visible and eligible for matchmaking again.
+- Strictly followed Test-First Development (TDD) by adding a unit test to `AdminDashboard.test.tsx` verifying the Reinstate button renders for removed users before implementing the feature.
+- Verified all 75 unit tests passing across the codebase and confirmed clean production compilation (`npm run build`).
+Follow-ups:
+- Request user verification to confirm reinstating players works smoothly in their admin dashboard.

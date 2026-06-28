@@ -93,7 +93,7 @@ export default function AdminDashboard() {
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [userMessage, setUserMessage] = useState('');
-  const [confirmAction, setConfirmAction] = useState<{ type: 'pause' | 'resume' | 'remove', userId: string, userName: string } | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ type: 'pause' | 'resume' | 'remove' | 'reinstate', userId: string, userName: string } | null>(null);
 
   // Map Editor
   const [mapLocations, setMapLocations] = useState<any[]>([]);
@@ -553,12 +553,13 @@ export default function AdminDashboard() {
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
           <div className="card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center', border: `1px solid ${confirmAction.type === 'remove' ? '#ef4444' : 'var(--theme-accent)'}` }}>
             <h3 style={{ marginBottom: '1rem', color: confirmAction.type === 'remove' ? '#ef4444' : 'var(--theme-accent)' }}>
-              {confirmAction.type === 'remove' ? 'Remove Player?' : confirmAction.type === 'pause' ? 'Pause Player?' : 'Resume Player?'}
+              {confirmAction.type === 'remove' ? 'Remove Player?' : confirmAction.type === 'pause' ? 'Pause Player?' : confirmAction.type === 'reinstate' ? 'Reinstate Player?' : 'Resume Player?'}
             </h3>
             <p style={{ marginBottom: '2rem' }}>
               Are you sure you want to {confirmAction.type} <strong>{confirmAction.userName}</strong>?
               {confirmAction.type === 'remove' && " This marks them as removed, excluding them from future matchmaking and active roster views."}
               {confirmAction.type === 'pause' && " This pauses their participation in automated matchmaking until resumed."}
+              {confirmAction.type === 'reinstate' && " This reinstates them as active, bringing them back into matchmaking and active roster views."}
             </p>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
               <button onClick={() => setConfirmAction(null)} className="btn secondary">Cancel</button>
@@ -958,7 +959,15 @@ export default function AdminDashboard() {
                     <td style={{ padding: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       <button onClick={() => handleEditUser(u)} className="btn secondary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }}>Edit</button>
                       
-                      {u.campaign_status !== 'removed' && (
+                      {u.campaign_status === 'removed' ? (
+                        <button 
+                          onClick={() => setConfirmAction({ type: 'reinstate', userId: u.id, userName: u.commander_name || 'Unknown' })} 
+                          className="btn secondary" 
+                          style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', borderColor: '#3b82f6', color: '#3b82f6' }}
+                        >
+                          Reinstate
+                        </button>
+                      ) : (
                         <>
                           <button 
                             onClick={() => setConfirmAction({ type: u.campaign_status === 'paused' ? 'resume' : 'pause', userId: u.id, userName: u.commander_name || 'Unknown' })} 
