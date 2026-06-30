@@ -1098,3 +1098,11 @@ Tasks:
 - Verified unit tests and clean production build (`npm run build`).
 Follow-ups:
 - None
+
+Date: 2026-06-30 (Army Chronicles Checklist Sync Fix)
+Tasks:
+- Investigated and resolved a bug in `CommanderProfile.tsx` where scribing and saving Army Chronicles lore displayed a success toast ("Army Chronicles safely archived") but failed to update local React `profile` state.
+- Updated `handleLoreSave` and `handleAvatarUpload` to invoke `setProfile` upon successful Supabase update so child components like `<CampaignQuests>` immediately reflect the new state, dynamically crossing out the "Scribe your Army Chronicles (Lore)" enlistment checkbox without needing a browser reload.
+- Added TDD unit test verifying immediate checkbox line-through styling on lore save.
+Follow-ups:
+- None

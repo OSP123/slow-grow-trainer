@@ -8,6 +8,8 @@ import type { Mock } from 'vitest';
 const createMockChain = (resolvedValue: any) => {
   const chain: any = {
     select: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+    upsert: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     not: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
@@ -131,6 +133,41 @@ describe('CommanderProfile', () => {
     fireEvent.click(screen.getByText('Army Chronicles'));
     await waitFor(() => {
       expect(screen.getByText(/We march for the Emperor/i)).toBeInTheDocument();
+    });
+  });
+
+  it('updates local profile state and crosses out Army Chronicles checklist item upon saving lore', async () => {
+    const profileWithoutLore = { ...mockProfile, army_lore: '' };
+    (supabase.auth.getUser as Mock).mockResolvedValue({
+      data: { user: { id: 'profile-123', user_metadata: {} } },
+      error: null,
+    });
+    const selectChain = createMockChain(profileWithoutLore);
+    (supabase.from as Mock).mockImplementation((table: string) => {
+      if (table === 'profiles') return selectChain;
+      return createMockChain([]);
+    });
+
+    renderProfile('profile-123');
+    await waitFor(() => screen.getByText('Scribe your Army Chronicles (Lore)'));
+
+    // Checkbox text item should initially not be crossed out
+    const questItem = screen.getByText('Scribe your Army Chronicles (Lore)');
+    expect(questItem).toHaveStyle({ textDecoration: 'none' });
+
+    // Navigate to Army Chronicles tab
+    fireEvent.click(screen.getByText('Army Chronicles'));
+    const textarea = await screen.findByPlaceholderText('Detail the narrative of your forces in this sector...');
+    fireEvent.change(textarea, { target: { value: 'The heroic defenders of Vespera Prime.' } });
+
+    // Submit lore
+    const submitBtn = screen.getByText('Commit to Archives');
+    fireEvent.click(submitBtn);
+
+    // Verify success message and check that quest item updates immediately to line-through
+    await waitFor(() => {
+      expect(screen.getByText('Army Chronicles safely archived.')).toBeInTheDocument();
+      expect(screen.getByText('Scribe your Army Chronicles (Lore)')).toHaveStyle({ textDecoration: 'line-through' });
     });
   });
 });

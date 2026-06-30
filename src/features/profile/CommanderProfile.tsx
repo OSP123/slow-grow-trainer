@@ -157,6 +157,7 @@ export default function CommanderProfile() {
     const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
     await supabase.from('profiles').update({ avatar_url: data.publicUrl }).eq('id', profile.id);
     setAvatarUrl(data.publicUrl);
+    setProfile({ ...profile, avatar_url: data.publicUrl });
     setUploading(false);
     setMessage('Avatar linked successfully.');
   };
@@ -166,8 +167,12 @@ export default function CommanderProfile() {
     if (!profile) return;
     setMessage('Scribing lore...');
     const { error } = await supabase.from('profiles').update({ army_lore: lore }).eq('id', profile.id);
-    if (error) setMessage('Error scribing lore: ' + error.message);
-    else setMessage('Army Chronicles safely archived.');
+    if (error) {
+      setMessage('Error scribing lore: ' + error.message);
+    } else {
+      setMessage('Army Chronicles safely archived.');
+      setProfile({ ...profile, army_lore: lore });
+    }
   };
 
   const handleSaveSettings = async (e: React.FormEvent) => {
