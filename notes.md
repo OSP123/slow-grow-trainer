@@ -1091,3 +1091,10 @@ Tasks:
 - Verified all 82 unit tests passing and clean production compilation (`npm run build`).
 Follow-ups:
 - None
+
+Date: 2026-06-30 (Campaign Timeline Date Correction)
+Tasks:
+- Corrected `CAMPAIGN_START` date in `CampaignTimeline.tsx` back to `2026-07-01T00:00:00` (July 1st) after it was inadvertently reverted to June 1st during component replacement.
+- Verified unit tests and clean production build (`npm run build`).
+Follow-ups:
+- None

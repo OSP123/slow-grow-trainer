@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import VoxWaveform from './VoxWaveform';
 import VoxAudioPlayer from './VoxAudioPlayer';
 
-const CAMPAIGN_START = new Date('2026-06-01T00:00:00');
+const CAMPAIGN_START = new Date('2026-07-01T00:00:00');
 
 export default function CampaignTimeline() {
   const [devOverride, setDevOverride] = useState(false);
