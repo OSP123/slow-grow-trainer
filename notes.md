@@ -1029,5 +1029,65 @@ Tasks:
 - Reinstating a commander transitions their `campaign_status` back to `'active'`, making them visible and eligible for matchmaking again.
 - Strictly followed Test-First Development (TDD) by adding a unit test to `AdminDashboard.test.tsx` verifying the Reinstate button renders for removed users before implementing the feature.
 - Verified all 75 unit tests passing across the codebase and confirmed clean production compilation (`npm run build`).
-Follow-ups:
 - Request user verification to confirm reinstating players works smoothly in their admin dashboard.
+
+Date: 2026-06-30
+Tasks:
+- Updated `CampaignTimeline.tsx` so that when the countdown timer expires, it is replaced by an interactive Vox Transmission interface styled similarly to the `INCOMING COMMUNIQUE :: SECTOR COMMAND` section.
+- Embedded an HTML5 `<audio>` player linked to `/Inquisitor-lore-slow-grow-voxcast-final.m4a` allowing commanders to listen to the final vox-cast transmission.
+- Added the full formatted transcript below the audio player complete with transmission timestamps, Governor Petro's dialogue, Inquisitor Charmeleus Kane's intervention and gunshot, and authentication codes.
+- Adhered strictly to Test-First Development (TDD): created `CampaignTimeline.test.tsx` with unit tests covering both the active countdown state and expired vox transmission state before completing implementation.
+- All 77 unit tests passing and verified clean production build (`npm run build`).
+Follow-ups:
+- None
+
+Date: 2026-06-30 (Vox Visualizer Update)
+Tasks:
+- Created animated `VoxWaveform` visualizer component featuring a retro oscilloscope grid background, dynamic frequency bars, and animated SVG carrier waves.
+- Connected the visualizer directly to the `<audio>` element play state (`isPlaying`) in `CampaignTimeline.tsx`: displays subtle standby oscillations when paused and shifts to energetic frequency animations when transmitting.
+- Adhered strictly to Test-First Development (TDD): created `VoxWaveform.test.tsx` asserting standby and live spectrum indicators before building the component, and updated `CampaignTimeline.test.tsx` to verify visualizer integration.
+- All 78 unit tests passing and verified clean production build (`npm run build`).
+Follow-ups:
+- None
+
+Date: 2026-06-30 (Vox Visualizer Visibility & Dev Override Fix)
+Tasks:
+- Improved `VoxWaveform.tsx` visibility and animation behavior: ensured frequency bars and oscilloscope sine wave continuously animate with vibrant phosphor green glow even in standby/idle mode (`!isPlaying`), switching to high-amplitude neon pulses when transmitting (`isPlaying`).
+- Added a convenient `[🛠️ DEV: SIMULATE JULY 1ST VOX TRANSMISSION]` simulation toggle button directly inside `CampaignTimeline.tsx` so commanders can immediately preview and interact with the vox transmission and wave animation without modifying date code or waiting for July 1st.
+- Verified all 78 unit tests passing and confirmed clean production compilation (`npm run build`).
+Follow-ups:
+- None
+
+Date: 2026-06-30 (CSS Flex Collapse Fix for Vox Waveform)
+Tasks:
+- Investigated user report that `VoxWaveform` was hidden by CSS: discovered that `.terminal-communique` (`display: flex; flex-direction: column; max-height: 420px;`) caused `VoxWaveform` (`flex-shrink: 1`, `overflow: hidden`) to shrink its computed height to `0px`.
+- Fixed the layout by adding `flex-shrink: 0`, `min-height: 180px`, and `box-sizing: border-box` to the `VoxWaveform` container style, preventing Flexbox from collapsing the visualizer when scrolling through long vox transcripts.
+- Verified all 78 unit tests passing and confirmed clean production compilation (`npm run build`).
+Follow-ups:
+- None
+
+Date: 2026-06-30 (Real-time Web Audio API Spectrum Analysis)
+Tasks:
+- Replaced simulated random math animation with genuine browser Web Audio API (`AudioContext` and `AnalyserNode`) real-time frequency analysis.
+- Connected the `<audio>` element in `CampaignTimeline.tsx` via `audioRef` directly into `VoxWaveform.tsx`: uses `createMediaElementSource()` and Fast Fourier Transform (FFT) frequency bin extraction (`getByteFrequencyData`) to drive the 20 vertical equalizer bars in exact sync with audio volume and frequency bands.
+- Utilized `getByteTimeDomainData` to map real-time soundwave amplitude points directly onto the SVG oscilloscope `<path>`, creating an authentic retro military spectrum analyzer trace.
+- Verified all 79 unit tests passing and confirmed clean production compilation (`npm run build`).
+Follow-ups:
+- None
+
+Date: 2026-06-30 (Custom Retro Auspex Terminal Audio Player)
+Tasks:
+- Replaced the browser-native white/grey HTML5 `<audio controls>` element in `CampaignTimeline.tsx` with a custom-built retro sci-fi component (`VoxAudioPlayer.tsx`).
+- Designed custom retro Auspex playback controls matching `.terminal-communique.imperial`: deep obsidian background (`#030803`), phosphor green border (`#1a3a1a`), glowing signal indicator (`SIGNAL LOCKED // ACTIVE`), custom `[ ▶ ACTIVATE FEED ]` / `[ ⏸ HOLD SIGNAL ]` button, digital time display (`mm:ss`), and interactive neon green seek bar.
+- Verified all 81 unit tests passing and clean production compilation (`npm run build`).
+Follow-ups:
+- None
+
+Date: 2026-06-30 (Continuous Multi-Layered Oscilloscope Waveform Visualizer)
+Tasks:
+- Completely removed vertical equalizer bars from `VoxWaveform.tsx` per user feedback requesting pure waveforms instead of bars.
+- Rewrote `VoxWaveform.tsx` to render a full-size (120px height) dynamic SVG oscilloscope window with retro background grid lines and center baseline.
+- Implemented three continuous, multi-layered undulating waveform paths (`primaryPath` with neon glow, phase-shifted `secondaryPath`, and subtle `tertiaryPath`) driven in real time by Web Audio API `getByteTimeDomainData` or smooth retro oscilloscope math in standby mode.
+- Verified all 82 unit tests passing and clean production compilation (`npm run build`).
+Follow-ups:
+- None
