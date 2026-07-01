@@ -70,6 +70,14 @@ export default function Dashboard() {
 
   const [activeTheme, setActiveTheme] = useState(document.body.getAttribute('data-theme') || 'imperium');
 
+  const getCommanderTheatre = (c: any) => {
+    if (allMatchups) {
+      const activeMatch = allMatchups.find(m => (m.p1_id === c.id || m.p2_id === c.id) && m.status !== 'cancelled');
+      if (activeMatch && activeMatch.theatre_name) return activeMatch.theatre_name;
+    }
+    return c.deployed_theatre || null;
+  };
+
   useEffect(() => {
     // Watch for theme changes from the sidebar dropdown
     const observer = new MutationObserver((mutations) => {
@@ -714,7 +722,10 @@ export default function Dashboard() {
               ))}
 
               {/* Deployed Commanders Overlay */}
-              {commanders.filter((c: any) => c.deployed_theatre === selectedTheatre.name).map((c: any) => {
+              {commanders.filter((c: any) => {
+                const t = getCommanderTheatre(c);
+                return t && (t === selectedTheatre.name || t.startsWith(`${selectedTheatre.name} -`));
+              }).map((c: any) => {
                 const factionData = FACTIONS.find(f => f.name === c.army_faction);
                 const color = getFactionColor(c.army_faction, factionData?.grandAlliance);
                 
@@ -733,7 +744,8 @@ export default function Dashboard() {
                     left = `${loc.x_pos + offsetX}%`;
                   }
                 } else {
-                  const pos = getDeploymentPosition(c.id, c.deployed_theatre);
+                  const t = getCommanderTheatre(c) || selectedTheatre.name;
+                  const pos = getDeploymentPosition(c.id, t);
                   top = pos.top;
                   left = pos.left;
                 }

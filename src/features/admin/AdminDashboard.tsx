@@ -350,6 +350,9 @@ export default function AdminDashboard() {
     }));
     const { error } = await supabase.from('matchups').insert(payload);
     if (!error) {
+      for (const m of generatedMatches) {
+        await supabase.from('profiles').update({ deployed_theatre: m.theatre_name }).in('id', [m.p1.id, m.p2.id]);
+      }
       setMatchupMessage('Matchups actively committed to the Ledger!');
       setGeneratedMatches([]);
       fetchAllMatchups();
@@ -377,14 +380,16 @@ export default function AdminDashboard() {
     const sectorList = REAL_SECTORS[chosenTheatre] || ['Rad Perimeter'];
     const monthIdx = Math.min(Math.max(1, campaignState?.current_month || 1), sectorList.length) - 1;
     const assignedSector = sectorList[monthIdx];
+    const fullTheatreName = `${chosenTheatre} - ${assignedSector}`;
 
     const { error } = await supabase.from('matchups').insert([{
       p1_id: manualP1,
       p2_id: manualP2,
       status: 'scheduled',
-      theatre_name: `${chosenTheatre} - ${assignedSector}`
+      theatre_name: fullTheatreName
     }]);
     if (!error) {
+      await supabase.from('profiles').update({ deployed_theatre: fullTheatreName }).in('id', [manualP1, manualP2]);
       setManualMessage('Manual narrative pairing successfully scheduled!');
       setManualP1('');
       setManualP2('');

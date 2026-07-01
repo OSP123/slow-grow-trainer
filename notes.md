@@ -1114,6 +1114,8 @@ Tasks:
 - Fixed matchmaker theatre assignment logic (`Matchmaker.ts`) to eliminate random zone hallucination and default bottlenecking in `The Ash Wastes`. Matchups are now distributed across all 6 real planetary theatres (`The Hive Spires`, `The Ash Wastes`, `The Magma Forges`, `Orbital Relay Station`, `The Sump Ruins`, `The Toxic Oceans`).
 - Synchronized sector assignment (`generateMatchups` and `handleCreateManualPairing`) with `campaignState.current_month` so that matchups are always assigned to the exact sector corresponding to the campaign's current escalation points value (e.g., Month 1 = 400 pts = Sector Index 0; Month 3 = 1200 pts = Sector Index 2).
 - Confirmed that once initial or manual pairings are locked into the ledger (`commitMatches` or `handleCreateManualPairing`), end users immediately see their active matchup banner at the top of the War Effort Map (`/dashboard`) showing their assigned opponent and faction, as well as on their individual commander card on the Sector Map.
+- Fixed territory map deployment filtering (`Dashboard.tsx` and `TacticalSectorMap.tsx`) so that commanders assigned to full war zone strings (e.g. `The Hive Spires - Outer Wall`) or derived directly from active matchups show up on the map overlays and inside their specific tactical sectors when clicking a territory.
+- Updated Admin locking logic (`commitMatches` and `handleCreateManualPairing`) to automatically sync `profiles.deployed_theatre` in Postgres whenever a match is locked in.
 - Wrote unit tests verifying option formatting and simulated list text formatting including war zone preview, distribution across real theatres, and sector points matching.
 Follow-ups:
 - None

@@ -166,10 +166,30 @@ interface TacticalSectorMapProps {
 export default function TacticalSectorMap({ theatre, commanders, matchups }: TacticalSectorMapProps) {
   const [selectedSector, setSelectedSector] = useState<number | null>(null);
 
-  const deployedCommanders = commanders.filter(c => c.deployed_theatre === theatre.name);
+  const getCommanderTheatre = (c: any) => {
+    if (matchups) {
+      const activeMatch = matchups.find(m => (m.p1_id === c.id || m.p2_id === c.id) && m.status !== 'cancelled');
+      if (activeMatch && activeMatch.theatre_name) return activeMatch.theatre_name;
+    }
+    return c.deployed_theatre || null;
+  };
+
+  const deployedCommanders = commanders.filter(c => {
+    const t = getCommanderTheatre(c);
+    return t && (t === theatre.name || t.startsWith(`${theatre.name} -`));
+  });
   const sectors = THEATRE_SECTORS[theatre.name] || DEFAULT_SECTORS;
 
   const getSectorForCommander = (cmdId: string) => {
+    const cmd = commanders.find(c => c.id === cmdId);
+    if (cmd) {
+      const t = getCommanderTheatre(cmd);
+      if (t && t.includes(' - ')) {
+        const sectorName = t.split(' - ')[1].trim().toLowerCase();
+        const foundIdx = sectors.findIndex(s => s.name.toLowerCase() === sectorName);
+        if (foundIdx !== -1) return sectors[foundIdx].id;
+      }
+    }
     let hash = 0;
     for (let i = 0; i < cmdId.length; i++) hash = ((hash << 5) - hash) + cmdId.charCodeAt(i);
     return Math.abs(hash) % sectors.length;
