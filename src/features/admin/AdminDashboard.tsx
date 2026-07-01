@@ -581,6 +581,15 @@ export default function AdminDashboard() {
     );
   }
 
+  const pairedUserIds = new Set<string>();
+  allMatchups.forEach(m => {
+    if (m.status !== 'cancelled') {
+      if (m.p1_id) pairedUserIds.add(m.p1_id);
+      if (m.p2_id) pairedUserIds.add(m.p2_id);
+    }
+  });
+  const unassignedUsers = users.filter(u => u.campaign_status !== 'removed' && u.campaign_status !== 'paused' && !pairedUserIds.has(u.id));
+
   return (
     <div style={{ padding: '2rem', position: 'relative' }}>
       {confirmAction && (
@@ -1238,6 +1247,32 @@ export default function AdminDashboard() {
                 </li>
               ))}
             </ul>
+            {(() => {
+              const proposedUserIds = new Set<string>();
+              generatedMatches.forEach(m => {
+                if (m.p1.id) proposedUserIds.add(m.p1.id);
+                if (m.p2.id) proposedUserIds.add(m.p2.id);
+              });
+              const unproposed = users.filter(u => u.campaign_status !== 'removed' && u.campaign_status !== 'paused' && !proposedUserIds.has(u.id));
+              if (unproposed.length > 0) {
+                return (
+                  <div style={{ marginBottom: '1rem', padding: '0.75rem', backgroundColor: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444', borderRadius: '4px', color: '#fca5a5', fontSize: '0.85rem' }}>
+                    <strong>⚠️ Left Out of Algorithm Simulation ({unproposed.length}):</strong>
+                    <ul style={{ margin: '0.5rem 0 0 1.25rem', padding: 0 }}>
+                      {unproposed.map(u => (
+                        <li key={u.id}>
+                          <strong>{u.commander_name}</strong> [{u.army_faction || 'No Faction'}] (Record: {getUserRecord(u.id)})
+                        </li>
+                      ))}
+                    </ul>
+                    <div style={{ marginTop: '0.5rem', color: '#fecaca' }}>
+                      Once you lock in these initial pairings, any unassigned commander(s) will remain visible in <strong>Active Pairings Overview</strong> and can be paired immediately using <strong>Manual Narrative Pairing</strong> below.
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
             <button onClick={commitMatches} disabled={committingMatches} className="btn primary">
               {committingMatches ? 'Committing to Postgres...' : 'Lock Initial Pairings'}
             </button>
@@ -1245,7 +1280,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Manual Narrative Pairing Form */}
-        <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--theme-border)' }}>
+        <div id="manual-narrative-pairing-section" style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--theme-border)' }}>
           <h3 style={{ marginBottom: '0.5rem' }}>Manual Narrative Pairing</h3>
           <p style={{ color: 'var(--theme-fg-muted)', fontSize: '0.85rem', marginBottom: '1rem' }}>
             Assign specific commanders based on campaign narrative. Enforces Grand Alliance guidelines: Imperial forces never fight one another, and Xenos factions do not fight against the exact same Xenos faction (e.g., Tyranids vs Tyranids).
@@ -1282,18 +1317,26 @@ export default function AdminDashboard() {
                     <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Player 1</label>
                     <select value={manualP1} onChange={e => setManualP1(e.target.value)} required style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}>
                       <option value="">Select Commander...</option>
-                      {users.filter(u => u.campaign_status !== 'removed').map(u => (
-                        <option key={u.id} value={u.id}>{u.commander_name} [{u.army_faction || 'No Faction'}] (Record: {getUserRecord(u.id)})</option>
-                      ))}
+                      {users.filter(u => u.campaign_status !== 'removed').map(u => {
+                        const isPaired = pairedUserIds.has(u.id);
+                        const statusLabel = isPaired ? ' [Already Paired]' : ' [UNASSIGNED]';
+                        return (
+                          <option key={u.id} value={u.id}>{u.commander_name} [{u.army_faction || 'No Faction'}]{statusLabel} (Record: {getUserRecord(u.id)})</option>
+                        );
+                      })}
                     </select>
                   </div>
                   <div style={{ flex: '1 1 200px' }}>
                     <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Player 2</label>
                     <select value={manualP2} onChange={e => setManualP2(e.target.value)} required style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}>
                       <option value="">Select Commander...</option>
-                      {users.filter(u => u.campaign_status !== 'removed').map(u => (
-                        <option key={u.id} value={u.id}>{u.commander_name} [{u.army_faction || 'No Faction'}] (Record: {getUserRecord(u.id)})</option>
-                      ))}
+                      {users.filter(u => u.campaign_status !== 'removed').map(u => {
+                        const isPaired = pairedUserIds.has(u.id);
+                        const statusLabel = isPaired ? ' [Already Paired]' : ' [UNASSIGNED]';
+                        return (
+                          <option key={u.id} value={u.id}>{u.commander_name} [{u.army_faction || 'No Faction'}]{statusLabel} (Record: {getUserRecord(u.id)})</option>
+                        );
+                      })}
                     </select>
                   </div>
                   <div style={{ flex: '1 1 200px' }}>
@@ -1320,7 +1363,7 @@ export default function AdminDashboard() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h3 style={{ margin: 0 }}>Active Pairings Overview ({allMatchups.length})</h3>
           </div>
-          {allMatchups.length === 0 ? (
+          {allMatchups.length === 0 && unassignedUsers.length === 0 ? (
             <p style={{ color: 'var(--theme-fg-muted)', fontSize: '0.85rem' }}>No active pairings committed yet.</p>
           ) : (
             <div style={{ overflowX: 'auto' }}>
@@ -1369,6 +1412,32 @@ export default function AdminDashboard() {
                       </tr>
                     );
                   })}
+                  {unassignedUsers.map(u => (
+                    <tr key={`unassigned-${u.id}`} style={{ borderBottom: '1px solid var(--theme-border)', backgroundColor: 'rgba(239, 68, 68, 0.1)' }}>
+                      <td style={{ padding: '0.5rem' }}>
+                        <strong style={{ color: '#ef4444' }}>{u.commander_name}</strong> <span style={{ fontSize: '0.75rem', color: 'var(--theme-accent)' }}>[{u.army_faction || 'No Faction'}]</span>
+                      </td>
+                      <td style={{ padding: '0.5rem', fontStyle: 'italic', color: '#ef4444' }}>
+                        — Unassigned / Left Out —
+                      </td>
+                      <td style={{ padding: '0.5rem', color: '#f87171' }}>Undeployed</td>
+                      <td style={{ padding: '0.5rem', textAlign: 'center', color: 'var(--theme-fg-muted)' }}>— : —</td>
+                      <td style={{ padding: '0.5rem', textAlign: 'center' }}>
+                        <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '3px', backgroundColor: '#991b1b', color: '#fff', fontWeight: 'bold' }}>
+                          UNASSIGNED
+                        </span>
+                      </td>
+                      <td style={{ padding: '0.5rem', textAlign: 'right' }}>
+                        <button onClick={() => {
+                          setManualP1(u.id);
+                          const pairingSection = document.getElementById('manual-narrative-pairing-section');
+                          if (pairingSection) pairingSection.scrollIntoView({ behavior: 'smooth' });
+                        }} className="btn secondary" style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderColor: '#ef4444', color: '#ef4444' }}>
+                          Pair Manually ↓
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

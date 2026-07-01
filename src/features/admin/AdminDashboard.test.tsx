@@ -195,8 +195,8 @@ describe('AdminDashboard (RBAC)', () => {
 
     // Verify option text includes faction and win-loss record
     await waitFor(() => {
-      expect(screen.getAllByText(/Lord Castellan \[Space Marines\] \(Record: 1W - 0L\)/i).length).toBeGreaterThan(0);
-      expect(screen.getAllByText(/Commander Farsight \[T'au Empire\] \(Record: 0W - 1L\)/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Lord Castellan \[Space Marines\].*\(Record: 1W - 0L\)/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Commander Farsight \[T'au Empire\].*\(Record: 0W - 1L\)/i).length).toBeGreaterThan(0);
     });
 
     // Verify simulated algorithm pairings display faction and win-loss record

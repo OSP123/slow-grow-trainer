@@ -1145,4 +1145,13 @@ Tasks:
 Follow-ups:
 - None
 
+Date: 2026-07-01 (Unassigned Commander Visibility & Manual Pairing Enhancement)
+Tasks:
+- Enhanced `Proposed Round Ledgers` in `AdminDashboard.tsx` to explicitly display any commanders left out of the algorithmic simulation with a clear notification and instructions for manual assignment.
+- Enhanced `Active Pairings Overview` in `AdminDashboard.tsx` to automatically detect and display any unassigned active commanders alongside committed matchups, complete with an `UNASSIGNED` badge and a direct `Pair Manually ↓` button that pre-selects the commander and scrolls to the Manual Narrative Pairing form.
+- Labeled commander options inside `Manual Narrative Pairing` dropdown selects with `[UNASSIGNED]` or `[Already Paired]` indicators to make it effortless to select commanders who need matchups or pair them against existing participants.
+Follow-ups:
+- None
+
+
 
