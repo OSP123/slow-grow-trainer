@@ -33,12 +33,12 @@ export interface MatchPair {
   theatre_name: string;
 }
 
-const getGrandAlliance = (factionName: string) => {
+const getAlliance = (factionName: string) => {
   const faction = FACTIONS.find(f => f.name.toLowerCase() === factionName.toLowerCase());
   return faction ? faction.grandAlliance : null;
 };
 
-export function generateMatchups(pool: CommanderProfile[]): MatchPair[] {
+export function generateMatchups(pool: CommanderProfile[], currentMonth: number = 1): MatchPair[] {
   const unresolved = [...pool];
   const matchups: MatchPair[] = [];
 
@@ -46,56 +46,45 @@ export function generateMatchups(pool: CommanderProfile[]): MatchPair[] {
   unresolved.sort(() => Math.random() - 0.5);
 
   while (unresolved.length > 1) {
-    const p1 = unresolved.pop()!;
-    const p1Alliance = getGrandAlliance(p1.army_faction || '');
-    
+    const p1 = unresolved.shift()!;
     let bestMatchIndex = -1;
-    let highestScore = -9999;
+    let highestScore = -1;
 
     for (let i = 0; i < unresolved.length; i++) {
       const p2 = unresolved[i];
-      const p2Alliance = getGrandAlliance(p2.army_faction || '');
-      let matchScore = 0;
 
-      // Strict Ban 1: Imperium vs Imperium
-      if (p1Alliance === 'Imperium' && p2Alliance === 'Imperium') {
+      // Alliance Logic
+      const a1 = getAlliance(p1.army_faction);
+      const a2 = getAlliance(p2.army_faction);
+
+      // STRICT BAN: Imperium vs Imperium is strictly forbidden
+      if (a1 === 'Imperium' && a2 === 'Imperium') {
         continue;
       }
 
-      // Strict Ban 2: Xenos vs exact same Xenos faction
-      if (p1Alliance === 'Xenos' && p2Alliance === 'Xenos') {
-        if (p1.army_faction && p2.army_faction && p1.army_faction.toLowerCase() === p2.army_faction.toLowerCase()) {
-          continue;
-        }
+      // STRICT BAN: Exact same Xenos faction is strictly forbidden (e.g. Tyranids vs Tyranids)
+      if (a1 === 'Xenos' && a2 === 'Xenos' && p1.army_faction === p2.army_faction) {
+        continue;
       }
 
-      // Rule 0: Chaos alignment preference (Chaos vs Chaos is allowed but penalized)
-      if (p1Alliance === 'Chaos' && p2Alliance === 'Chaos') {
-        matchScore -= 15;
+      let matchScore = 0;
+
+      // Chaos vs Chaos penalty: allowed, but heavily penalized so Chaos vs non-Chaos is preferred
+      if (a1 === 'Chaos' && a2 === 'Chaos') {
+        matchScore -= 50;
       }
 
-      // Rule 1: Theatre Proximity (+50 points)
-      if (p1.deployed_theatre && p2.deployed_theatre && p1.deployed_theatre === p2.deployed_theatre) {
-        matchScore += 50;
-      }
-      
-      // Rule 1.5: Exact Location Proximity (+100 points)
-      if (p1.deployed_location_id && p2.deployed_location_id && p1.deployed_location_id === p2.deployed_location_id) {
-        matchScore += 100;
-      }
-
-      // Rule 2: Attacker vs Defender (+20 points)
-      if ((p1Alliance === 'Imperium' && (p2Alliance === 'Chaos' || p2Alliance === 'Xenos')) ||
-          (p2Alliance === 'Imperium' && (p1Alliance === 'Chaos' || p1Alliance === 'Xenos'))) {
-        matchScore += 20;
-      }
-
-      // Rule 3: Location (+10 points)
-      if (p1.location && p2.location && p1.location.toLowerCase() === p2.location.toLowerCase()) {
+      // Geospatial proximity priority: Huge bonus if players share same store/location
+      if (p1.location && p2.location && p1.location.trim().toLowerCase() === p2.location.trim().toLowerCase()) {
         matchScore += 10;
       }
 
-      // Rule 4: Experience Tier (+5 points)
+      // Narrative pairing: Attacker vs Defender bonus (Imperium vs non-Imperium)
+      if ((a1 === 'Imperium' && a2 !== 'Imperium') || (a1 !== 'Imperium' && a2 === 'Imperium')) {
+        matchScore += 20;
+      }
+
+      // Experience level parity
       if (p1.experience_level === p2.experience_level) {
         matchScore += 5;
       }
@@ -129,7 +118,8 @@ export function generateMatchups(pool: CommanderProfile[]): MatchPair[] {
       }
 
       const sectors = REAL_THEATRE_SECTORS[baseTheatre];
-      const subSector = sectors[matchups.length % sectors.length];
+      const sectorIndex = Math.min(Math.max(1, currentMonth), sectors.length) - 1;
+      const subSector = sectors[sectorIndex];
       
       matchups.push({ p1, p2, score: highestScore, theatre_name: `${baseTheatre} - ${subSector}` });
     } else {

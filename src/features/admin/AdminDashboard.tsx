@@ -333,7 +333,7 @@ export default function AdminDashboard() {
   const handleGenerateMatches = async () => {
     const { data } = await supabase.from('profiles').select('id, location, experience_level, army_faction, commander_name').eq('campaign_status', 'active');
     if (data) {
-      const pairings = generateMatchups(data);
+      const pairings = generateMatchups(data, campaignState?.current_month || 1);
       setGeneratedMatches(pairings);
     }
   };
@@ -375,7 +375,8 @@ export default function AdminDashboard() {
     };
     const chosenTheatre = manualTheatre || 'The Ash Wastes';
     const sectorList = REAL_SECTORS[chosenTheatre] || ['Rad Perimeter'];
-    const assignedSector = sectorList[Math.floor(Math.random() * sectorList.length)];
+    const monthIdx = Math.min(Math.max(1, campaignState?.current_month || 1), sectorList.length) - 1;
+    const assignedSector = sectorList[monthIdx];
 
     const { error } = await supabase.from('matchups').insert([{
       p1_id: manualP1,
@@ -1115,7 +1116,7 @@ export default function AdminDashboard() {
                     Location: {m.p2.location || '?'}, Tier: {m.p2.experience_level} <span style={{ color: 'gray', marginLeft: '0.5rem' }}>[Score: {m.score}]</span>
                   </div>
                   <div style={{ padding: '4px 8px', backgroundColor: 'rgba(59, 130, 246, 0.15)', borderRadius: '4px', border: '1px solid rgba(59, 130, 246, 0.3)', fontSize: '0.85rem', color: '#60a5fa' }}>
-                    📍 Deployed War Zone: <strong style={{ color: '#fff' }}>{m.theatre_name}</strong>
+                    📍 Deployed War Zone: <strong style={{ color: '#fff' }}>{m.theatre_name}</strong> <span style={{ marginLeft: '8px', color: '#fbbf24' }}>[{(campaignState?.current_month || 1) * 400} PTS]</span>
                   </div>
                 </li>
               ))}

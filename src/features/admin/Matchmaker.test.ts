@@ -122,4 +122,20 @@ describe('Matchmaker Simulation Algorithm Engine', () => {
       expect(REAL_SECTORS[theatre]).toContain(sector);
     });
   });
+
+  it('assigns the exact sector matching the current campaign month points value (Month 3 = 1200 pts = index 2)', () => {
+    const pool: CommanderProfile[] = [
+      { id: '1', location: 'LA', experience_level: 'beginner', army_faction: 'Space Marines', commander_name: 'P1' },
+      { id: '2', location: 'LA', experience_level: 'beginner', army_faction: 'Orks', commander_name: 'P2' },
+    ];
+
+    // Month 3 corresponds to 1200 points (sector index 2)
+    const results = generateMatchups(pool, 3);
+    expect(results).toHaveLength(1);
+    
+    const [, sector] = results[0].theatre_name.split(' - ');
+    // Index 2 sectors across the theatres: 'Merchant Quarter', 'Storm Corridor', 'Foundry Floor', 'Weapons Battery', 'Collapsed Tunnels', 'Deep Channels'
+    const month3Sectors = ['Merchant Quarter', 'Storm Corridor', 'Foundry Floor', 'Weapons Battery', 'Collapsed Tunnels', 'Deep Channels'];
+    expect(month3Sectors).toContain(sector);
+  });
 });

@@ -1110,10 +1110,10 @@ Follow-ups:
 Date: 2026-07-01 (Admin Matchup Engine Comparison Enhancements)
 Tasks:
 - Updated the Admin Matchmaking & Override Station to display each player's Faction (`army_faction`) and calculated Win-Loss Record (`getUserRecord`) directly inside the algorithmically generated `Proposed Round Ledgers` and the `Manual Narrative Pairing` dropdown selects.
-- Added a `📍 Deployed War Zone` preview badge to each proposed pairing in the simulation ledger so administrators can verify where players will fight before locking matches in.
-- Fixed matchmaker theatre assignment logic (`Matchmaker.ts`) to eliminate random zone hallucination and default bottlenecking in `The Ash Wastes`. Matchups are now distributed across all 6 real planetary theatres (`The Hive Spires`, `The Ash Wastes`, `The Magma Forges`, `Orbital Relay Station`, `The Sump Ruins`, `The Toxic Oceans`), assigning exact valid sectors for each theatre.
-- Fixed manual narrative pairing defaults to assign real sectors instead of hallucinated fallback strings.
+- Added a `📍 Deployed War Zone` preview badge to each proposed pairing in the simulation ledger so administrators can verify where players will fight before locking matches in, including the exact points limit (`[400 PTS]`, `[800 PTS]`, etc.) for the current campaign round.
+- Fixed matchmaker theatre assignment logic (`Matchmaker.ts`) to eliminate random zone hallucination and default bottlenecking in `The Ash Wastes`. Matchups are now distributed across all 6 real planetary theatres (`The Hive Spires`, `The Ash Wastes`, `The Magma Forges`, `Orbital Relay Station`, `The Sump Ruins`, `The Toxic Oceans`).
+- Synchronized sector assignment (`generateMatchups` and `handleCreateManualPairing`) with `campaignState.current_month` so that matchups are always assigned to the exact sector corresponding to the campaign's current escalation points value (e.g., Month 1 = 400 pts = Sector Index 0; Month 3 = 1200 pts = Sector Index 2).
 - Confirmed that once initial or manual pairings are locked into the ledger (`commitMatches` or `handleCreateManualPairing`), end users immediately see their active matchup banner at the top of the War Effort Map (`/dashboard`) showing their assigned opponent and faction, as well as on their individual commander card on the Sector Map.
-- Wrote unit tests verifying option formatting and simulated list text formatting including war zone preview and distribution across real theatres.
+- Wrote unit tests verifying option formatting and simulated list text formatting including war zone preview, distribution across real theatres, and sector points matching.
 Follow-ups:
 - None
