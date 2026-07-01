@@ -24,6 +24,7 @@ export interface CommanderProfile {
   commander_name: string;
   deployed_theatre?: string;
   deployed_location_id?: string;
+  preferred_store_id?: string;
 }
 
 export interface MatchPair {
@@ -36,6 +37,26 @@ export interface MatchPair {
 const getAlliance = (factionName: string) => {
   const faction = FACTIONS.find(f => f.name.toLowerCase() === factionName.toLowerCase());
   return faction ? faction.grandAlliance : null;
+};
+
+const checkLocationSynergy = (p1: CommanderProfile, p2: CommanderProfile): boolean => {
+  if (p1.preferred_store_id && p2.preferred_store_id && p1.preferred_store_id === p2.preferred_store_id) return true;
+  if (p1.deployed_location_id && p2.deployed_location_id && p1.deployed_location_id === p2.deployed_location_id) return true;
+  if (p1.deployed_theatre && p2.deployed_theatre && p1.deployed_theatre === p2.deployed_theatre && p1.deployed_theatre !== 'The Ash Wastes') return true;
+  if (p1.location && p2.location) {
+    const l1 = p1.location.trim().toLowerCase();
+    const l2 = p2.location.trim().toLowerCase();
+    if (l1 === l2 && l1 !== '') return true;
+    
+    const zips1: string[] = l1.match(/\b\d{5}\b/g) || [];
+    const zips2: string[] = l2.match(/\b\d{5}\b/g) || [];
+    if (zips1.some((z: string) => zips2.includes(z))) return true;
+
+    const parts1 = l1.split(/[\s,]+/).filter(p => p.length >= 4 && !/^\d+$/.test(p));
+    const parts2 = l2.split(/[\s,]+/).filter(p => p.length >= 4 && !/^\d+$/.test(p));
+    if (parts1.some(p => l2.includes(p)) || parts2.some(p => l1.includes(p))) return true;
+  }
+  return false;
 };
 
 export function generateMatchups(pool: CommanderProfile[], currentMonth: number = 1): MatchPair[] {
@@ -74,8 +95,10 @@ export function generateMatchups(pool: CommanderProfile[], currentMonth: number 
         matchScore -= 50;
       }
 
-      // Geospatial proximity priority: Huge bonus if players share same store/location
-      if (p1.location && p2.location && p1.location.trim().toLowerCase() === p2.location.trim().toLowerCase()) {
+      // Geospatial proximity priority: From round 2 onwards (+100 pts) based on location preferences
+      if (currentMonth > 1 && checkLocationSynergy(p1, p2)) {
+        matchScore += 100;
+      } else if (p1.location && p2.location && p1.location.trim().toLowerCase() === p2.location.trim().toLowerCase()) {
         matchScore += 10;
       }
 

@@ -1162,6 +1162,15 @@ Tasks:
 Follow-ups:
 - None
 
+Date: 2026-07-02 (Location Prioritization From Round 2 Onwards)
+Tasks:
+- Added `preferred_store_id`, `deployed_theatre`, and `deployed_location_id` to the profile query in `AdminDashboard.tsx` when generating algorithmic matchups.
+- Added `checkLocationSynergy` helper to `Matchmaker.ts` to detect shared preferred stores, matching deployed locations/theatres, exact location string matches, overlapping zip codes, and shared city/neighborhood substrings.
+- Updated `generateMatchups` in `Matchmaker.ts` so that from Round 2 onwards (`currentMonth > 1`), location preference synergy grants a massive priority bonus (`+100` points), ensuring players at the same store or geographic cluster are matched together before narrative or experience weighting is applied.
+Follow-ups:
+- None
+
+
 
 
 

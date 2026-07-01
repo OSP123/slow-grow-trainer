@@ -138,4 +138,19 @@ describe('Matchmaker Simulation Algorithm Engine', () => {
     const month3Sectors = ['Merchant Quarter', 'Storm Corridor', 'Foundry Floor', 'Weapons Battery', 'Collapsed Tunnels', 'Deep Channels'];
     expect(month3Sectors).toContain(sector);
   });
+
+  it('heavily prioritizes location preferences (+100 pts) from Round 2 onwards (currentMonth > 1)', () => {
+    const pool: CommanderProfile[] = [
+      { id: '1', location: 'Los Angeles, 90036', experience_level: 'beginner', army_faction: 'Space Marines', commander_name: 'P1' },
+      { id: '2', location: 'New York City', experience_level: 'beginner', army_faction: 'Chaos Space Marines', commander_name: 'P2' },
+      { id: '3', location: 'Santa Monica, 90036', experience_level: 'expert', army_faction: 'Orks', commander_name: 'P3' },
+    ];
+
+    // In Round 2, P1 should pair with P3 because of matching zip code 90036 (+100), overriding Attacker vs Defender (+20) with Chaos P2
+    const results = generateMatchups(pool, 2);
+    expect(results).toHaveLength(1);
+    const pairedIDs = [results[0].p1.id, results[0].p2.id];
+    expect(pairedIDs).toContain('1');
+    expect(pairedIDs).toContain('3');
+  });
 });

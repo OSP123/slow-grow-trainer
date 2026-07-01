@@ -333,7 +333,7 @@ export default function AdminDashboard() {
   };
 
   const handleGenerateMatches = async () => {
-    const { data } = await supabase.from('profiles').select('id, location, experience_level, army_faction, commander_name').eq('campaign_status', 'active');
+    const { data } = await supabase.from('profiles').select('id, location, experience_level, army_faction, commander_name, preferred_store_id, deployed_theatre, deployed_location_id').eq('campaign_status', 'active');
     if (data) {
       const pairings = generateMatchups(data, campaignState?.current_month || 1);
       setGeneratedMatches(pairings);
