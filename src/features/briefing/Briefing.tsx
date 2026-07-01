@@ -87,7 +87,8 @@ export default function Briefing() {
         <ul style={{ paddingLeft: '1.5rem', lineHeight: '1.6', marginBottom: '1rem' }}>
           <li><strong>Imperium Wins:</strong> Increase Imperium Control and push back Chaos Corruption.</li>
           <li><strong>Chaos Wins:</strong> Increase Chaos Corruption and lower Imperium Control.</li>
-          <li><strong>Xenos Wins (Orks, T'au, Aeldari/Drukhari):</strong> Increase their respective faction footholds in that region.</li>
+          <li><strong>Xenos Wins (Orks, T'au, Aeldari/Drukhari, Tyranids, Genestealer Cults):</strong> Increase their respective faction footholds in that war zone.</li>
+          <li><strong>Necrons Awakening:</strong> Whenever Necrons gain a battle victory anywhere on the planet, their victory fuels the awakening of ancient subterranean tomb complexes beneath Vespera Prime, actively increasing Necron control specifically in <strong>The Sump Ruins</strong> where their primary tomb world lies (as well as the contested war zone).</li>
           <li><strong>T'au Empire vs Chaos:</strong> A T'au win against Chaos forces actively reduces Chaos Corruption in the sector (representing the neutralization of warp rituals).</li>
           <li><strong>Leagues of Votann:</strong> Winning any match secures critical resources for the Ancestor Cores. Winning in industrial sectors (The Magma Forges or The Sump Ruins) yields bonus resources!</li>
         </ul>

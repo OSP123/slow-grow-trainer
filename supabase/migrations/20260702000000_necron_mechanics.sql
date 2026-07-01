@@ -1,59 +1,9 @@
--- Migration: Campaign Narrative Engine
+-- Migration: Add Necrons, Tyranids, and Genestealer Cults territory mechanics
 
--- 1. Create the campaign_state table
-CREATE TABLE IF NOT EXISTS public.campaign_state (
-    id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
-    current_month INTEGER DEFAULT 1,
-    points_limit INTEGER DEFAULT 400,
-    votann_resources_secured INTEGER DEFAULT 0,
-    global_warp_corruption INTEGER DEFAULT 0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
+ALTER TABLE public.territories ADD COLUMN IF NOT EXISTS necron_foothold INTEGER DEFAULT 0;
+ALTER TABLE public.territories ADD COLUMN IF NOT EXISTS tyranid_foothold INTEGER DEFAULT 0;
+ALTER TABLE public.territories ADD COLUMN IF NOT EXISTS genestealer_foothold INTEGER DEFAULT 0;
 
--- Insert the singleton row if it doesn't exist
-INSERT INTO public.campaign_state (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
-
--- 2. Create the territories table
-CREATE TABLE IF NOT EXISTS public.territories (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name TEXT UNIQUE NOT NULL,
-    imperium_control INTEGER DEFAULT 50,
-    chaos_corruption INTEGER DEFAULT 50,
-    ork_foothold INTEGER DEFAULT 0,
-    tau_foothold INTEGER DEFAULT 0,
-    aeldari_foothold INTEGER DEFAULT 0,
-    necron_foothold INTEGER DEFAULT 0,
-    tyranid_foothold INTEGER DEFAULT 0,
-    genestealer_foothold INTEGER DEFAULT 0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- Seed territories
-INSERT INTO public.territories (name) VALUES 
-('The Hive Spires'),
-('The Magma Forges'),
-('The Sump Ruins'),
-('The Ash Wastes'),
-('The Toxic Oceans'),
-('Orbital Defense Grid')
-ON CONFLICT (name) DO NOTHING;
-
--- Enable RLS
-ALTER TABLE public.campaign_state ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.territories ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Enable read access for all users on campaign_state" ON public.campaign_state FOR SELECT USING (true);
-CREATE POLICY "Enable update for admins on campaign_state" ON public.campaign_state FOR UPDATE USING (
-  EXISTS (SELECT 1 FROM public.profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin')
-);
-
-CREATE POLICY "Enable read access for all users on territories" ON public.territories FOR SELECT USING (true);
-CREATE POLICY "Enable update for admins on territories" ON public.territories FOR UPDATE USING (
-  EXISTS (SELECT 1 FROM public.profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin')
-);
-
--- 3. Matchup Processing Logic
--- When a matchup is marked 'completed' or 'verified', process the territory changes
 CREATE OR REPLACE FUNCTION public.process_match_outcome()
 RETURNS trigger AS $$
 DECLARE
@@ -96,7 +46,6 @@ BEGIN
 
                 -- Farsight Enclaves vs Chaos Tracking
                 IF winner_faction = 'T''au Empire' AND loser_faction IN ('Chaos Space Marines', 'Thousand Sons', 'World Eaters', 'Chaos Daemons', 'Death Guard') THEN
-                    -- Note: Assumes FSE is played as Tau, could be more specific
                     UPDATE public.territories SET chaos_corruption = GREATEST(0, chaos_corruption - 5) WHERE name = NEW.theatre_name;
                 END IF;
 
@@ -133,10 +82,3 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Create the trigger
-DROP TRIGGER IF EXISTS trigger_process_match_outcome ON public.matchups;
-CREATE TRIGGER trigger_process_match_outcome
-AFTER UPDATE ON public.matchups
-FOR EACH ROW
-EXECUTE FUNCTION public.process_match_outcome();

@@ -1153,5 +1153,15 @@ Tasks:
 Follow-ups:
 - None
 
+Date: 2026-07-02 (Necrons & Xenos Territory Mechanics)
+Tasks:
+- Created SQL migration `20260702000000_necron_mechanics.sql` and updated `20260621000000_campaign_engine.sql` to add `necron_foothold`, `tyranid_foothold`, and `genestealer_foothold` columns to `public.territories`.
+- Updated `process_match_outcome()` trigger function so that whenever Necrons gain a match victory anywhere on Vespera Prime, their victory increases `necron_foothold` in `The Sump Ruins` (where their tomb world lies) as well as the contested war zone.
+- Added visual progress bars for `necron_foothold`, `tyranid_foothold`, and `genestealer_foothold` in the territory cards on `Dashboard.tsx`.
+- Updated the Dynamic Campaign Mechanics verbiage in `Briefing.tsx` to explicitly explain the Necrons Awakening rule and complete Xenos faction representation.
+Follow-ups:
+- None
+
+
 
 

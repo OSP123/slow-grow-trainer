@@ -767,6 +767,39 @@ export default function Dashboard() {
                             </div>
                           </div>
                         )}
+                        {t.necron_foothold > 0 && (
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
+                              <span style={{ color: getFactionColor('Necrons') }}>Necron Awakening</span>
+                              <span>{t.necron_foothold}%</span>
+                            </div>
+                            <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
+                              <div style={{ width: `${t.necron_foothold}%`, height: '100%', background: getFactionColor('Necrons'), transition: 'width 0.5s ease-out' }}></div>
+                            </div>
+                          </div>
+                        )}
+                        {t.tyranid_foothold > 0 && (
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
+                              <span style={{ color: getFactionColor('Tyranids') }}>Tyranid Infestation</span>
+                              <span>{t.tyranid_foothold}%</span>
+                            </div>
+                            <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
+                              <div style={{ width: `${t.tyranid_foothold}%`, height: '100%', background: getFactionColor('Tyranids'), transition: 'width 0.5s ease-out' }}></div>
+                            </div>
+                          </div>
+                        )}
+                        {t.genestealer_foothold > 0 && (
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
+                              <span style={{ color: getFactionColor('Genestealer Cults') }}>Cult Uprising</span>
+                              <span>{t.genestealer_foothold}%</span>
+                            </div>
+                            <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
+                              <div style={{ width: `${t.genestealer_foothold}%`, height: '100%', background: getFactionColor('Genestealer Cults'), transition: 'width 0.5s ease-out' }}></div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })()}
