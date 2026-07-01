@@ -109,15 +109,27 @@ export function generateMatchups(pool: CommanderProfile[]): MatchPair[] {
     if (bestMatchIndex !== -1) {
       const p2 = unresolved.splice(bestMatchIndex, 1)[0];
       
-      const prefixes = ['Sector', 'Outpost', 'Trench', 'Zone', 'Point'];
-      const suffixes = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Omega', 'Prime'];
-      const subSector = `${prefixes[Math.floor(Math.random() * prefixes.length)]} ${suffixes[Math.floor(Math.random() * suffixes.length)]}`;
+      const REAL_THEATRE_SECTORS: Record<string, string[]> = {
+        'The Hive Spires': ['Outer Wall', 'Hab Districts', 'Merchant Quarter', 'Administratum', 'Spire Apex'],
+        'The Ash Wastes': ['Rad Perimeter', 'Nomad Trail', 'Storm Corridor', 'Scavenger Dens', 'Dead Zone'],
+        'The Magma Forges': ['Cooling Vents', 'Extraction Bay', 'Foundry Floor', 'Slag Channels', 'Forge Core'],
+        'Orbital Relay Station': ['Docking Pylons', 'Comms Array', 'Weapons Battery', 'Engineering Deck', 'Command Bridge'],
+        'The Sump Ruins': ['Crater Rim', 'Outer Ruins', 'Collapsed Tunnels', 'Warp Fissure', 'Buried Tomb'],
+        'The Toxic Oceans': ['Shore Batteries', 'Tidal Zone', 'Deep Channels', 'Leviathan Depths', 'Abyssal Trench']
+      };
+
+      const theatreKeys = Object.keys(REAL_THEATRE_SECTORS);
+      let baseTheatre: string;
       
-      let baseTheatre = p1.deployed_theatre || p2.deployed_theatre || 'The Ash Wastes';
-      // If deployed in different theatres, random pick one
-      if (p1.deployed_theatre && p2.deployed_theatre && p1.deployed_theatre !== p2.deployed_theatre) {
-        baseTheatre = Math.random() > 0.5 ? p1.deployed_theatre : p2.deployed_theatre;
+      // If both players explicitly selected the same non-default theatre, honor it; otherwise distribute across all theatres
+      if (p1.deployed_theatre && p2.deployed_theatre && p1.deployed_theatre === p2.deployed_theatre && p1.deployed_theatre !== 'The Ash Wastes' && REAL_THEATRE_SECTORS[p1.deployed_theatre]) {
+        baseTheatre = p1.deployed_theatre;
+      } else {
+        baseTheatre = theatreKeys[matchups.length % theatreKeys.length];
       }
+
+      const sectors = REAL_THEATRE_SECTORS[baseTheatre];
+      const subSector = sectors[matchups.length % sectors.length];
       
       matchups.push({ p1, p2, score: highestScore, theatre_name: `${baseTheatre} - ${subSector}` });
     } else {

@@ -365,12 +365,23 @@ export default function AdminDashboard() {
       setManualMessage('Please select two distinct commanders.');
       return;
     }
-    setManualMessage('');
+    const REAL_SECTORS: Record<string, string[]> = {
+      'The Hive Spires': ['Outer Wall', 'Hab Districts', 'Merchant Quarter', 'Administratum', 'Spire Apex'],
+      'The Ash Wastes': ['Rad Perimeter', 'Nomad Trail', 'Storm Corridor', 'Scavenger Dens', 'Dead Zone'],
+      'The Magma Forges': ['Cooling Vents', 'Extraction Bay', 'Foundry Floor', 'Slag Channels', 'Forge Core'],
+      'Orbital Relay Station': ['Docking Pylons', 'Comms Array', 'Weapons Battery', 'Engineering Deck', 'Command Bridge'],
+      'The Sump Ruins': ['Crater Rim', 'Outer Ruins', 'Collapsed Tunnels', 'Warp Fissure', 'Buried Tomb'],
+      'The Toxic Oceans': ['Shore Batteries', 'Tidal Zone', 'Deep Channels', 'Leviathan Depths', 'Abyssal Trench']
+    };
+    const chosenTheatre = manualTheatre || 'The Ash Wastes';
+    const sectorList = REAL_SECTORS[chosenTheatre] || ['Rad Perimeter'];
+    const assignedSector = sectorList[Math.floor(Math.random() * sectorList.length)];
+
     const { error } = await supabase.from('matchups').insert([{
       p1_id: manualP1,
       p2_id: manualP2,
       status: 'scheduled',
-      theatre_name: manualTheatre || 'The Ash Wastes - Sector Alpha'
+      theatre_name: `${chosenTheatre} - ${assignedSector}`
     }]);
     if (!error) {
       setManualMessage('Manual narrative pairing successfully scheduled!');

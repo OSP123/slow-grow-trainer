@@ -78,4 +78,48 @@ describe('Matchmaker Simulation Algorithm Engine', () => {
     const pairedFactions = [results[0].p1.army_faction, results[0].p2.army_faction];
     expect(pairedFactions).toContain('Space Marines');
   });
+
+  it('spreads matchups across all 6 real planetary theatres using exact real sector names without hallucinating zones', () => {
+    const pool: CommanderProfile[] = [
+      { id: '1', location: 'LA', experience_level: 'beginner', army_faction: 'Space Marines', commander_name: 'P1' },
+      { id: '2', location: 'LA', experience_level: 'beginner', army_faction: 'Orks', commander_name: 'P2' },
+      { id: '3', location: 'LA', experience_level: 'beginner', army_faction: 'Space Marines', commander_name: 'P3' },
+      { id: '4', location: 'LA', experience_level: 'beginner', army_faction: 'Orks', commander_name: 'P4' },
+      { id: '5', location: 'LA', experience_level: 'beginner', army_faction: 'Space Marines', commander_name: 'P5' },
+      { id: '6', location: 'LA', experience_level: 'beginner', army_faction: 'Orks', commander_name: 'P6' },
+      { id: '7', location: 'LA', experience_level: 'beginner', army_faction: 'Space Marines', commander_name: 'P7' },
+      { id: '8', location: 'LA', experience_level: 'beginner', army_faction: 'Orks', commander_name: 'P8' },
+      { id: '9', location: 'LA', experience_level: 'beginner', army_faction: 'Space Marines', commander_name: 'P9' },
+      { id: '10', location: 'LA', experience_level: 'beginner', army_faction: 'Orks', commander_name: 'P10' },
+      { id: '11', location: 'LA', experience_level: 'beginner', army_faction: 'Space Marines', commander_name: 'P11' },
+      { id: '12', location: 'LA', experience_level: 'beginner', army_faction: 'Orks', commander_name: 'P12' },
+    ];
+
+    const results = generateMatchups(pool);
+    expect(results).toHaveLength(6);
+
+    const assignedTheatres = results.map(r => r.theatre_name.split(' - ')[0]);
+    expect(assignedTheatres).toContain('The Hive Spires');
+    expect(assignedTheatres).toContain('The Ash Wastes');
+    expect(assignedTheatres).toContain('The Magma Forges');
+    expect(assignedTheatres).toContain('Orbital Relay Station');
+    expect(assignedTheatres).toContain('The Sump Ruins');
+    expect(assignedTheatres).toContain('The Toxic Oceans');
+
+    // Verify each sub-sector is a real sector name for that theatre
+    const REAL_SECTORS: Record<string, string[]> = {
+      'The Hive Spires': ['Outer Wall', 'Hab Districts', 'Merchant Quarter', 'Administratum', 'Spire Apex'],
+      'The Ash Wastes': ['Rad Perimeter', 'Nomad Trail', 'Storm Corridor', 'Scavenger Dens', 'Dead Zone'],
+      'The Magma Forges': ['Cooling Vents', 'Extraction Bay', 'Foundry Floor', 'Slag Channels', 'Forge Core'],
+      'Orbital Relay Station': ['Docking Pylons', 'Comms Array', 'Weapons Battery', 'Engineering Deck', 'Command Bridge'],
+      'The Sump Ruins': ['Crater Rim', 'Outer Ruins', 'Collapsed Tunnels', 'Warp Fissure', 'Buried Tomb'],
+      'The Toxic Oceans': ['Shore Batteries', 'Tidal Zone', 'Deep Channels', 'Leviathan Depths', 'Abyssal Trench']
+    };
+
+    results.forEach(r => {
+      const [theatre, sector] = r.theatre_name.split(' - ');
+      expect(REAL_SECTORS[theatre]).toBeDefined();
+      expect(REAL_SECTORS[theatre]).toContain(sector);
+    });
+  });
 });
