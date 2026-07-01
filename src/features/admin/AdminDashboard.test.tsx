@@ -208,6 +208,7 @@ describe('AdminDashboard (RBAC)', () => {
       expect(screen.getAllByText(/Lord Castellan/i).length).toBeGreaterThan(0);
       expect(screen.getAllByText(/\[Space Marines\]/i).length).toBeGreaterThan(0);
       expect(screen.getAllByText(/\(Record: 1W - 0L\)/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Deployed War Zone:/i).length).toBeGreaterThan(0);
     });
   });
 });

@@ -1089,7 +1089,7 @@ export default function AdminDashboard() {
             <h3>Proposed Round Ledgers</h3>
             <ul style={{ listStyle: 'none', padding: 0, margin: '1rem 0' }}>
               {generatedMatches.map((m, idx) => (
-                <li key={idx} style={{ marginBottom: '0.75rem', padding: '0.5rem', backgroundColor: 'var(--theme-bg-secondary)', borderRadius: '4px' }}>
+                <li key={idx} style={{ marginBottom: '0.75rem', padding: '0.75rem', backgroundColor: 'var(--theme-bg-secondary)', borderRadius: '4px', borderLeft: '4px solid var(--theme-accent)' }}>
                   <div>
                     <strong>{m.p1.commander_name || 'Unknown'}</strong> [{m.p1.army_faction || 'No Faction'}] (Record: {getUserRecord(m.p1.id)})
                   </div>
@@ -1100,8 +1100,11 @@ export default function AdminDashboard() {
                   <div>
                     <strong>{m.p2.commander_name || 'Unknown'}</strong> [{m.p2.army_faction || 'No Faction'}] (Record: {getUserRecord(m.p2.id)})
                   </div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)' }}>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', marginBottom: '0.5rem' }}>
                     Location: {m.p2.location || '?'}, Tier: {m.p2.experience_level} <span style={{ color: 'gray', marginLeft: '0.5rem' }}>[Score: {m.score}]</span>
+                  </div>
+                  <div style={{ padding: '4px 8px', backgroundColor: 'rgba(59, 130, 246, 0.15)', borderRadius: '4px', border: '1px solid rgba(59, 130, 246, 0.3)', fontSize: '0.85rem', color: '#60a5fa' }}>
+                    📍 Deployed War Zone: <strong style={{ color: '#fff' }}>{m.theatre_name}</strong>
                   </div>
                 </li>
               ))}

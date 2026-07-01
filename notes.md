@@ -1110,7 +1110,8 @@ Follow-ups:
 Date: 2026-07-01 (Admin Matchup Engine Comparison Enhancements)
 Tasks:
 - Updated the Admin Matchmaking & Override Station to display each player's Faction (`army_faction`) and calculated Win-Loss Record (`getUserRecord`) directly inside the algorithmically generated `Proposed Round Ledgers` and the `Manual Narrative Pairing` dropdown selects.
+- Added a `📍 Deployed War Zone` preview badge to each proposed pairing in the simulation ledger so administrators can verify where players will fight before locking matches in.
 - Confirmed that once initial or manual pairings are locked into the ledger (`commitMatches` or `handleCreateManualPairing`), end users immediately see their active matchup banner at the top of the War Effort Map (`/dashboard`) showing their assigned opponent and faction, as well as on their individual commander card on the Sector Map.
-- Wrote unit tests verifying option and simulated list text formatting.
+- Wrote unit tests verifying option formatting and simulated list text formatting including war zone preview.
 Follow-ups:
 - None
