@@ -1138,3 +1138,11 @@ Tasks:
 Follow-ups:
 - None
 
+Date: 2026-07-01 (Banner Emoji Removal)
+Tasks:
+- Removed the target emoji (`🎯`) before "YOUR CURRENT CAMPAIGN MISSION" in `Dashboard.tsx`.
+- Removed the pin emoji (`📍`) before "Assigned War Zone" in the active matchup banner in `Dashboard.tsx`.
+Follow-ups:
+- None
+
+

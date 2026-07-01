@@ -425,7 +425,7 @@ export default function Dashboard() {
         }}>
           <div>
             <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#3b82f6', letterSpacing: '2px', marginBottom: '4px' }}>
-              🎯 YOUR CURRENT CAMPAIGN MISSION
+              YOUR CURRENT CAMPAIGN MISSION
             </div>
             <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <span>VS {opp.commander_name || 'Commander'}</span>
@@ -433,7 +433,7 @@ export default function Dashboard() {
             </div>
             {myActiveMatchup.theatre_name && (
               <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '4px' }}>
-                📍 Assigned War Zone: <strong style={{ color: '#e2e8f0' }}>{myActiveMatchup.theatre_name}</strong>
+                Assigned War Zone: <strong style={{ color: '#e2e8f0' }}>{myActiveMatchup.theatre_name}</strong>
               </div>
             )}
           </div>
