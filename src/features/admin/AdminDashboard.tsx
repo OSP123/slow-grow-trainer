@@ -40,6 +40,7 @@ interface EditableMatchup {
   id: string;
   p1_id: string;
   p2_id: string;
+  theatre_name?: string;
   p1_score: number | '';
   p2_score: number | '';
   game_result: string;
@@ -48,8 +49,8 @@ interface EditableMatchup {
   p2_temperament: number | '';
   p1_rules_engagement: number | '';
   p2_rules_engagement: number | '';
-  p1_profile?: { commander_name: string };
-  p2_profile?: { commander_name: string };
+  p1_profile?: { commander_name: string; army_faction?: string };
+  p2_profile?: { commander_name: string; army_faction?: string };
 }
 
 export default function AdminDashboard() {
@@ -235,7 +236,7 @@ export default function AdminDashboard() {
   const fetchAllMatchups = async () => {
     const { data } = await supabase
       .from('matchups')
-      .select('*, p1_profile:profiles!p1_id(commander_name), p2_profile:profiles!p2_id(commander_name)')
+      .select('*, p1_profile:profiles!p1_id(commander_name, army_faction), p2_profile:profiles!p2_id(commander_name, army_faction)')
       .order('created_at', { ascending: false });
     if (data) setAllMatchups(data.map(m => ({
       ...m,
@@ -247,6 +248,7 @@ export default function AdminDashboard() {
       p2_rules_engagement: m.p2_rules_engagement ?? '',
       game_result: m.game_result ?? '',
       status: m.status ?? 'scheduled',
+      theatre_name: m.theatre_name ?? ''
     })));
   };
 
@@ -462,18 +464,10 @@ export default function AdminDashboard() {
     e.preventDefault();
     if (!editingMatchup) return;
 
-    type MatchupPayload = {
-      p1_score?: number | null;
-      p2_score?: number | null;
-      game_result?: string | null;
-      status: string;
-      p1_temperament?: number | null;
-      p2_temperament?: number | null;
-      p1_rules_engagement?: number | null;
-      p2_rules_engagement?: number | null;
-    };
-
-    const payload: MatchupPayload = {
+    const payload: any = {
+      p1_id: editingMatchup.p1_id,
+      p2_id: editingMatchup.p2_id,
+      theatre_name: editingMatchup.theatre_name || null,
       p1_score: editingMatchup.p1_score !== '' ? editingMatchup.p1_score as number : null,
       p2_score: editingMatchup.p2_score !== '' ? editingMatchup.p2_score as number : null,
       game_result: editingMatchup.game_result || null,
@@ -488,6 +482,9 @@ export default function AdminDashboard() {
     if (error) {
       setMatchupMessage('Error: ' + error.message);
     } else {
+      if (editingMatchup.theatre_name) {
+        await supabase.from('profiles').update({ deployed_theatre: editingMatchup.theatre_name }).in('id', [editingMatchup.p1_id, editingMatchup.p2_id]);
+      }
       setMatchupMessage('Matchup record updated.');
       setEditingMatchup(null);
       fetchAllMatchups();
@@ -682,15 +679,65 @@ export default function AdminDashboard() {
           <div style={{ marginBottom: '2rem', padding: '1.25rem', border: '1px solid var(--theme-accent)', borderRadius: '6px', backgroundColor: 'var(--theme-bg-secondary)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <h3 style={{ margin: 0, fontSize: '1rem' }}>
-                Editing: {editingMatchup.p1_profile?.commander_name} vs {editingMatchup.p2_profile?.commander_name}
+                Editing Matchup Override
               </h3>
               <button onClick={() => setEditingMatchup(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--theme-fg-muted)' }}>✕ Cancel</button>
             </div>
             <form onSubmit={handleSaveMatchup} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--theme-border)' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Player 1</label>
+                  <select
+                    value={editingMatchup.p1_id}
+                    onChange={e => {
+                      const u = users.find(user => user.id === e.target.value);
+                      setEditingMatchup(prev => prev ? {
+                        ...prev,
+                        p1_id: e.target.value,
+                        p1_profile: u ? { commander_name: u.commander_name, army_faction: u.army_faction } : prev.p1_profile
+                      } : null);
+                    }}
+                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  >
+                    {users.map(u => (
+                      <option key={u.id} value={u.id}>{u.commander_name} ({u.army_faction})</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Player 2</label>
+                  <select
+                    value={editingMatchup.p2_id}
+                    onChange={e => {
+                      const u = users.find(user => user.id === e.target.value);
+                      setEditingMatchup(prev => prev ? {
+                        ...prev,
+                        p2_id: e.target.value,
+                        p2_profile: u ? { commander_name: u.commander_name, army_faction: u.army_faction } : prev.p2_profile
+                      } : null);
+                    }}
+                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  >
+                    {users.map(u => (
+                      <option key={u.id} value={u.id}>{u.commander_name} ({u.army_faction})</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Assigned War Zone</label>
+                  <input
+                    type="text"
+                    value={editingMatchup.theatre_name || ''}
+                    onChange={e => setEditingMatchup(prev => prev ? { ...prev, theatre_name: e.target.value } : null)}
+                    placeholder="e.g. The Hive Spires - Outer Wall"
+                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>
-                    {editingMatchup.p1_profile?.commander_name} VP
+                    {editingMatchup.p1_profile?.commander_name || 'Player 1'} VP
                   </label>
                   <input type="number" min={0}
                     value={editingMatchup.p1_score}
@@ -700,7 +747,7 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>
-                    {editingMatchup.p2_profile?.commander_name} VP
+                    {editingMatchup.p2_profile?.commander_name || 'Player 2'} VP
                   </label>
                   <input type="number" min={0}
                     value={editingMatchup.p2_score}
@@ -716,8 +763,8 @@ export default function AdminDashboard() {
                     style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
                   >
                     <option value="">— None —</option>
-                    <option value="p1_win">{editingMatchup.p1_profile?.commander_name} Wins</option>
-                    <option value="p2_win">{editingMatchup.p2_profile?.commander_name} Wins</option>
+                    <option value="p1_win">{editingMatchup.p1_profile?.commander_name || 'Player 1'} Wins</option>
+                    <option value="p2_win">{editingMatchup.p2_profile?.commander_name || 'Player 2'} Wins</option>
                     <option value="draw">Draw</option>
                   </select>
                 </div>
@@ -737,10 +784,10 @@ export default function AdminDashboard() {
               <div style={{ fontSize: '0.75rem', color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '1px' }}>Honour Ratings (1–5)</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
                 {[
-                  { key: 'p1_temperament' as const, label: `${editingMatchup.p1_profile?.commander_name} Temperament` },
-                  { key: 'p1_rules_engagement' as const, label: `${editingMatchup.p1_profile?.commander_name} Spirit` },
-                  { key: 'p2_temperament' as const, label: `${editingMatchup.p2_profile?.commander_name} Temperament` },
-                  { key: 'p2_rules_engagement' as const, label: `${editingMatchup.p2_profile?.commander_name} Spirit` },
+                  { key: 'p1_temperament' as const, label: `${editingMatchup.p1_profile?.commander_name || 'P1'} Temperament` },
+                  { key: 'p1_rules_engagement' as const, label: `${editingMatchup.p1_profile?.commander_name || 'P1'} Spirit` },
+                  { key: 'p2_temperament' as const, label: `${editingMatchup.p2_profile?.commander_name || 'P2'} Temperament` },
+                  { key: 'p2_rules_engagement' as const, label: `${editingMatchup.p2_profile?.commander_name || 'P2'} Spirit` },
                 ].map(({ key, label }) => (
                   <div key={key}>
                     <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>{label}</label>
@@ -761,49 +808,67 @@ export default function AdminDashboard() {
         {allMatchups.length === 0 ? (
           <p style={{ color: 'var(--theme-fg-muted)' }}>No matchups in the ledger yet.</p>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
-            <thead>
-              <tr style={{ borderBottom: '2px solid var(--theme-border)', textAlign: 'left' }}>
-                <th style={{ padding: '0.5rem' }}>Player 1</th>
-                <th style={{ padding: '0.5rem' }}>Player 2</th>
-                <th style={{ padding: '0.5rem', textAlign: 'center' }}>Score</th>
-                <th style={{ padding: '0.5rem', textAlign: 'center' }}>Result</th>
-                <th style={{ padding: '0.5rem', textAlign: 'center' }}>Status</th>
-                <th style={{ padding: '0.5rem' }}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {allMatchups.map(m => (
-                <tr key={m.id} style={{ borderBottom: '1px solid var(--theme-border)' }}>
-                  <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>{m.p1_profile?.commander_name || '—'}</td>
-                  <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>{m.p2_profile?.commander_name || '—'}</td>
-                  <td style={{ padding: '0.5rem', textAlign: 'center', color: 'var(--theme-fg-muted)' }}>
-                    {m.p1_score !== '' ? m.p1_score : '—'} : {m.p2_score !== '' ? m.p2_score : '—'}
-                  </td>
-                  <td style={{ padding: '0.5rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--theme-fg-muted)' }}>
-                    {m.game_result || '—'}
-                  </td>
-                  <td style={{ padding: '0.5rem', textAlign: 'center' }}>
-                    <span style={{
-                      fontSize: '0.7rem', letterSpacing: '1px', padding: '2px 8px', borderRadius: '3px',
-                      backgroundColor: m.status === 'completed' ? '#166534' : m.status === 'verified' ? '#1e40af' : '#713f12',
-                      color: '#fff',
-                    }}>
-                      {m.status}
-                    </span>
-                  </td>
-                  <td style={{ padding: '0.5rem', display: 'flex', gap: '0.5rem' }}>
-                    <button onClick={() => handleEditMatchup(m)} className="btn secondary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem' }}>
-                      Edit
-                    </button>
-                    <button onClick={() => handleDeleteMatchup(m.id)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '0.75rem' }}>
-                      Delete
-                    </button>
-                  </td>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid var(--theme-border)', textAlign: 'left' }}>
+                  <th style={{ padding: '0.5rem' }}>Player 1</th>
+                  <th style={{ padding: '0.5rem' }}>Player 2</th>
+                  <th style={{ padding: '0.5rem' }}>War Zone</th>
+                  <th style={{ padding: '0.5rem', textAlign: 'center' }}>Score</th>
+                  <th style={{ padding: '0.5rem', textAlign: 'center' }}>Result</th>
+                  <th style={{ padding: '0.5rem', textAlign: 'center' }}>Status</th>
+                  <th style={{ padding: '0.5rem' }}></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {allMatchups.map(m => {
+                  const p1Name = m.p1_profile?.commander_name || users.find(u => u.id === m.p1_id)?.commander_name || 'Unknown';
+                  const p1Faction = m.p1_profile?.army_faction || users.find(u => u.id === m.p1_id)?.army_faction || 'No Faction';
+                  const p2Name = m.p2_profile?.commander_name || users.find(u => u.id === m.p2_id)?.commander_name || 'Unknown';
+                  const p2Faction = m.p2_profile?.army_faction || users.find(u => u.id === m.p2_id)?.army_faction || 'No Faction';
+                  return (
+                    <tr key={m.id} style={{ borderBottom: '1px solid var(--theme-border)' }}>
+                      <td style={{ padding: '0.5rem' }}>
+                        <strong style={{ display: 'block' }}>{p1Name}</strong>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--theme-accent)' }}>[{p1Faction}]</span>
+                      </td>
+                      <td style={{ padding: '0.5rem' }}>
+                        <strong style={{ display: 'block' }}>{p2Name}</strong>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--theme-accent)' }}>[{p2Faction}]</span>
+                      </td>
+                      <td style={{ padding: '0.5rem', color: '#60a5fa', fontWeight: '500' }}>
+                        {m.theatre_name || 'Undeployed'}
+                      </td>
+                      <td style={{ padding: '0.5rem', textAlign: 'center', color: 'var(--theme-fg-muted)' }}>
+                        {m.p1_score !== '' ? m.p1_score : '—'} : {m.p2_score !== '' ? m.p2_score : '—'}
+                      </td>
+                      <td style={{ padding: '0.5rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--theme-fg-muted)' }}>
+                        {m.game_result || '—'}
+                      </td>
+                      <td style={{ padding: '0.5rem', textAlign: 'center' }}>
+                        <span style={{
+                          fontSize: '0.7rem', letterSpacing: '1px', padding: '2px 8px', borderRadius: '3px',
+                          backgroundColor: m.status === 'completed' ? '#166534' : m.status === 'verified' ? '#1e40af' : '#713f12',
+                          color: '#fff',
+                        }}>
+                          {m.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: '0.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <button onClick={() => handleEditMatchup(m)} className="btn secondary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem' }}>
+                          Edit
+                        </button>
+                        <button onClick={() => handleDeleteMatchup(m.id)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '0.75rem' }}>
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
@@ -1103,24 +1168,71 @@ export default function AdminDashboard() {
         </button>
         {generatedMatches.length > 0 && (
           <div style={{ marginTop: '1rem', padding: '1rem', border: '1px solid var(--theme-border)' }}>
-            <h3>Proposed Round Ledgers</h3>
+            <h3>Proposed Round Ledgers (Editable Before Locking)</h3>
             <ul style={{ listStyle: 'none', padding: 0, margin: '1rem 0' }}>
               {generatedMatches.map((m, idx) => (
                 <li key={idx} style={{ marginBottom: '0.75rem', padding: '0.75rem', backgroundColor: 'var(--theme-bg-secondary)', borderRadius: '4px', borderLeft: '4px solid var(--theme-accent)' }}>
-                  <div>
-                    <strong>{m.p1.commander_name || 'Unknown'}</strong> [{m.p1.army_faction || 'No Faction'}] (Record: {getUserRecord(m.p1.id)})
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--theme-fg-muted)' }}>Player 1</label>
+                      <select
+                        value={m.p1.id}
+                        onChange={e => {
+                          const u = users.find(user => user.id === e.target.value);
+                          if (u) {
+                            setGeneratedMatches(prev => prev.map((match, i) => i === idx ? { ...match, p1: u } : match));
+                          }
+                        }}
+                        style={{ width: '100%', padding: '0.4rem', fontSize: '0.85rem' }}
+                      >
+                        {users.map(u => (
+                          <option key={u.id} value={u.id}>{u.commander_name} ({u.army_faction})</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--theme-fg-muted)' }}>Player 2</label>
+                      <select
+                        value={m.p2.id}
+                        onChange={e => {
+                          const u = users.find(user => user.id === e.target.value);
+                          if (u) {
+                            setGeneratedMatches(prev => prev.map((match, i) => i === idx ? { ...match, p2: u } : match));
+                          }
+                        }}
+                        style={{ width: '100%', padding: '0.4rem', fontSize: '0.85rem' }}
+                      >
+                        {users.map(u => (
+                          <option key={u.id} value={u.id}>{u.commander_name} ({u.army_faction})</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--theme-fg-muted)' }}>War Zone</label>
+                      <input
+                        type="text"
+                        value={m.theatre_name || ''}
+                        onChange={e => setGeneratedMatches(prev => prev.map((match, i) => i === idx ? { ...match, theatre_name: e.target.value } : match))}
+                        style={{ width: '100%', padding: '0.4rem', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                      <button
+                        type="button"
+                        onClick={() => setGeneratedMatches(prev => prev.filter((_, i) => i !== idx))}
+                        style={{ background: 'none', border: '1px solid #f87171', color: '#f87171', padding: '0.4rem 0.75rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
+                      >
+                        Remove Pair
+                      </button>
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', marginBottom: '0.25rem' }}>
-                    Location: {m.p1.location || '?'}, Tier: {m.p1.experience_level}
+                  <div style={{ fontSize: '0.85rem' }}>
+                    <strong>{m.p1.commander_name || 'Unknown'}</strong> [{m.p1.army_faction || 'No Faction'}] (Record: {getUserRecord(m.p1.id)}) <span style={{ color: 'var(--theme-accent)', fontWeight: 'bold', margin: '0 0.5rem' }}>VS</span> <strong>{m.p2.commander_name || 'Unknown'}</strong> [{m.p2.army_faction || 'No Faction'}] (Record: {getUserRecord(m.p2.id)})
                   </div>
-                  <span style={{ color: 'var(--theme-accent)', fontWeight: 'bold', margin: '0.25rem 0', display: 'inline-block' }}>VS</span>
-                  <div>
-                    <strong>{m.p2.commander_name || 'Unknown'}</strong> [{m.p2.army_faction || 'No Faction'}] (Record: {getUserRecord(m.p2.id)})
+                  <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', margin: '0.25rem 0' }}>
+                    Locations: {m.p1.location || '?'} vs {m.p2.location || '?'}, Tiers: {m.p1.experience_level} vs {m.p2.experience_level} <span style={{ color: 'gray', marginLeft: '0.5rem' }}>[Fit Score: {m.score}]</span>
                   </div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', marginBottom: '0.5rem' }}>
-                    Location: {m.p2.location || '?'}, Tier: {m.p2.experience_level} <span style={{ color: 'gray', marginLeft: '0.5rem' }}>[Score: {m.score}]</span>
-                  </div>
-                  <div style={{ padding: '4px 8px', backgroundColor: 'rgba(59, 130, 246, 0.15)', borderRadius: '4px', border: '1px solid rgba(59, 130, 246, 0.3)', fontSize: '0.85rem', color: '#60a5fa' }}>
+                  <div style={{ marginTop: '0.5rem', padding: '4px 8px', backgroundColor: 'rgba(59, 130, 246, 0.15)', borderRadius: '4px', border: '1px solid rgba(59, 130, 246, 0.3)', fontSize: '0.85rem', color: '#60a5fa' }}>
                     📍 Deployed War Zone: <strong style={{ color: '#fff' }}>{m.theatre_name}</strong> <span style={{ marginLeft: '8px', color: '#fbbf24' }}>[{(campaignState?.current_month || 1) * 400} PTS]</span>
                   </div>
                 </li>
@@ -1201,6 +1313,66 @@ export default function AdminDashboard() {
               </>
             );
           })()}
+        </div>
+
+        {/* Active Pairings Overview right inside Matchmaking Engine */}
+        <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--theme-border)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0 }}>Active Pairings Overview ({allMatchups.length})</h3>
+          </div>
+          {allMatchups.length === 0 ? (
+            <p style={{ color: 'var(--theme-fg-muted)', fontSize: '0.85rem' }}>No active pairings committed yet.</p>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid var(--theme-border)', textAlign: 'left' }}>
+                    <th style={{ padding: '0.5rem' }}>Player 1</th>
+                    <th style={{ padding: '0.5rem' }}>Player 2</th>
+                    <th style={{ padding: '0.5rem' }}>War Zone</th>
+                    <th style={{ padding: '0.5rem', textAlign: 'center' }}>Score</th>
+                    <th style={{ padding: '0.5rem', textAlign: 'center' }}>Status</th>
+                    <th style={{ padding: '0.5rem' }}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {allMatchups.map(m => {
+                    const p1Name = m.p1_profile?.commander_name || users.find(u => u.id === m.p1_id)?.commander_name || 'Unknown';
+                    const p1Faction = m.p1_profile?.army_faction || users.find(u => u.id === m.p1_id)?.army_faction || 'No Faction';
+                    const p2Name = m.p2_profile?.commander_name || users.find(u => u.id === m.p2_id)?.commander_name || 'Unknown';
+                    const p2Faction = m.p2_profile?.army_faction || users.find(u => u.id === m.p2_id)?.army_faction || 'No Faction';
+                    return (
+                      <tr key={m.id} style={{ borderBottom: '1px solid var(--theme-border)' }}>
+                        <td style={{ padding: '0.5rem' }}>
+                          <strong>{p1Name}</strong> <span style={{ fontSize: '0.75rem', color: 'var(--theme-accent)' }}>[{p1Faction}]</span>
+                        </td>
+                        <td style={{ padding: '0.5rem' }}>
+                          <strong>{p2Name}</strong> <span style={{ fontSize: '0.75rem', color: 'var(--theme-accent)' }}>[{p2Faction}]</span>
+                        </td>
+                        <td style={{ padding: '0.5rem', color: '#60a5fa' }}>{m.theatre_name || 'Undeployed'}</td>
+                        <td style={{ padding: '0.5rem', textAlign: 'center', color: 'var(--theme-fg-muted)' }}>
+                          {m.p1_score !== '' ? m.p1_score : '—'} : {m.p2_score !== '' ? m.p2_score : '—'}
+                        </td>
+                        <td style={{ padding: '0.5rem', textAlign: 'center' }}>
+                          <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '3px', backgroundColor: m.status === 'completed' ? '#166534' : '#713f12', color: '#fff' }}>
+                            {m.status}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.5rem', textAlign: 'right' }}>
+                          <button onClick={() => {
+                            handleEditMatchup(m);
+                            window.scrollTo({ top: 400, behavior: 'smooth' });
+                          }} className="btn secondary" style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem' }}>
+                            Adjust / Override
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 

@@ -1,6 +1,9 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect } from 'vitest';
 import TacticalSectorMap, { getFactionColor, getFactionNarrativeGoal } from './TacticalSectorMap';
+
+const renderWithRouter = (ui: React.ReactElement) => render(<MemoryRouter>{ui}</MemoryRouter>);
 
 describe('TacticalSectorMap & Helper Tests', () => {
   describe('getFactionColor', () => {
@@ -38,26 +41,26 @@ describe('TacticalSectorMap & Helper Tests', () => {
     ];
 
     it('renders header and tap instruction', () => {
-      render(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} />);
+      renderWithRouter(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} />);
       expect(screen.getByText('AUSPEX TACTICAL DISPLAY // THE HIVE SPIRES')).toBeInTheDocument();
       expect(screen.getByText('TAP A SECTOR TO VIEW TACTICAL TELEMETRY')).toBeInTheDocument();
     });
 
     it('renders 5 sectors per theatre (one per escalation round)', () => {
-      const { container } = render(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} />);
+      const { container } = renderWithRouter(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} />);
       const polygons = container.querySelectorAll('svg polygon');
       expect(polygons.length).toBe(5);
     });
 
     it('shows round and points labels for each sector', () => {
-      render(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} />);
+      renderWithRouter(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} />);
       expect(screen.getByText('RND 1 // 400 PTS')).toBeInTheDocument();
       expect(screen.getByText('RND 3 // 1200 PTS')).toBeInTheDocument();
       expect(screen.getByText('RND 5 // 2000 PTS')).toBeInTheDocument();
     });
 
     it('renders unique sector names for The Hive Spires (horizontal bands)', () => {
-      render(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} />);
+      renderWithRouter(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} />);
       expect(screen.getByText('Outer Wall')).toBeInTheDocument();
       expect(screen.getByText('Hab Districts')).toBeInTheDocument();
       expect(screen.getByText('Spire Apex')).toBeInTheDocument();
@@ -65,7 +68,7 @@ describe('TacticalSectorMap & Helper Tests', () => {
 
     it('renders completely different sector names for The Ash Wastes (diagonal slashes)', () => {
       const ashWastes = { name: 'The Ash Wastes', narrative: 'Test', color: '#f97316' };
-      render(<TacticalSectorMap theatre={ashWastes} commanders={[]} mapLocations={[]} />);
+      renderWithRouter(<TacticalSectorMap theatre={ashWastes} commanders={[]} mapLocations={[]} />);
       expect(screen.getByText('Rad Perimeter')).toBeInTheDocument();
       expect(screen.getByText('Storm Corridor')).toBeInTheDocument();
       expect(screen.getByText('Dead Zone')).toBeInTheDocument();
@@ -73,14 +76,14 @@ describe('TacticalSectorMap & Helper Tests', () => {
 
     it('renders completely different sector names for Orbital Relay Station (radial wedges)', () => {
       const orbital = { name: 'Orbital Relay Station', narrative: 'Test', color: '#06b6d4' };
-      render(<TacticalSectorMap theatre={orbital} commanders={[]} mapLocations={[]} />);
+      renderWithRouter(<TacticalSectorMap theatre={orbital} commanders={[]} mapLocations={[]} />);
       expect(screen.getByText('Docking Pylons')).toBeInTheDocument();
       expect(screen.getByText('Weapons Battery')).toBeInTheDocument();
       expect(screen.getByText('Command Bridge')).toBeInTheDocument();
     });
 
     it('displays sector telemetry on click/tap', () => {
-      render(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} />);
+      renderWithRouter(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} />);
 
       const sectorLabel = screen.getByText('Outer Wall');
       const sectorGroup = sectorLabel.closest('g');
@@ -93,7 +96,7 @@ describe('TacticalSectorMap & Helper Tests', () => {
     });
 
     it('deselects sector when tapping the same sector again', () => {
-      render(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} />);
+      renderWithRouter(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} />);
 
       const sectorLabel = screen.getByText('Outer Wall');
       const sectorGroup = sectorLabel.closest('g');
@@ -116,7 +119,7 @@ describe('TacticalSectorMap & Helper Tests', () => {
       ];
 
       theatres.forEach(t => {
-        const { container, unmount } = render(
+        const { container, unmount } = renderWithRouter(
           <TacticalSectorMap theatre={{ ...t, narrative: 'test' }} commanders={[]} mapLocations={[]} />
         );
         const polygons = container.querySelectorAll('svg polygon');
@@ -127,7 +130,7 @@ describe('TacticalSectorMap & Helper Tests', () => {
 
     it('falls back to default sectors for unknown theatre', () => {
       const unknown = { name: 'Unknown Place', narrative: 'Test', color: '#aaa' };
-      render(<TacticalSectorMap theatre={unknown} commanders={[]} mapLocations={[]} />);
+      renderWithRouter(<TacticalSectorMap theatre={unknown} commanders={[]} mapLocations={[]} />);
       expect(screen.getByText('Sector Alpha')).toBeInTheDocument();
       expect(screen.getByText('Sector Epsilon')).toBeInTheDocument();
     });
@@ -144,7 +147,7 @@ describe('TacticalSectorMap & Helper Tests', () => {
         }
       ];
 
-      render(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} matchups={mockMatchups} />);
+      renderWithRouter(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} matchups={mockMatchups} />);
       expect(screen.getByText('ACTIVE DEPLOYMENTS & MATCHUPS')).toBeInTheDocument();
       expect(screen.getByText(/VS Farsight/)).toBeInTheDocument();
       expect(screen.getByText(/VS Ghazghkull/)).toBeInTheDocument();
@@ -168,7 +171,7 @@ describe('TacticalSectorMap & Helper Tests', () => {
         { id: '3', commander_name: 'Imotekh', army_faction: 'Necrons', deployed_theatre: 'Test Theatre' }
       ];
 
-      render(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} matchups={[]} />);
+      renderWithRouter(<TacticalSectorMap theatre={mockTheatre} commanders={mockCommanders} mapLocations={[]} matchups={[]} />);
       expect(screen.getByText(/Imperial Forces/i)).toBeInTheDocument();
       expect(screen.getByText(/Chaos Forces/i)).toBeInTheDocument();
       expect(screen.getByText(/Xenos Forces/i)).toBeInTheDocument();

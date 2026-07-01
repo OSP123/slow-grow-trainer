@@ -1119,3 +1119,22 @@ Tasks:
 - Wrote unit tests verifying option formatting and simulated list text formatting including war zone preview, distribution across real theatres, and sector points matching.
 Follow-ups:
 - None
+
+Date: 2026-07-01 (Full Matchup Ledger Visibility & Adjustment Station)
+Tasks:
+- Enhanced `AdminDashboard.tsx` to display complete pairing details (Player 1 Name, Faction, Player 2 Name, Faction, War Zone, Score, Result, and Status) across both the `Matchup Command Override` table and a new inline `Active Pairings Overview` table located inside the `Matchmaking Engine Override` card.
+- Updated `fetchAllMatchups` query to join and select `army_faction` from `profiles` along with fallback lookup to `users` list so all active pairings always show full player and faction identification.
+- Added live adjustment and reassignment controls to the `Proposed Round Ledgers` simulation view: admins can now directly change Player 1, Player 2, or War Zone via inline selects/inputs or remove proposed matches prior to locking them into Postgres.
+- Added live adjustment and reassignment controls to the `Matchup Command Override` edit form: admins can now reassign Player 1, Player 2, and War Zone (`theatre_name`) on existing active pairings, which also automatically synchronizes `profiles.deployed_theatre` in Postgres.
+- Follow-ups:
+- None
+
+Date: 2026-07-01 (Interactive Commander Navigation & Icon Cleanup)
+Tasks:
+- Removed the scattered circular avatar icon overlay from the War Effort Map in `Dashboard.tsx`, eliminating visual clutter across tactical sectors.
+- Updated the matchup listing inside `TacticalSectorMap.tsx` (`[Commander Name] / [Faction] VS [Opponent Name]`) to be fully interactive `<Link>` elements directing straight to the respective commander's public profile (`/profile/:id`).
+- Updated the sector command forces roster inside `TacticalSectorMap.tsx` so that clicking on any deployed commander pill navigates directly to their profile page.
+- Updated Vitest unit suites (`TacticalSectorMap.test.tsx`) with router context wrappers (`renderWithRouter`) to verify 100% test pass rates across all 86 unit tests.
+Follow-ups:
+- None
+

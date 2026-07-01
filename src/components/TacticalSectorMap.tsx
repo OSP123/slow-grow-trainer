@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { FACTIONS } from '../data/warhammer40k';
 
 // ─── Faction Color Helper ────────────────────────────────────────────────────
@@ -402,9 +403,9 @@ export default function TacticalSectorMap({ theatre, commanders, matchups }: Tac
           {activeSector.control.commanders.length > 0 && (
             <div style={{ width: '100%', paddingTop: '6px', borderTop: '1px dashed rgba(255,255,255,0.15)', display: 'flex', flexWrap: 'wrap', gap: '6px 16px' }}>
               {activeSector.control.commanders.map((c: any) => (
-                <span key={c.id} style={{ fontSize: '0.8rem', color: '#e2e8f0', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px', borderLeft: `3px solid ${getFactionColor(c.army_faction)}` }}>
+                <Link to={`/profile/${c.id}`} key={c.id} style={{ textDecoration: 'none', fontSize: '0.8rem', color: '#e2e8f0', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px', borderLeft: `3px solid ${getFactionColor(c.army_faction)}`, cursor: 'pointer' }}>
                   ▸ {c.commander_name} ({c.army_faction})
-                </span>
+                </Link>
               ))}
             </div>
           )}
@@ -465,13 +466,16 @@ export default function TacticalSectorMap({ theatre, commanders, matchups }: Tac
                         }
 
                         return (
-                          <div key={c.id} style={{
+                          <Link to={`/profile/${c.id}`} key={c.id} style={{
                             padding: '8px 10px',
                             background: 'rgba(255,255,255,0.03)',
                             border: '1px solid rgba(255,255,255,0.1)',
                             borderLeft: `4px solid ${getFactionColor(c.army_faction)}`,
                             borderRadius: '4px',
-                            display: 'flex', flexDirection: 'column', gap: '4px'
+                            display: 'flex', flexDirection: 'column', gap: '4px',
+                            textDecoration: 'none',
+                            color: 'inherit',
+                            cursor: 'pointer'
                           }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                               <span style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#f8fafc' }}>{c.commander_name}</span>
@@ -480,7 +484,7 @@ export default function TacticalSectorMap({ theatre, commanders, matchups }: Tac
                             <div style={{ fontSize: '0.75rem', color: activeMatch ? '#fbbf24' : '#64748b', fontWeight: activeMatch ? 'bold' : 'normal' }}>
                               {opponentText}
                             </div>
-                          </div>
+                          </Link>
                         );
                       })}
                     </div>

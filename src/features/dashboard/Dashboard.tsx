@@ -38,21 +38,6 @@ function getDeterministicOffset(seedStr: string) {
   };
 }
 
-function getDeploymentPosition(userId: string, subSector: string) {
-  let hash = 0;
-  const str = userId + subSector;
-  for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) - hash) + str.charCodeAt(i);
-    hash |= 0; 
-  }
-  
-  // Use modulo to get a number between 0 and 1, then scale to 15-85% to keep away from edges
-  const randomX = Math.abs(Math.sin(hash)) * 70 + 15;
-  const randomY = Math.abs(Math.cos(hash)) * 70 + 15;
-  
-  return { top: `${randomY}%`, left: `${randomX}%` };
-}
-
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [theatres, setTheatres] = useState<any[]>([]);
@@ -70,13 +55,6 @@ export default function Dashboard() {
 
   const [activeTheme, setActiveTheme] = useState(document.body.getAttribute('data-theme') || 'imperium');
 
-  const getCommanderTheatre = (c: any) => {
-    if (allMatchups) {
-      const activeMatch = allMatchups.find(m => (m.p1_id === c.id || m.p2_id === c.id) && m.status !== 'cancelled');
-      if (activeMatch && activeMatch.theatre_name) return activeMatch.theatre_name;
-    }
-    return c.deployed_theatre || null;
-  };
 
   useEffect(() => {
     // Watch for theme changes from the sidebar dropdown
@@ -720,60 +698,6 @@ export default function Dashboard() {
                   boxShadow: `0 0 10px ${selectedTheatre.color}`
                 }} />
               ))}
-
-              {/* Deployed Commanders Overlay */}
-              {commanders.filter((c: any) => {
-                const t = getCommanderTheatre(c);
-                return t && (t === selectedTheatre.name || t.startsWith(`${selectedTheatre.name} -`));
-              }).map((c: any) => {
-                const factionData = FACTIONS.find(f => f.name === c.army_faction);
-                const color = getFactionColor(c.army_faction, factionData?.grandAlliance);
-                
-                let top = '50%';
-                let left = '50%';
-                
-                if (c.deployed_location_id) {
-                  const loc = mapLocations.find(ml => ml.id === c.deployed_location_id);
-                  if (loc) {
-                    // Slight random offset based on ID to cluster them around the node instead of perfectly overlapping
-                    let hash = 0;
-                    for (let i = 0; i < c.id.length; i++) hash = ((hash << 5) - hash) + c.id.charCodeAt(i);
-                    const offsetX = (Math.sin(hash) * 4); // +/- 4%
-                    const offsetY = (Math.cos(hash) * 4);
-                    top = `${loc.y_pos + offsetY}%`;
-                    left = `${loc.x_pos + offsetX}%`;
-                  }
-                } else {
-                  const t = getCommanderTheatre(c) || selectedTheatre.name;
-                  const pos = getDeploymentPosition(c.id, t);
-                  top = pos.top;
-                  left = pos.left;
-                }
-
-                return (
-                  <Link to={`/profile/${c.id}`} key={c.id} title={`${c.commander_name} - ${c.army_faction}`} style={{
-                    position: 'absolute',
-                    top,
-                    left,
-                    transform: 'translate(-50%, -50%)',
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    border: `2px solid ${color}`,
-                    overflow: 'hidden',
-                    cursor: 'pointer',
-                    boxShadow: `0 0 10px ${color}`,
-                    zIndex: 10,
-                    backgroundColor: 'rgba(0,0,0,0.8)'
-                  }}>
-                    {c.avatar_url ? (
-                      <img src={getTransformUrl(c.avatar_url, 64, 64)} alt={c.commander_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', color }}>⚔</div>
-                    )}
-                  </Link>
-                );
-              })}
             </div>
 
             {/* Stats side */}
