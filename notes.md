@@ -1106,3 +1106,11 @@ Tasks:
 - Added TDD unit test verifying immediate checkbox line-through styling on lore save.
 Follow-ups:
 - None
+
+Date: 2026-07-01 (Admin Matchup Engine Comparison Enhancements)
+Tasks:
+- Updated the Admin Matchmaking & Override Station to display each player's Faction (`army_faction`) and calculated Win-Loss Record (`getUserRecord`) directly inside the algorithmically generated `Proposed Round Ledgers` and the `Manual Narrative Pairing` dropdown selects.
+- Confirmed that once initial or manual pairings are locked into the ledger (`commitMatches` or `handleCreateManualPairing`), end users immediately see their active matchup banner at the top of the War Effort Map (`/dashboard`) showing their assigned opponent and faction, as well as on their individual commander card on the Sector Map.
+- Wrote unit tests verifying option and simulated list text formatting.
+Follow-ups:
+- None

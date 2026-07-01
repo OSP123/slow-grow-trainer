@@ -212,6 +212,26 @@ export default function AdminDashboard() {
     setFetchingVotes(false);
   };
 
+  const getUserRecord = (userId: string) => {
+    let wins = 0;
+    let losses = 0;
+    let draws = 0;
+    allMatchups.forEach(m => {
+      if (m.status === 'completed' && m.game_result) {
+        if (m.p1_id === userId) {
+          if (m.game_result === 'p1_win' || m.game_result === 'P1_WIN') wins++;
+          else if (m.game_result === 'p2_win' || m.game_result === 'P2_WIN') losses++;
+          else if (m.game_result === 'draw' || m.game_result === 'DRAW') draws++;
+        } else if (m.p2_id === userId) {
+          if (m.game_result === 'p2_win' || m.game_result === 'P2_WIN') wins++;
+          else if (m.game_result === 'p1_win' || m.game_result === 'P1_WIN') losses++;
+          else if (m.game_result === 'draw' || m.game_result === 'DRAW') draws++;
+        }
+      }
+    });
+    return `${wins}W - ${losses}L${draws > 0 ? ` - ${draws}D` : ''}`;
+  };
+
   const fetchAllMatchups = async () => {
     const { data } = await supabase
       .from('matchups')
@@ -1069,11 +1089,20 @@ export default function AdminDashboard() {
             <h3>Proposed Round Ledgers</h3>
             <ul style={{ listStyle: 'none', padding: 0, margin: '1rem 0' }}>
               {generatedMatches.map((m, idx) => (
-                <li key={idx} style={{ marginBottom: '0.5rem' }}>
-                  <strong>{m.p1.commander_name || 'Unknown'}</strong> ({m.p1.location || '?'}, {m.p1.experience_level})
-                  <span style={{ color: 'red', margin: '0 0.5rem' }}>VS</span>
-                  <strong>{m.p2.commander_name || 'Unknown'}</strong> ({m.p2.location || '?'}, {m.p2.experience_level})
-                  <span style={{ fontSize: '0.8rem', color: 'gray', marginLeft: '0.5rem' }}>[Score: {m.score}]</span>
+                <li key={idx} style={{ marginBottom: '0.75rem', padding: '0.5rem', backgroundColor: 'var(--theme-bg-secondary)', borderRadius: '4px' }}>
+                  <div>
+                    <strong>{m.p1.commander_name || 'Unknown'}</strong> [{m.p1.army_faction || 'No Faction'}] (Record: {getUserRecord(m.p1.id)})
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', marginBottom: '0.25rem' }}>
+                    Location: {m.p1.location || '?'}, Tier: {m.p1.experience_level}
+                  </div>
+                  <span style={{ color: 'var(--theme-accent)', fontWeight: 'bold', margin: '0.25rem 0', display: 'inline-block' }}>VS</span>
+                  <div>
+                    <strong>{m.p2.commander_name || 'Unknown'}</strong> [{m.p2.army_faction || 'No Faction'}] (Record: {getUserRecord(m.p2.id)})
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)' }}>
+                    Location: {m.p2.location || '?'}, Tier: {m.p2.experience_level} <span style={{ color: 'gray', marginLeft: '0.5rem' }}>[Score: {m.score}]</span>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -1122,7 +1151,7 @@ export default function AdminDashboard() {
                     <select value={manualP1} onChange={e => setManualP1(e.target.value)} required style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}>
                       <option value="">Select Commander...</option>
                       {users.filter(u => u.campaign_status !== 'removed').map(u => (
-                        <option key={u.id} value={u.id}>{u.commander_name} ({u.army_faction || 'No Faction'})</option>
+                        <option key={u.id} value={u.id}>{u.commander_name} [{u.army_faction || 'No Faction'}] (Record: {getUserRecord(u.id)})</option>
                       ))}
                     </select>
                   </div>
@@ -1131,7 +1160,7 @@ export default function AdminDashboard() {
                     <select value={manualP2} onChange={e => setManualP2(e.target.value)} required style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}>
                       <option value="">Select Commander...</option>
                       {users.filter(u => u.campaign_status !== 'removed').map(u => (
-                        <option key={u.id} value={u.id}>{u.commander_name} ({u.army_faction || 'No Faction'})</option>
+                        <option key={u.id} value={u.id}>{u.commander_name} [{u.army_faction || 'No Faction'}] (Record: {getUserRecord(u.id)})</option>
                       ))}
                     </select>
                   </div>
