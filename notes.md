@@ -1185,3 +1185,10 @@ Tasks:
 - Wrote unit test verifying dropdown expansion behavior in `CampaignBattles.test.tsx` following strict TDD workflow.
 Follow-ups:
 - None
+
+Date: 2026-07-02 (Automatic Matchup Cleanup on Admin Actions)
+Tasks:
+- Updated `AdminDashboard.tsx` (`executeConfirmAction`) so that updating a user's campaign status to `paused` or `removed` automatically deletes any existing uncompleted (`scheduled`) matchups involving that user.
+- Updated `AdminDashboard.tsx` (`handleCreateManualPairing`) so that scheduling a Manual Narrative Pairing automatically removes any existing uncompleted (`scheduled`) matchups involving either of the two selected commanders before creating the new pairing, preventing duplicate matchups.
+Follow-ups:
+- Admin must manually click "Delete" in the Admin Dashboard under "Matchup Command Override" to remove the older duplicate matchup that was created before this auto-cleanup rule was deployed.
