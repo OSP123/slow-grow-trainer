@@ -389,8 +389,6 @@ export default function AdminDashboard() {
     const assignedSector = sectorList[monthIdx];
     const fullTheatreName = `${chosenTheatre} - ${assignedSector}`;
 
-    await supabase.from('matchups').delete().eq('status', 'scheduled').or(`p1_id.eq.${manualP1},p2_id.eq.${manualP1},p1_id.eq.${manualP2},p2_id.eq.${manualP2}`);
-
     const { error } = await supabase.from('matchups').insert([{
       p1_id: manualP1,
       p2_id: manualP2,

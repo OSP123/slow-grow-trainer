@@ -1189,6 +1189,6 @@ Follow-ups:
 Date: 2026-07-02 (Automatic Matchup Cleanup on Admin Actions)
 Tasks:
 - Updated `AdminDashboard.tsx` (`executeConfirmAction`) so that updating a user's campaign status to `paused` or `removed` automatically deletes any existing uncompleted (`scheduled`) matchups involving that user.
-- Updated `AdminDashboard.tsx` (`handleCreateManualPairing`) so that scheduling a Manual Narrative Pairing automatically removes any existing uncompleted (`scheduled`) matchups involving either of the two selected commanders before creating the new pairing, preventing duplicate matchups.
+- Kept Manual Narrative Pairing (`handleCreateManualPairing`) unconstrained so active players can match with multiple people when ordered by command.
 Follow-ups:
-- Admin must manually click "Delete" in the Admin Dashboard under "Matchup Command Override" to remove the older duplicate matchup that was created before this auto-cleanup rule was deployed.
+- Admin must manually click "Delete" in the Admin Dashboard under "Matchup Command Override" to remove the older duplicate matchup involving the paused player.
