@@ -68,6 +68,7 @@ export default function CampaignBattles() {
   const [myMatchups, setMyMatchups] = useState<MatchupData[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [expandedReports, setExpandedReports] = useState<Record<string, boolean>>({});
 
   const [activeMatch, setActiveMatch] = useState<string | null>(null);
   const [myScore, setMyScore] = useState<number | ''>('');
@@ -403,6 +404,46 @@ export default function CampaignBattles() {
                     <span style={{ color: 'var(--theme-fg-muted)' }}>score</span>
                     <span>VP: {m.p2_score ?? '—'}</span>
                   </div>
+
+                  {(m.p1_lore || m.p2_lore) && (
+                    <div style={{ borderTop: '1px solid var(--theme-border)', paddingTop: '0.5rem' }}>
+                      <button
+                        type="button"
+                        onClick={() => setExpandedReports(prev => ({ ...prev, [m.id]: !prev[m.id] }))}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: 'var(--theme-accent)',
+                          fontSize: '0.75rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          padding: 0,
+                          width: '100%',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <span>{expandedReports[m.id] ? '▾ Hide Battle Reports' : '▸ View Battle Reports'}</span>
+                      </button>
+                      {expandedReports[m.id] && (
+                        <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem' }}>
+                          {m.p1_lore && (
+                            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '4px' }}>
+                              <strong style={{ color: 'var(--theme-accent)', display: 'block', marginBottom: '2px' }}>{formatCommanderWithDiscord(m.p1_profile, 'Player 1')}:</strong>
+                              <p style={{ margin: 0, fontStyle: 'italic', color: 'var(--theme-fg-muted)' }}>"{m.p1_lore}"</p>
+                            </div>
+                          )}
+                          {m.p2_lore && (
+                            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '4px' }}>
+                              <strong style={{ color: 'var(--theme-accent)', display: 'block', marginBottom: '2px' }}>{formatCommanderWithDiscord(m.p2_profile, 'Player 2')}:</strong>
+                              <p style={{ margin: 0, fontStyle: 'italic', color: 'var(--theme-fg-muted)' }}>"{m.p2_lore}"</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}

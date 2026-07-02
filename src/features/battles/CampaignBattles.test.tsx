@@ -104,4 +104,38 @@ describe('Campaign Battles Integrations', () => {
       expect(screen.getByText(/Seal Battle Report/i)).toBeInTheDocument();
     });
   });
+
+  it('toggles battle reports dropdown when clicked on Global Warzone Board card', async () => {
+    const matchupWithLore = [{
+      ...mockMatchups[0],
+      p1_lore: 'The Space Marines charged fearlessly into the breach.',
+      p2_lore: 'The Orks held the line with dakka.'
+    }];
+    (supabase.from as Mock).mockImplementation(() => ({
+      select: vi.fn().mockReturnValue({
+        order: vi.fn().mockResolvedValue({
+          data: matchupWithLore,
+          error: null,
+        }),
+      }),
+      update: vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ error: null }),
+      }),
+    }));
+
+    render(<CampaignBattles />);
+    await waitFor(() => {
+      expect(screen.getByText('Global Warzone Board')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByText(/The Space Marines charged fearlessly/i)).not.toBeInTheDocument();
+
+    const toggleBtn = screen.getByRole('button', { name: /View Battle Reports/i });
+    fireEvent.click(toggleBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(/The Space Marines charged fearlessly/i)).toBeInTheDocument();
+      expect(screen.getByText(/The Orks held the line/i)).toBeInTheDocument();
+    });
+  });
 });

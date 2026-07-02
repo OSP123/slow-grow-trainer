@@ -1177,3 +1177,11 @@ Tasks:
 - Unified commander name formatting across active matchup banners, proposed round ledgers, active pairings overview tables, unassigned player notices, and tactical sector map deployments to display both commander name and Discord username formatted as `Commander Name (Discord Username)`.
 Follow-ups:
 - None
+
+Date: 2026-07-02 (Expandable Battle Reports in Campaign Battles Tab)
+Tasks:
+- Added `expandedReports` state and interactive dropdown toggle button (`▸ View Battle Reports` / `▾ Hide Battle Reports`) to cards on the `/battles` page (`CampaignBattles.tsx`).
+- Submitted narrative perspectives (`p1_lore` and `p2_lore`) now display cleanly inside expanded drop-down sections beneath VP scores, labeled by commander and Discord username.
+- Wrote unit test verifying dropdown expansion behavior in `CampaignBattles.test.tsx` following strict TDD workflow.
+Follow-ups:
+- None
