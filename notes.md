@@ -1170,7 +1170,10 @@ Tasks:
 Follow-ups:
 - None
 
-
-
-
-
+Date: 2026-07-02 (Discord Name Display Across Matchups & Maps)
+Tasks:
+- Created helper utility `formatCommanderWithDiscord` in `src/utils/commanderUtils.ts` with complete unit test suite (`src/utils/commanderUtils.test.ts`).
+- Updated `Dashboard.tsx`, `AdminDashboard.tsx`, `TacticalSectorMap.tsx`, and `CampaignBattles.tsx` to query `discord_name` directly from profiles and via `private_profiles`.
+- Unified commander name formatting across active matchup banners, proposed round ledgers, active pairings overview tables, unassigned player notices, and tactical sector map deployments to display both commander name and Discord username formatted as `Commander Name (Discord Username)`.
+Follow-ups:
+- None

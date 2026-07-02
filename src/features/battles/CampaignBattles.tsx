@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { FACTIONS } from '../../data/warhammer40k';
+import { formatCommanderWithDiscord } from '../../utils/commanderUtils';
 
 export interface MatchupData {
   id: string;
@@ -84,7 +85,7 @@ export default function CampaignBattles() {
 
     const { data: all } = await supabase
       .from('matchups')
-      .select('*, p1_profile:profiles!p1_id(commander_name, army_faction), p2_profile:profiles!p2_id(commander_name, army_faction)')
+      .select('*, p1_profile:profiles!p1_id(commander_name, discord_name, army_faction, private_profiles(discord_name)), p2_profile:profiles!p2_id(commander_name, discord_name, army_faction, private_profiles(discord_name))')
       .order('created_at', { ascending: false });
 
     if (all) {
@@ -384,9 +385,9 @@ export default function CampaignBattles() {
 
                   {/* Commanders */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>{m.p1_profile?.commander_name || 'Unknown'}</span>
+                    <span style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>{formatCommanderWithDiscord(m.p1_profile, 'Unknown')}</span>
                     <span style={{ color: 'var(--theme-fg-muted)', fontSize: '0.8rem' }}>vs</span>
-                    <span style={{ fontWeight: 'bold', fontSize: '0.95rem', textAlign: 'right' }}>{m.p2_profile?.commander_name || 'Unknown'}</span>
+                    <span style={{ fontWeight: 'bold', fontSize: '0.95rem', textAlign: 'right' }}>{formatCommanderWithDiscord(m.p2_profile, 'Unknown')}</span>
                   </div>
 
                   {/* ── Match Status Indicator ── */}
@@ -441,7 +442,7 @@ export default function CampaignBattles() {
                   >
                     {/* Opponent name */}
                     <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>
-                      vs {isP1 ? (m.p2_profile?.commander_name || 'Unknown') : (m.p1_profile?.commander_name || 'Unknown')}
+                      vs {isP1 ? formatCommanderWithDiscord(m.p2_profile, 'Unknown') : formatCommanderWithDiscord(m.p1_profile, 'Unknown')}
                     </div>
 
                     {/* ── PRIMARY: My Honour ratings ── */}

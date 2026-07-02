@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FACTIONS } from '../data/warhammer40k';
+import { formatCommanderWithDiscord } from '../utils/commanderUtils';
 
 // ─── Faction Color Helper ────────────────────────────────────────────────────
 
@@ -404,7 +405,7 @@ export default function TacticalSectorMap({ theatre, commanders, matchups }: Tac
             <div style={{ width: '100%', paddingTop: '6px', borderTop: '1px dashed rgba(255,255,255,0.15)', display: 'flex', flexWrap: 'wrap', gap: '6px 16px' }}>
               {activeSector.control.commanders.map((c: any) => (
                 <Link to={`/profile/${c.id}`} key={c.id} style={{ textDecoration: 'none', fontSize: '0.8rem', color: '#e2e8f0', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px', borderLeft: `3px solid ${getFactionColor(c.army_faction)}`, cursor: 'pointer' }}>
-                  ▸ {c.commander_name} ({c.army_faction})
+                  ▸ {formatCommanderWithDiscord(c)} ({c.army_faction})
                 </Link>
               ))}
             </div>
@@ -461,7 +462,7 @@ export default function TacticalSectorMap({ theatre, commanders, matchups }: Tac
                           const oppProfile = isP1 ? activeMatch.p2_profile : activeMatch.p1_profile;
                           const opp = Array.isArray(oppProfile) ? oppProfile[0] : oppProfile;
                           if (opp) {
-                            opponentText = `VS ${opp.commander_name || 'Commander'} (${opp.army_faction || 'Enemy Faction'})`;
+                            opponentText = `VS ${formatCommanderWithDiscord(opp)} (${opp.army_faction || 'Enemy Faction'})`;
                           }
                         }
 
@@ -478,7 +479,7 @@ export default function TacticalSectorMap({ theatre, commanders, matchups }: Tac
                             cursor: 'pointer'
                           }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                              <span style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#f8fafc' }}>{c.commander_name}</span>
+                              <span style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#f8fafc' }}>{formatCommanderWithDiscord(c)}</span>
                               <span style={{ fontSize: '0.7rem', color: getFactionColor(c.army_faction) }}>{c.army_faction}</span>
                             </div>
                             <div style={{ fontSize: '0.75rem', color: activeMatch ? '#fbbf24' : '#64748b', fontWeight: activeMatch ? 'bold' : 'normal' }}>

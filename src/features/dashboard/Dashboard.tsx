@@ -6,6 +6,7 @@ import Globe from 'react-globe.gl';
 import { Castle, Factory, Satellite, Skull, Biohazard, Mountain, Target } from 'lucide-react';
 import { FACTIONS } from '../../data/warhammer40k';
 import { getTransformUrl } from '../../utils/imageCompression';
+import { formatCommanderWithDiscord } from '../../utils/commanderUtils';
 import TacticalSectorMap, { getFactionColor, getGrandAlliance } from '../../components/TacticalSectorMap';
 
 const THEATRES_OF_WAR = [
@@ -132,7 +133,7 @@ export default function Dashboard() {
         // Try matchups with private_profiles join
         const { data: matchupsData, error } = await supabase
           .from('matchups')
-          .select('id, status, theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, army_faction, avatar_url, army_lore, campaign_status, private_profiles(discord_name)), p2_profile:profiles!p2_id(commander_name, army_faction, avatar_url, army_lore, campaign_status, private_profiles(discord_name))');
+          .select('id, status, theatre_name, game_result, p1_id, p2_id, p1_lore, p2_lore, p1_profile:profiles!p1_id(commander_name, discord_name, army_faction, avatar_url, army_lore, campaign_status, private_profiles(discord_name)), p2_profile:profiles!p2_id(commander_name, discord_name, army_faction, avatar_url, army_lore, campaign_status, private_profiles(discord_name))');
 
         if (!error && matchupsData) {
           matchups = matchupsData;
@@ -267,7 +268,7 @@ export default function Dashboard() {
               const isP1Win = m.game_result === 'P1_WIN' || m.game_result === 'p1_win';
               return {
                 theatre: m.theatre_name,
-                winner: isP1Win ? m.p1_profile?.commander_name : m.p2_profile?.commander_name,
+                winner: isP1Win ? formatCommanderWithDiscord(m.p1_profile) : formatCommanderWithDiscord(m.p2_profile),
                 lore: isP1Win ? m.p1_lore : m.p2_lore
               };
             });
@@ -312,19 +313,19 @@ export default function Dashboard() {
                 name: match.theatre_name || `${baseTheatre.name} - Sector Unknown`,
                 lat: baseTheatre.lat + latOffset,
                 lng: baseTheatre.lng + lngOffset,
-                narrative: `Sub-sector conquered by ${winnerProfile.commander_name}.`,
+                narrative: `Sub-sector conquered by ${formatCommanderWithDiscord(winnerProfile)}.`,
                 Icon: Target, // Use a distinct 'Target' icon for sub-sectors to differentiate from the Base
                 isBase: false,
                 color,
                 mapImage: baseTheatre.mapImage,
                 controllingFaction: winnerProfile.army_faction,
-                warlord: winnerProfile.commander_name,
+                warlord: formatCommanderWithDiscord(winnerProfile),
                 avatar: winnerProfile.avatar_url,
                 lore: winnerProfile.army_lore,
                 p1Lore: match.p1_lore,
                 p2Lore: match.p2_lore,
-                p1Name: p1Profile?.commander_name ? `${p1Profile.commander_name}${(p1Profile as any).private_profiles?.discord_name ? ` (${(p1Profile as any).private_profiles.discord_name})` : ''}` : 'Commander',
-                p2Name: p2Profile?.commander_name ? `${p2Profile.commander_name}${(p2Profile as any).private_profiles?.discord_name ? ` (${(p2Profile as any).private_profiles.discord_name})` : ''}` : 'Commander',
+                p1Name: formatCommanderWithDiscord(p1Profile),
+                p2Name: formatCommanderWithDiscord(p2Profile),
                 winnerId: isP1Win ? match.p1_id : (isP2Win ? match.p2_id : null),
                 p1Id: match.p1_id,
                 p2Id: match.p2_id
@@ -428,7 +429,7 @@ export default function Dashboard() {
               YOUR CURRENT CAMPAIGN MISSION
             </div>
             <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <span>VS {opp.commander_name || 'Commander'}</span>
+              <span>VS {formatCommanderWithDiscord(opp)}</span>
               <span style={{ fontSize: '0.85rem', color: getFactionColor(opp.army_faction), background: 'rgba(0,0,0,0.5)', padding: '2px 8px', borderRadius: '4px' }}>{opp.army_faction || 'Enemy Faction'}</span>
             </div>
             {myActiveMatchup.theatre_name && (

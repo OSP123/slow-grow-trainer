@@ -4,6 +4,7 @@ import { generateMatchups, type MatchPair } from './Matchmaker';
 import { getFactionsGrouped } from '../../data/warhammer40k';
 import { useUnitRegistry } from '../../hooks/useUnitRegistry';
 import { getGrandAlliance } from '../../components/TacticalSectorMap';
+import { formatCommanderWithDiscord } from '../../utils/commanderUtils';
 
 export interface UnitPoint {
   id: string;
@@ -236,7 +237,7 @@ export default function AdminDashboard() {
   const fetchAllMatchups = async () => {
     const { data } = await supabase
       .from('matchups')
-      .select('*, p1_profile:profiles!p1_id(commander_name, army_faction), p2_profile:profiles!p2_id(commander_name, army_faction)')
+      .select('*, p1_profile:profiles!p1_id(commander_name, discord_name, army_faction, private_profiles(discord_name)), p2_profile:profiles!p2_id(commander_name, discord_name, army_faction, private_profiles(discord_name))')
       .order('created_at', { ascending: false });
     if (data) setAllMatchups(data.map(m => ({
       ...m,
@@ -832,10 +833,12 @@ export default function AdminDashboard() {
               </thead>
               <tbody>
                 {allMatchups.map(m => {
-                  const p1Name = m.p1_profile?.commander_name || users.find(u => u.id === m.p1_id)?.commander_name || 'Unknown';
-                  const p1Faction = m.p1_profile?.army_faction || users.find(u => u.id === m.p1_id)?.army_faction || 'No Faction';
-                  const p2Name = m.p2_profile?.commander_name || users.find(u => u.id === m.p2_id)?.commander_name || 'Unknown';
-                  const p2Faction = m.p2_profile?.army_faction || users.find(u => u.id === m.p2_id)?.army_faction || 'No Faction';
+                  const p1Obj = m.p1_profile || users.find(u => u.id === m.p1_id);
+                  const p1Name = formatCommanderWithDiscord(p1Obj, 'Unknown');
+                  const p1Faction = p1Obj?.army_faction || 'No Faction';
+                  const p2Obj = m.p2_profile || users.find(u => u.id === m.p2_id);
+                  const p2Name = formatCommanderWithDiscord(p2Obj, 'Unknown');
+                  const p2Faction = p2Obj?.army_faction || 'No Faction';
                   return (
                     <tr key={m.id} style={{ borderBottom: '1px solid var(--theme-border)' }}>
                       <td style={{ padding: '0.5rem' }}>
@@ -1380,10 +1383,12 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody>
                   {allMatchups.map(m => {
-                    const p1Name = m.p1_profile?.commander_name || users.find(u => u.id === m.p1_id)?.commander_name || 'Unknown';
-                    const p1Faction = m.p1_profile?.army_faction || users.find(u => u.id === m.p1_id)?.army_faction || 'No Faction';
-                    const p2Name = m.p2_profile?.commander_name || users.find(u => u.id === m.p2_id)?.commander_name || 'Unknown';
-                    const p2Faction = m.p2_profile?.army_faction || users.find(u => u.id === m.p2_id)?.army_faction || 'No Faction';
+                    const p1Obj = m.p1_profile || users.find(u => u.id === m.p1_id);
+                    const p1Name = formatCommanderWithDiscord(p1Obj, 'Unknown');
+                    const p1Faction = p1Obj?.army_faction || 'No Faction';
+                    const p2Obj = m.p2_profile || users.find(u => u.id === m.p2_id);
+                    const p2Name = formatCommanderWithDiscord(p2Obj, 'Unknown');
+                    const p2Faction = p2Obj?.army_faction || 'No Faction';
                     return (
                       <tr key={m.id} style={{ borderBottom: '1px solid var(--theme-border)' }}>
                         <td style={{ padding: '0.5rem' }}>
@@ -1415,7 +1420,7 @@ export default function AdminDashboard() {
                   {unassignedUsers.map(u => (
                     <tr key={`unassigned-${u.id}`} style={{ borderBottom: '1px solid var(--theme-border)', backgroundColor: 'rgba(239, 68, 68, 0.1)' }}>
                       <td style={{ padding: '0.5rem' }}>
-                        <strong style={{ color: '#ef4444' }}>{u.commander_name}</strong> <span style={{ fontSize: '0.75rem', color: 'var(--theme-accent)' }}>[{u.army_faction || 'No Faction'}]</span>
+                        <strong style={{ color: '#ef4444' }}>{formatCommanderWithDiscord(u)}</strong> <span style={{ fontSize: '0.75rem', color: 'var(--theme-accent)' }}>[{u.army_faction || 'No Faction'}]</span>
                       </td>
                       <td style={{ padding: '0.5rem', fontStyle: 'italic', color: '#ef4444' }}>
                         — Unassigned / Left Out —
