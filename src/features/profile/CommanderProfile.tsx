@@ -184,6 +184,8 @@ export default function CommanderProfile() {
     }).eq('id', profile.id);
     if (error) setMessage('Failed to lock taxonomy updates.');
     else { 
+      // Sync discord_name to private_profiles so matchup displays stay current
+      await supabase.from('private_profiles').update({ discord_name: discordName }).eq('id', profile.id);
       setMessage('Commander metadata archived.'); 
       setProfile({ ...profile, commander_name: commanderName, discord_name: discordName, location, army_faction: faction, army_subfaction: subfaction, preferred_store_id: storeId });
       setEditMode(false); 
