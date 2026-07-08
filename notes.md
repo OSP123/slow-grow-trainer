@@ -1192,3 +1192,13 @@ Tasks:
 - Kept Manual Narrative Pairing (`handleCreateManualPairing`) unconstrained so active players can match with multiple people when ordered by command.
 Follow-ups:
 - Admin must manually click "Delete" in the Admin Dashboard under "Matchup Command Override" to remove the older duplicate matchup involving the paused player.
+
+Date: 2026-07-08 (Scrollable Battle Reports + TL;DR Summary)
+Tasks:
+- Added scrollable container (max-height 200px, overflow-y auto) to expanded battle report area on Global Warzone Board cards so long reports don't blow out card height.
+- Added optional "Battle Summary (TL;DR)" text input (200-char max with live counter) to both the Live VP Tracker and Finalize Battle forms.
+- TL;DR summaries display prominently with accent left-border styling above full narrative text in the expanded battle reports view.
+- Created DB migration `20260708000000_add_battle_tldr.sql` adding `p1_tldr`/`p2_tldr` columns and updating the `enforce_matchup_update()` security trigger.
+- Updated tests: new test for TL;DR input field presence, updated lore toggle test to verify TL;DR display alongside full lore. All 6 tests passing.
+Follow-ups:
+- Run the `20260708000000_add_battle_tldr.sql` migration against the Supabase instance before deploying.

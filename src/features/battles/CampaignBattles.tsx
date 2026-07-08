@@ -11,6 +11,8 @@ export interface MatchupData {
   p2_score?: number;
   p1_lore?: string;
   p2_lore?: string;
+  p1_tldr?: string;
+  p2_tldr?: string;
   game_result?: string;
   status?: string;
   theatre_name?: string;
@@ -76,6 +78,7 @@ export default function CampaignBattles() {
   const [myLore, setMyLore] = useState('');
   const [message, setMessage] = useState('');
   const [isFinalizing, setIsFinalizing] = useState(false);
+  const [myTldr, setMyTldr] = useState('');
   const [oppTemperament, setOppTemperament] = useState<number | ''>('');
   const [oppRulesEngagement, setOppRulesEngagement] = useState<number | ''>('');
 
@@ -109,6 +112,7 @@ export default function CampaignBattles() {
     setMyScore(isP1 ? (m.p1_score ?? '') : (m.p2_score ?? ''));
     setOppScore(isP1 ? (m.p2_score ?? '') : (m.p1_score ?? ''));
     setMyLore(isP1 ? (m.p1_lore ?? '') : (m.p2_lore ?? ''));
+    setMyTldr(isP1 ? (m.p1_tldr ?? '') : (m.p2_tldr ?? ''));
     setOppTemperament(isP1 ? (m.p2_temperament ?? '') : (m.p1_temperament ?? ''));
     setOppRulesEngagement(isP1 ? (m.p2_rules_engagement ?? '') : (m.p1_rules_engagement ?? ''));
   };
@@ -120,16 +124,18 @@ export default function CampaignBattles() {
     if (!match) return;
     const isP1 = match.p1_id === userId;
 
-    type VPPayload = { p1_score?: number; p2_score?: number; p1_lore?: string; p2_lore?: string };
+    type VPPayload = { p1_score?: number; p2_score?: number; p1_lore?: string; p2_lore?: string; p1_tldr?: string; p2_tldr?: string };
     const payload: VPPayload = {};
     if (isP1) {
       if (myScore !== '') payload.p1_score = myScore as number;
       if (oppScore !== '') payload.p2_score = oppScore as number;
       payload.p1_lore = myLore;
+      payload.p1_tldr = myTldr;
     } else {
       if (myScore !== '') payload.p2_score = myScore as number;
       if (oppScore !== '') payload.p1_score = oppScore as number;
       payload.p2_lore = myLore;
+      payload.p2_tldr = myTldr;
     }
 
     const { error } = await supabase.from('matchups').update(payload).eq('id', activeMatch);
@@ -166,6 +172,7 @@ export default function CampaignBattles() {
       status?: string; game_result?: string;
       p1_score?: number; p2_score?: number;
       p1_lore?: string; p2_lore?: string;
+      p1_tldr?: string; p2_tldr?: string;
       p1_temperament?: number; p2_temperament?: number;
       p1_rules_engagement?: number; p2_rules_engagement?: number;
     };
@@ -175,6 +182,7 @@ export default function CampaignBattles() {
       if (myScore !== '') payload.p1_score = myScore as number;
       if (oppScore !== '') payload.p2_score = oppScore as number;
       payload.p1_lore = myLore;
+      payload.p1_tldr = myTldr;
       payload.p2_temperament = oppTemperament as number;
       payload.p2_rules_engagement = oppRulesEngagement as number;
       
@@ -186,6 +194,7 @@ export default function CampaignBattles() {
       if (myScore !== '') payload.p2_score = myScore as number;
       if (oppScore !== '') payload.p1_score = oppScore as number;
       payload.p2_lore = myLore;
+      payload.p2_tldr = myTldr;
       payload.p1_temperament = oppTemperament as number;
       payload.p1_rules_engagement = oppRulesEngagement as number;
       
@@ -405,7 +414,7 @@ export default function CampaignBattles() {
                     <span>VP: {m.p2_score ?? '—'}</span>
                   </div>
 
-                  {(m.p1_lore || m.p2_lore) && (
+                  {(m.p1_lore || m.p2_lore || m.p1_tldr || m.p2_tldr) && (
                     <div style={{ borderTop: '1px solid var(--theme-border)', paddingTop: '0.5rem' }}>
                       <button
                         type="button"
@@ -427,7 +436,19 @@ export default function CampaignBattles() {
                         <span>{expandedReports[m.id] ? '▾ Hide Battle Reports' : '▸ View Battle Reports'}</span>
                       </button>
                       {expandedReports[m.id] && (
-                        <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem' }}>
+                        <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem', maxHeight: '200px', overflowY: 'auto' }}>
+                          {m.p1_tldr && (
+                            <div style={{ background: 'rgba(0,0,0,0.15)', padding: '0.5rem 0.5rem 0.4rem', borderRadius: '4px', borderLeft: '3px solid var(--theme-accent)' }}>
+                              <strong style={{ color: 'var(--theme-accent)', fontSize: '0.7rem', display: 'block', marginBottom: '2px' }}>{formatCommanderWithDiscord(m.p1_profile, 'Player 1')} — TL;DR</strong>
+                              <span style={{ color: 'var(--theme-fg)', fontWeight: 'bold' }}>{m.p1_tldr}</span>
+                            </div>
+                          )}
+                          {m.p2_tldr && (
+                            <div style={{ background: 'rgba(0,0,0,0.15)', padding: '0.5rem 0.5rem 0.4rem', borderRadius: '4px', borderLeft: '3px solid var(--theme-accent)' }}>
+                              <strong style={{ color: 'var(--theme-accent)', fontSize: '0.7rem', display: 'block', marginBottom: '2px' }}>{formatCommanderWithDiscord(m.p2_profile, 'Player 2')} — TL;DR</strong>
+                              <span style={{ color: 'var(--theme-fg)', fontWeight: 'bold' }}>{m.p2_tldr}</span>
+                            </div>
+                          )}
                           {m.p1_lore && (
                             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '4px' }}>
                               <strong style={{ color: 'var(--theme-accent)', display: 'block', marginBottom: '2px' }}>{formatCommanderWithDiscord(m.p1_profile, 'Player 1')}:</strong>
@@ -620,6 +641,27 @@ export default function CampaignBattles() {
                   </div>
                 </div>
                 <div>
+                  <label htmlFor="tldr" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem' }}>Battle Summary (TL;DR)</label>
+                  <input
+                    id="tldr" type="text" value={myTldr}
+                    onChange={e => setMyTldr(e.target.value.slice(0, 200))}
+                    disabled={isLocked}
+                    maxLength={200}
+                    placeholder="One-line summary of this battle (optional)"
+                    style={{
+                      width: '100%', padding: '0.75rem',
+                      backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-fg)',
+                      border: '1px solid var(--theme-border)', boxSizing: 'border-box',
+                      opacity: isLocked ? 0.5 : 1,
+                    }}
+                  />
+                  {!isLocked && (
+                    <div style={{ fontSize: '0.7rem', color: 'var(--theme-fg-muted)', textAlign: 'right', marginTop: '2px' }}>
+                      {myTldr.length}/200
+                    </div>
+                  )}
+                </div>
+                <div>
                   <label htmlFor="lore" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem' }}>Narrative Perspective</label>
                   <textarea
                     id="lore" value={myLore} onChange={e => setMyLore(e.target.value)}
@@ -710,6 +752,23 @@ export default function CampaignBattles() {
                   </div>
                 </div>
 
+                <div>
+                  <label htmlFor="finalTldr" style={{ display: 'block', marginBottom: '0.4rem' }}>Battle Summary (TL;DR)</label>
+                  <input
+                    id="finalTldr" type="text" value={myTldr}
+                    onChange={e => setMyTldr(e.target.value.slice(0, 200))}
+                    maxLength={200}
+                    placeholder="One-line summary of this battle (optional)"
+                    style={{
+                      width: '100%', padding: '0.75rem',
+                      backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-fg)',
+                      border: '1px solid var(--theme-border)', boxSizing: 'border-box',
+                    }}
+                  />
+                  <div style={{ fontSize: '0.7rem', color: 'var(--theme-fg-muted)', textAlign: 'right', marginTop: '2px' }}>
+                    {myTldr.length}/200
+                  </div>
+                </div>
                 <div>
                   <label htmlFor="finalLore" style={{ display: 'block', marginBottom: '0.4rem' }}>Narrative Perspective</label>
                   <textarea

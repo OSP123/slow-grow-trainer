@@ -23,6 +23,8 @@ const mockMatchups = [
     p2_score: null,
     p1_lore: null,
     p2_lore: null,
+    p1_tldr: null,
+    p2_tldr: null,
     game_result: null,
     p1_temperament: null,
     p2_temperament: null,
@@ -105,11 +107,26 @@ describe('Campaign Battles Integrations', () => {
     });
   });
 
+  it('shows TL;DR input field in the VP tracker panel', async () => {
+    render(<CampaignBattles />);
+    await waitFor(() => screen.getByText('My Assigned Frontlines'));
+
+    const sidebarItem = await screen.findByText(/vs Commander Beta/i);
+    fireEvent.click(sidebarItem.closest('li')!);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Battle Summary \(TL;DR\)/i)).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(/One-line summary/i)).toBeInTheDocument();
+    });
+  });
+
   it('toggles battle reports dropdown when clicked on Global Warzone Board card', async () => {
     const matchupWithLore = [{
       ...mockMatchups[0],
       p1_lore: 'The Space Marines charged fearlessly into the breach.',
-      p2_lore: 'The Orks held the line with dakka.'
+      p2_lore: 'The Orks held the line with dakka.',
+      p1_tldr: 'Marines won the flank',
+      p2_tldr: 'Orks held the center',
     }];
     (supabase.from as Mock).mockImplementation(() => ({
       select: vi.fn().mockReturnValue({
@@ -129,11 +146,16 @@ describe('Campaign Battles Integrations', () => {
     });
 
     expect(screen.queryByText(/The Space Marines charged fearlessly/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Marines won the flank/i)).not.toBeInTheDocument();
 
     const toggleBtn = screen.getByRole('button', { name: /View Battle Reports/i });
     fireEvent.click(toggleBtn);
 
     await waitFor(() => {
+      // TL;DR summaries should appear
+      expect(screen.getByText(/Marines won the flank/i)).toBeInTheDocument();
+      expect(screen.getByText(/Orks held the center/i)).toBeInTheDocument();
+      // Full lore should also appear
       expect(screen.getByText(/The Space Marines charged fearlessly/i)).toBeInTheDocument();
       expect(screen.getByText(/The Orks held the line/i)).toBeInTheDocument();
     });
