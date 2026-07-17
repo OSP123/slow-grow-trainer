@@ -452,13 +452,13 @@ export default function CampaignBattles() {
                           {m.p1_lore && (
                             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '4px' }}>
                               <strong style={{ color: 'var(--theme-accent)', display: 'block', marginBottom: '2px' }}>{formatCommanderWithDiscord(m.p1_profile, 'Player 1')}:</strong>
-                              <p style={{ margin: 0, fontStyle: 'italic', color: 'var(--theme-fg-muted)' }}>"{m.p1_lore}"</p>
+                              <p style={{ margin: 0, fontStyle: 'italic', color: 'var(--theme-fg-muted)', whiteSpace: 'pre-wrap' }}>"{m.p1_lore}"</p>
                             </div>
                           )}
                           {m.p2_lore && (
                             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '4px' }}>
                               <strong style={{ color: 'var(--theme-accent)', display: 'block', marginBottom: '2px' }}>{formatCommanderWithDiscord(m.p2_profile, 'Player 2')}:</strong>
-                              <p style={{ margin: 0, fontStyle: 'italic', color: 'var(--theme-fg-muted)' }}>"{m.p2_lore}"</p>
+                              <p style={{ margin: 0, fontStyle: 'italic', color: 'var(--theme-fg-muted)', whiteSpace: 'pre-wrap' }}>"{m.p2_lore}"</p>
                             </div>
                           )}
                         </div>
