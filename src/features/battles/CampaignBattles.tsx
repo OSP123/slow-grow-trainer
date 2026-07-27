@@ -228,7 +228,7 @@ export default function CampaignBattles() {
   const hasFinalized = activeMatchData 
     ? (isP1Active ? activeMatchData.p2_temperament != null : activeMatchData.p1_temperament != null)
     : false;
-  const isLocked = activeMatchData?.status === 'completed' || hasFinalized;
+  const isLocked = activeMatchData?.status === 'completed';
 
   const getTopCommanders = () => {
     const scores: Record<string, { name: string, totalTemp: number, countTemp: number, totalSpirit: number, countSpirit: number, games: number }> = {};
