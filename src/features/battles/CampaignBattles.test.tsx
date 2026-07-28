@@ -120,6 +120,93 @@ describe('Campaign Battles Integrations', () => {
     });
   });
 
+  it('shows opponent VP as read-only with hint text', async () => {
+    const matchupWithScores = [{
+      ...mockMatchups[0],
+      p2_score: 45,
+    }];
+    (supabase.from as Mock).mockImplementation(() => ({
+      select: vi.fn().mockReturnValue({
+        order: vi.fn().mockResolvedValue({
+          data: matchupWithScores,
+          error: null,
+        }),
+      }),
+      update: vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ error: null }),
+      }),
+    }));
+
+    render(<CampaignBattles />);
+    await waitFor(() => screen.getByText('My Assigned Frontlines'));
+
+    const sidebarItem = await screen.findByText(/vs Commander Beta/i);
+    fireEvent.click(sidebarItem.closest('li')!);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Set by your opponent/i)).toBeInTheDocument();
+      // Opponent score should be displayed as text, not as an editable input
+      expect(screen.queryByLabelText(/Opponent VP Score/i)).not.toBeInTheDocument();
+      expect(screen.getByText('45')).toBeInTheDocument();
+    });
+  });
+
+  it('saves only own VP score and lore, not opponent fields', async () => {
+    const mockUpdate = vi.fn().mockReturnValue({
+      eq: vi.fn().mockResolvedValue({ error: null }),
+    });
+    (supabase.from as Mock).mockImplementation((table: string) => {
+      if (table === 'matchups') {
+        return {
+          select: vi.fn().mockReturnValue({
+            order: vi.fn().mockResolvedValue({
+              data: mockMatchups,
+              error: null,
+            }),
+          }),
+          update: mockUpdate,
+        };
+      }
+      return {
+        select: vi.fn().mockReturnValue({
+          order: vi.fn().mockResolvedValue({ data: [], error: null }),
+        }),
+        update: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ error: null }),
+        }),
+      };
+    });
+
+    render(<CampaignBattles />);
+    await waitFor(() => screen.getByText('My Assigned Frontlines'));
+
+    const sidebarItem = await screen.findByText(/vs Commander Beta/i);
+    fireEvent.click(sidebarItem.closest('li')!);
+
+    await waitFor(() => screen.getByText(/Live VP Tracker/i));
+
+    // Enter own VP score
+    const myScoreInput = screen.getByLabelText(/Your VP Score/i);
+    fireEvent.change(myScoreInput, { target: { value: '55' } });
+
+    // Click Save VP Progress
+    const saveBtn = screen.getByText(/Save VP Progress/i);
+    fireEvent.click(saveBtn);
+
+    await waitFor(() => {
+      expect(mockUpdate).toHaveBeenCalled();
+      const payload = mockUpdate.mock.calls[0][0];
+      // P1 user: payload should include p1_score, p1_lore, p1_tldr
+      expect(payload.p1_score).toBe(55);
+      expect(payload).toHaveProperty('p1_lore');
+      expect(payload).toHaveProperty('p1_tldr');
+      // Should NOT include opponent fields
+      expect(payload).not.toHaveProperty('p2_score');
+      expect(payload).not.toHaveProperty('p2_lore');
+      expect(payload).not.toHaveProperty('p2_tldr');
+    });
+  });
+
   it('toggles battle reports dropdown when clicked on Global Warzone Board card', async () => {
     const matchupWithLore = [{
       ...mockMatchups[0],
