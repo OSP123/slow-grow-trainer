@@ -120,23 +120,7 @@ describe('Campaign Battles Integrations', () => {
     });
   });
 
-  it('shows opponent VP as read-only with hint text', async () => {
-    const matchupWithScores = [{
-      ...mockMatchups[0],
-      p2_score: 45,
-    }];
-    (supabase.from as Mock).mockImplementation(() => ({
-      select: vi.fn().mockReturnValue({
-        order: vi.fn().mockResolvedValue({
-          data: matchupWithScores,
-          error: null,
-        }),
-      }),
-      update: vi.fn().mockReturnValue({
-        eq: vi.fn().mockResolvedValue({ error: null }),
-      }),
-    }));
-
+  it('shows both VP score fields as editable inputs', async () => {
     render(<CampaignBattles />);
     await waitFor(() => screen.getByText('My Assigned Frontlines'));
 
@@ -144,14 +128,15 @@ describe('Campaign Battles Integrations', () => {
     fireEvent.click(sidebarItem.closest('li')!);
 
     await waitFor(() => {
-      expect(screen.getByText(/Set by your opponent/i)).toBeInTheDocument();
-      // Opponent score should be displayed as text, not as an editable input
-      expect(screen.queryByLabelText(/Opponent VP Score/i)).not.toBeInTheDocument();
-      expect(screen.getByText('45')).toBeInTheDocument();
+      expect(screen.getByLabelText(/Your VP Score/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Opponent VP Score/i)).toBeInTheDocument();
+      // Both should be editable inputs, not read-only
+      expect(screen.getByLabelText(/Your VP Score/i)).not.toBeDisabled();
+      expect(screen.getByLabelText(/Opponent VP Score/i)).not.toBeDisabled();
     });
   });
 
-  it('saves only own VP score and lore, not opponent fields', async () => {
+  it('saves both VP scores but only own lore/tldr', async () => {
     const mockUpdate = vi.fn().mockReturnValue({
       eq: vi.fn().mockResolvedValue({ error: null }),
     });
@@ -185,9 +170,11 @@ describe('Campaign Battles Integrations', () => {
 
     await waitFor(() => screen.getByText(/Live VP Tracker/i));
 
-    // Enter own VP score
+    // Enter both VP scores
     const myScoreInput = screen.getByLabelText(/Your VP Score/i);
+    const oppScoreInput = screen.getByLabelText(/Opponent VP Score/i);
     fireEvent.change(myScoreInput, { target: { value: '55' } });
+    fireEvent.change(oppScoreInput, { target: { value: '40' } });
 
     // Click Save VP Progress
     const saveBtn = screen.getByText(/Save VP Progress/i);
@@ -196,12 +183,12 @@ describe('Campaign Battles Integrations', () => {
     await waitFor(() => {
       expect(mockUpdate).toHaveBeenCalled();
       const payload = mockUpdate.mock.calls[0][0];
-      // P1 user: payload should include p1_score, p1_lore, p1_tldr
+      // P1 user: both scores should be in payload
       expect(payload.p1_score).toBe(55);
+      expect(payload.p2_score).toBe(40);
+      // Own lore/tldr included, opponent lore/tldr not
       expect(payload).toHaveProperty('p1_lore');
       expect(payload).toHaveProperty('p1_tldr');
-      // Should NOT include opponent fields
-      expect(payload).not.toHaveProperty('p2_score');
       expect(payload).not.toHaveProperty('p2_lore');
       expect(payload).not.toHaveProperty('p2_tldr');
     });

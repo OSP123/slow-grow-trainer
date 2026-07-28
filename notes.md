@@ -1201,4 +1201,32 @@ Tasks:
 - Created DB migration `20260708000000_add_battle_tldr.sql` adding `p1_tldr`/`p2_tldr` columns and updating the `enforce_matchup_update()` security trigger.
 - Updated tests: new test for TL;DR input field presence, updated lore toggle test to verify TL;DR display alongside full lore. All 6 tests passing.
 Follow-ups:
-- Run the `20260708000000_add_battle_tldr.sql` migration against the Supabase instance before deploying.
+- Migration has been pushed via `supabase db push`.
+
+Date: 2026-07-08 (Discord Handle Sync Fix)
+Tasks:
+- Fixed stale discord handle showing in matchup displays. Root cause: `CommanderProfile.tsx` updated `profiles.discord_name` on save but not `private_profiles.discord_name`. Matchup queries join to `private_profiles`, so they showed the original signup handle.
+- Added `private_profiles.discord_name` sync in `handleSaveSettings` to keep both tables in sync.
+Follow-ups:
+- The user who reported the issue will need to re-save their Commander Profile to trigger the sync. Alternatively, an admin could run a one-off SQL to sync all: `UPDATE private_profiles pp SET discord_name = p.discord_name FROM profiles p WHERE pp.id = p.id AND p.discord_name IS DISTINCT FROM pp.discord_name;`
+
+Date: 2026-07-17 (Battle Report Formatting Fix)
+Tasks:
+- Fixed battle report lore text losing all formatting (line breaks, spacing) when displayed. Root cause: lore was rendered in `<p>` tags which collapse whitespace by default. Added `whiteSpace: 'pre-wrap'` to both p1 and p2 lore display paragraphs in `CampaignBattles.tsx`.
+Follow-ups:
+- None. Existing reports will display correctly immediately — no data changes needed.
+
+Date: 2026-07-27 (VP Score & Lore Locking Fix)
+Tasks:
+- Fixed bug where players were locked out of editing VP scores, TL;DR, and lore after submitting their honour ratings. Root cause: `isLocked` was set to `true` when `hasFinalized` was true (user had submitted ratings), but the match wasn't yet `completed`. Changed `isLocked` to only trigger on `status === 'completed'` so fields remain editable until both players have finalized.
+Follow-ups:
+- None. Players who were previously locked out should now be able to edit their scores and narrative immediately.
+
+Date: 2026-07-27 (VP Save Silent Failure Fix)
+Tasks:
+- Fixed silent save failure for VP scores. The DB security trigger (`enforce_matchup_update`) blocks cross-player writes (P1 can't set p2_score, P2 can't set p1_score), but the UI had editable "Opponent VP Score" inputs in both the VP Tracker and Finalize forms. Users could edit opponent scores, click save, get a success message, but the opponent score would revert after refetch.
+- Made Opponent VP Score a read-only display element showing the opponent's submitted score (or "—" if not yet submitted), with "Set by your opponent" hint text.
+- Removed opponent score fields from `handleSaveVP` and `handleFinalizeMatch` payloads since the trigger blocks them anyway.
+- Added proper tests: (1) opponent VP displays as read-only text, not editable input; (2) save payload only includes own player's fields (p1_score/lore/tldr for P1, p2_score/lore/tldr for P2), verified no cross-player fields in payload. All 8 tests passing.
+Follow-ups:
+- None.

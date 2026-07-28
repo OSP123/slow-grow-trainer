@@ -128,10 +128,12 @@ export default function CampaignBattles() {
     const payload: VPPayload = {};
     if (isP1) {
       if (myScore !== '') payload.p1_score = myScore as number;
+      if (oppScore !== '') payload.p2_score = oppScore as number;
       payload.p1_lore = myLore;
       payload.p1_tldr = myTldr;
     } else {
       if (myScore !== '') payload.p2_score = myScore as number;
+      if (oppScore !== '') payload.p1_score = oppScore as number;
       payload.p2_lore = myLore;
       payload.p2_tldr = myTldr;
     }
@@ -178,6 +180,7 @@ export default function CampaignBattles() {
     const payload: FinalPayload = {};
     if (isP1) {
       if (myScore !== '') payload.p1_score = myScore as number;
+      if (oppScore !== '') payload.p2_score = oppScore as number;
       payload.p1_lore = myLore;
       payload.p1_tldr = myTldr;
       payload.p2_temperament = oppTemperament as number;
@@ -189,6 +192,7 @@ export default function CampaignBattles() {
       }
     } else {
       if (myScore !== '') payload.p2_score = myScore as number;
+      if (oppScore !== '') payload.p1_score = oppScore as number;
       payload.p2_lore = myLore;
       payload.p2_tldr = myTldr;
       payload.p1_temperament = oppTemperament as number;
@@ -627,17 +631,13 @@ export default function CampaignBattles() {
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem', color: 'var(--theme-fg-muted)' }}>Opponent VP Score</label>
-                    <div style={{
-                      width: '100%', padding: '0.75rem', boxSizing: 'border-box',
-                      backgroundColor: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)',
-                      borderRadius: '4px', color: 'var(--theme-fg-muted)', fontSize: '0.95rem',
-                    }}>
-                      {oppScore !== '' ? oppScore : '—'}
-                    </div>
-                    <div style={{ fontSize: '0.65rem', color: 'var(--theme-fg-muted)', fontStyle: 'italic', marginTop: '2px' }}>
-                      Set by your opponent
-                    </div>
+                    <label htmlFor="oppScore" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem' }}>Opponent VP Score</label>
+                    <input
+                      id="oppScore" type="number" min={0} value={oppScore}
+                      onChange={e => setOppScore(parseInt(e.target.value) || '')}
+                      disabled={isLocked}
+                      style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box', opacity: isLocked ? 0.5 : 1 }}
+                    />
                   </div>
                 </div>
                 <div>
@@ -744,17 +744,10 @@ export default function CampaignBattles() {
                         style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }} />
                     </div>
                     <div>
-                      <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--theme-fg-muted)' }}>Opponent VP</label>
-                      <div style={{
-                        width: '100%', padding: '0.75rem', boxSizing: 'border-box',
-                        backgroundColor: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)',
-                        borderRadius: '4px', color: 'var(--theme-fg-muted)', fontSize: '0.95rem',
-                      }}>
-                        {oppScore !== '' ? oppScore : '—'}
-                      </div>
-                      <div style={{ fontSize: '0.65rem', color: 'var(--theme-fg-muted)', fontStyle: 'italic', marginTop: '2px' }}>
-                        Set by your opponent
-                      </div>
+                      <label style={{ display: 'block', marginBottom: '0.4rem' }}>Opponent VP</label>
+                      <input type="number" min={0} value={oppScore}
+                        onChange={e => setOppScore(parseInt(e.target.value) || '')}
+                        style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }} />
                     </div>
                   </div>
                 </div>
