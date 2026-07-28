@@ -185,11 +185,6 @@ export default function CampaignBattles() {
       payload.p1_tldr = myTldr;
       payload.p2_temperament = oppTemperament as number;
       payload.p2_rules_engagement = oppRulesEngagement as number;
-      
-      if (match.p1_temperament !== null && match.p1_temperament !== undefined) {
-        payload.status = 'completed';
-        payload.game_result = gameResult;
-      }
     } else {
       if (myScore !== '') payload.p2_score = myScore as number;
       if (oppScore !== '') payload.p1_score = oppScore as number;
@@ -197,18 +192,17 @@ export default function CampaignBattles() {
       payload.p2_tldr = myTldr;
       payload.p1_temperament = oppTemperament as number;
       payload.p1_rules_engagement = oppRulesEngagement as number;
-      
-      if (match.p2_temperament !== null && match.p2_temperament !== undefined) {
-        payload.status = 'completed';
-        payload.game_result = gameResult;
-      }
     }
+
+    // Either player can finalize the match
+    payload.status = 'completed';
+    payload.game_result = gameResult;
 
     const { error } = await supabase.from('matchups').update(payload).eq('id', activeMatch);
     if (error) {
       setMessage('Error: ' + error.message);
     } else {
-      setMessage(payload.status === 'completed' ? 'Battle report sealed. The Codex Administratum has been updated.' : 'Your report is sealed. Awaiting opponent...');
+      setMessage('Battle report sealed. The Codex Administratum has been updated.');
       setActiveMatch(null);
       setIsFinalizing(false);
       fetchBattles();

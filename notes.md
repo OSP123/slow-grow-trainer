@@ -1228,5 +1228,11 @@ Tasks:
 - Made Opponent VP Score a read-only display element showing the opponent's submitted score (or "—" if not yet submitted), with "Set by your opponent" hint text.
 - Removed opponent score fields from `handleSaveVP` and `handleFinalizeMatch` payloads since the trigger blocks them anyway.
 - Added proper tests: (1) opponent VP displays as read-only text, not editable input; (2) save payload only includes own player's fields (p1_score/lore/tldr for P1, p2_score/lore/tldr for P2), verified no cross-player fields in payload. All 8 tests passing.
+Date: 2026-07-27 (VP Save Revert and Trigger Fix)
+Tasks:
+- Reverted previous change that made the Opponent VP field read-only. Both players need to be able to set both VP scores.
+- Created DB migration (`20260727000000_allow_both_scores.sql`) to update the `enforce_matchup_update` security trigger. The trigger now allows cross-player updates for `p1_score` and `p2_score`, while continuing to protect player-specific fields (`lore` and `tldr`).
+- Updated `CampaignBattles.tsx` to include both scores in the save payload again.
+- Updated tests to verify both scores are editable and included in the payload. Tests and build are passing.
 Follow-ups:
-- None.
+- The migration needs to be pushed to Supabase (`npx supabase db push`).
