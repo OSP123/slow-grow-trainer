@@ -138,10 +138,12 @@ export default function CampaignBattles() {
       payload.p2_tldr = myTldr;
     }
 
-    const { error } = await supabase.from('matchups').update(payload).eq('id', activeMatch);
+    const { error, count } = await supabase.from('matchups').update(payload).eq('id', activeMatch);
     if (error) {
-      setMessage('Error: ' + error.message);
+      console.error('Save VP error:', error);
+      setMessage('Error saving: ' + error.message);
     } else {
+      console.log('Save VP success, rows affected:', count, 'payload:', payload);
       setMessage('VP scores updated. Keep fighting, Commander!');
       fetchBattles();
     }

@@ -1235,4 +1235,13 @@ Tasks:
 - Updated `CampaignBattles.tsx` to include both scores in the save payload again.
 - Updated tests to verify both scores are editable and included in the payload. Tests and build are passing.
 Follow-ups:
-- The migration needs to be pushed to Supabase (`npx supabase db push`).
+- None. Migration was pushed to Supabase.
+
+Date: 2026-07-28 (Single-Player Match Finalization)
+Tasks:
+- Fixed match completion logic. Previously the match only got `status = 'completed'` when the *second* player submitted their finalization (it checked whether the opponent had already submitted their temperament rating). Now either player can finalize the match, immediately setting `status = 'completed'` and computing `game_result` from VP scores.
+- Removed the conditional checks for `match.p1_temperament` / `match.p2_temperament` from `handleFinalizeMatch`. The finalization payload now always includes `status: 'completed'` and `game_result`.
+- Simplified the success message (no more "awaiting opponent" branch).
+- 8/8 tests passing, build successful, code committed and pushed.
+Follow-ups:
+- None.
