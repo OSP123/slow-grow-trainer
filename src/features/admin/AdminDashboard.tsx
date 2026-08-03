@@ -625,7 +625,10 @@ export default function AdminDashboard() {
 
       <h1 style={{ marginBottom: '1rem' }}>Administration Override Station</h1>
 
-      {/* ── CAMPAIGN ENGINE CONTROLS ── */}
+            {/* ========================================= */}
+      {/*       CAMPAIGN & LORE MANAGEMENT         */}
+      {/* ========================================= */}
+{/* ── CAMPAIGN ENGINE CONTROLS ── */}
       <div className="card" style={{ marginBottom: '2rem', border: '1px solid var(--theme-accent)' }}>
         <h2 style={{ marginBottom: '0.5rem', color: 'var(--theme-accent)' }}>Global Campaign Engine</h2>
         <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1.5rem' }}>
@@ -675,217 +678,59 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* ── MATCHUP MANAGEMENT ── */}
+      {/* ── GLOBAL EVENTS ENGINE ── */}
       <div className="card" style={{ marginBottom: '2rem' }}>
-        <h2 style={{ marginBottom: '0.5rem' }}>Matchup Command Override</h2>
-        <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1.5rem' }}>
-          Edit scores, result, status, and honour ratings for any matchup. Changes override player submissions.
+        <h2>Global Events Override</h2>
+        <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1rem' }}>
+          Trigger narrative conditions. You can now apply events globally or specifically to an individual Theatre of War.
         </p>
-
-        {matchupMessage && (
+        
+        {eventMessage && (
           <div style={{ marginBottom: '1rem', padding: '0.75rem', border: '1px solid var(--theme-accent)', color: 'var(--theme-accent)', fontSize: '0.85rem' }}>
-            {matchupMessage}
+            {eventMessage}
           </div>
         )}
 
-        {/* Edit form */}
-        {editingMatchup && (
-          <div style={{ marginBottom: '2rem', padding: '1.25rem', border: '1px solid var(--theme-accent)', borderRadius: '6px', backgroundColor: 'var(--theme-bg-secondary)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1rem' }}>
-                Editing Matchup Override
-              </h3>
-              <button onClick={() => setEditingMatchup(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--theme-fg-muted)' }}>✕ Cancel</button>
-            </div>
-            <form onSubmit={handleSaveMatchup} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--theme-border)' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Player 1</label>
-                  <select
-                    value={editingMatchup.p1_id}
-                    onChange={e => {
-                      const u = users.find(user => user.id === e.target.value);
-                      setEditingMatchup(prev => prev ? {
-                        ...prev,
-                        p1_id: e.target.value,
-                        p1_profile: u ? { commander_name: u.commander_name, army_faction: u.army_faction } : prev.p1_profile
-                      } : null);
-                    }}
-                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
-                  >
-                    {users.map(u => (
-                      <option key={u.id} value={u.id}>{u.commander_name} ({u.army_faction})</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Player 2</label>
-                  <select
-                    value={editingMatchup.p2_id}
-                    onChange={e => {
-                      const u = users.find(user => user.id === e.target.value);
-                      setEditingMatchup(prev => prev ? {
-                        ...prev,
-                        p2_id: e.target.value,
-                        p2_profile: u ? { commander_name: u.commander_name, army_faction: u.army_faction } : prev.p2_profile
-                      } : null);
-                    }}
-                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
-                  >
-                    {users.map(u => (
-                      <option key={u.id} value={u.id}>{u.commander_name} ({u.army_faction})</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Assigned War Zone</label>
-                  <input
-                    type="text"
-                    value={editingMatchup.theatre_name || ''}
-                    onChange={e => setEditingMatchup(prev => prev ? { ...prev, theatre_name: e.target.value } : null)}
-                    placeholder="e.g. The Hive Spires - Outer Wall"
-                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
-                  />
-                </div>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>
-                    {editingMatchup.p1_profile?.commander_name || 'Player 1'} VP
-                  </label>
-                  <input type="number" min={0}
-                    value={editingMatchup.p1_score}
-                    onChange={e => setEditingMatchup(prev => prev ? { ...prev, p1_score: parseInt(e.target.value) || '' } : null)}
-                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>
-                    {editingMatchup.p2_profile?.commander_name || 'Player 2'} VP
-                  </label>
-                  <input type="number" min={0}
-                    value={editingMatchup.p2_score}
-                    onChange={e => setEditingMatchup(prev => prev ? { ...prev, p2_score: parseInt(e.target.value) || '' } : null)}
-                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Result</label>
-                  <select
-                    value={editingMatchup.game_result}
-                    onChange={e => setEditingMatchup(prev => prev ? { ...prev, game_result: e.target.value } : null)}
-                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
-                  >
-                    <option value="">— None —</option>
-                    <option value="p1_win">{editingMatchup.p1_profile?.commander_name || 'Player 1'} Wins</option>
-                    <option value="p2_win">{editingMatchup.p2_profile?.commander_name || 'Player 2'} Wins</option>
-                    <option value="draw">Draw</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Status</label>
-                  <select
-                    value={editingMatchup.status}
-                    onChange={e => setEditingMatchup(prev => prev ? { ...prev, status: e.target.value } : null)}
-                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
-                  >
-                    <option value="scheduled">Scheduled</option>
-                    <option value="completed">Completed</option>
-                    <option value="verified">Verified</option>
-                  </select>
-                </div>
-              </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '1px' }}>Honour Ratings (1–5)</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
-                {[
-                  { key: 'p1_temperament' as const, label: `${editingMatchup.p1_profile?.commander_name || 'P1'} Temperament` },
-                  { key: 'p1_rules_engagement' as const, label: `${editingMatchup.p1_profile?.commander_name || 'P1'} Spirit` },
-                  { key: 'p2_temperament' as const, label: `${editingMatchup.p2_profile?.commander_name || 'P2'} Temperament` },
-                  { key: 'p2_rules_engagement' as const, label: `${editingMatchup.p2_profile?.commander_name || 'P2'} Spirit` },
-                ].map(({ key, label }) => (
-                  <div key={key}>
-                    <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>{label}</label>
-                    <input type="number" min={1} max={5}
-                      value={editingMatchup[key]}
-                      onChange={e => setEditingMatchup(prev => prev ? { ...prev, [key]: parseInt(e.target.value) || '' } : null)}
-                      style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
-                    />
-                  </div>
-                ))}
-              </div>
-              <button type="submit" className="btn primary" style={{ alignSelf: 'flex-start' }}>Save Override</button>
-            </form>
-          </div>
-        )}
+        <form onSubmit={handleAddEvent} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+          <input type="text" placeholder="Event Title (e.g. Warp Storm)" value={newEventTitle}
+            onChange={e => setNewEventTitle(e.target.value)} required style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box', minWidth: '150px' }} />
+          <input type="text" placeholder="Narrative Description / Rules" value={newEventDesc}
+            onChange={e => setNewEventDesc(e.target.value)} required style={{ flex: 2, padding: '0.75rem', boxSizing: 'border-box', minWidth: '200px' }} />
+          <select value={newEventTheatre} onChange={e => setNewEventTheatre(e.target.value)} style={{ padding: '0.75rem', boxSizing: 'border-box' }}>
+            <option value="">Global Event (All Theatres)</option>
+            <option value="Hive Primus">Hive Primus</option>
+            <option value="The Ash Wastes">The Ash Wastes</option>
+            <option value="Magma Forges">Magma Forges</option>
+            <option value="Orbital Tether">Orbital Tether</option>
+            <option value="The Sump">The Sump</option>
+            <option value="Rad-Zone Gamma">Rad-Zone Gamma</option>
+          </select>
+          <button type="submit" className="btn primary">Stage Event</button>
+        </form>
 
-        {/* Matchup List */}
-        {allMatchups.length === 0 ? (
-          <p style={{ color: 'var(--theme-fg-muted)' }}>No matchups in the ledger yet.</p>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
-              <thead>
-                <tr style={{ borderBottom: '2px solid var(--theme-border)', textAlign: 'left' }}>
-                  <th style={{ padding: '0.5rem' }}>Player 1</th>
-                  <th style={{ padding: '0.5rem' }}>Player 2</th>
-                  <th style={{ padding: '0.5rem' }}>War Zone</th>
-                  <th style={{ padding: '0.5rem', textAlign: 'center' }}>Score</th>
-                  <th style={{ padding: '0.5rem', textAlign: 'center' }}>Result</th>
-                  <th style={{ padding: '0.5rem', textAlign: 'center' }}>Status</th>
-                  <th style={{ padding: '0.5rem' }}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {allMatchups.map(m => {
-                  const p1Obj = m.p1_profile || users.find(u => u.id === m.p1_id);
-                  const p1Name = formatCommanderWithDiscord(p1Obj, 'Unknown');
-                  const p1Faction = p1Obj?.army_faction || 'No Faction';
-                  const p2Obj = m.p2_profile || users.find(u => u.id === m.p2_id);
-                  const p2Name = formatCommanderWithDiscord(p2Obj, 'Unknown');
-                  const p2Faction = p2Obj?.army_faction || 'No Faction';
-                  return (
-                    <tr key={m.id} style={{ borderBottom: '1px solid var(--theme-border)' }}>
-                      <td style={{ padding: '0.5rem' }}>
-                        <strong style={{ display: 'block' }}>{p1Name}</strong>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--theme-accent)' }}>[{p1Faction}]</span>
-                      </td>
-                      <td style={{ padding: '0.5rem' }}>
-                        <strong style={{ display: 'block' }}>{p2Name}</strong>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--theme-accent)' }}>[{p2Faction}]</span>
-                      </td>
-                      <td style={{ padding: '0.5rem', color: '#60a5fa', fontWeight: '500' }}>
-                        {m.theatre_name || 'Undeployed'}
-                      </td>
-                      <td style={{ padding: '0.5rem', textAlign: 'center', color: 'var(--theme-fg-muted)' }}>
-                        {m.p1_score !== '' ? m.p1_score : '—'} : {m.p2_score !== '' ? m.p2_score : '—'}
-                      </td>
-                      <td style={{ padding: '0.5rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--theme-fg-muted)' }}>
-                        {m.game_result || '—'}
-                      </td>
-                      <td style={{ padding: '0.5rem', textAlign: 'center' }}>
-                        <span style={{
-                          fontSize: '0.7rem', letterSpacing: '1px', padding: '2px 8px', borderRadius: '3px',
-                          backgroundColor: m.status === 'completed' ? '#166534' : m.status === 'verified' ? '#1e40af' : '#713f12',
-                          color: '#fff',
-                        }}>
-                          {m.status}
-                        </span>
-                      </td>
-                      <td style={{ padding: '0.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <button onClick={() => handleEditMatchup(m)} className="btn secondary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem' }}>
-                          Edit
-                        </button>
-                        <button onClick={() => handleDeleteMatchup(m.id)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '0.75rem' }}>
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {globalEvents.length === 0 && <span style={{ color: 'var(--theme-fg-muted)' }}>No narrative events in the ledger.</span>}
+          {globalEvents.map(event => (
+            <li key={event.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '1rem', borderBottom: '1px solid var(--theme-border)', backgroundColor: event.is_active ? 'rgba(168, 85, 247, 0.1)' : 'transparent', borderLeft: event.is_active ? '4px solid #a855f7' : '4px solid transparent' }}>
+              <div style={{ flex: 1 }}>
+                <strong style={{ color: event.is_active ? '#a855f7' : 'var(--theme-fg)', fontSize: '1.1rem' }}>{event.title}</strong>
+                {event.theatre_name && <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', padding: '2px 6px', backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-accent)', border: '1px solid var(--theme-accent)', borderRadius: '4px' }}>{event.theatre_name}</span>}
+                {event.is_active && <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', padding: '2px 6px', backgroundColor: '#a855f7', color: 'white', borderRadius: '4px', textTransform: 'uppercase' }}>Active</span>}
+                <div style={{ color: 'var(--theme-fg-muted)', marginTop: '0.25rem', fontSize: '0.9rem' }}>{event.description}</div>
+              </div>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <button onClick={() => handleToggleEvent(event.id, event.is_active)}
+                  style={{ backgroundColor: event.is_active ? 'transparent' : '#a855f7', color: event.is_active ? '#a855f7' : 'white', border: `1px solid ${event.is_active ? '#a855f7' : 'transparent'}`, padding: '4px 12px', borderRadius: '4px', cursor: 'pointer' }}>
+                  {event.is_active ? 'Deactivate' : 'Trigger'}
+                </button>
+                <button onClick={() => handleDeleteEvent(event.id)}
+                  style={{ backgroundColor: 'transparent', color: 'red', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* ── MAP EDITOR ── */}
@@ -997,7 +842,10 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* ── CAMPAIGN ROSTER & PAYMENTS ── */}
+            {/* ========================================= */}
+      {/*            ROSTER & VENUES              */}
+      {/* ========================================= */}
+{/* ── CAMPAIGN ROSTER & PAYMENTS ── */}
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h2 style={{ marginBottom: '0.5rem' }}>Campaign Roster & Payments</h2>
         <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1.5rem' }}>
@@ -1173,13 +1021,53 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* ── MATCHMAKING ENGINE ── */}
+      {/* ── SANCTIONED VENUES ── */}
       <div className="card" style={{ marginBottom: '2rem' }}>
-        <h2>Matchmaking Engine Override</h2>
+        <h2>Sanctioned Venue Control (Game Stores)</h2>
         <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1rem' }}>
-          Automatically pairs commanders globally across Locations, Experience Tiers, and Army differences.
+          Manage global store endpoints where physical operations map via Registration forms.
         </p>
-        <button onClick={handleGenerateMatches} className="btn secondary" style={{ marginBottom: '1rem' }}>
+        <form onSubmit={handleAddStore} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+          <input type="text" placeholder="Store Name" value={newStoreName}
+            onChange={e => setNewStoreName(e.target.value)} required style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box' }} />
+          <input type="text" placeholder="Location (Optional)" value={newStoreLoc}
+            onChange={e => setNewStoreLoc(e.target.value)} style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box' }} />
+          <button type="submit" className="btn primary">Add Venue</button>
+        </form>
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {stores.length === 0 && <span style={{ color: 'var(--theme-fg-muted)' }}>No Active Stores Connected...</span>}
+          {stores.map(store => (
+            <li key={store.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem', borderBottom: '1px solid var(--theme-border)' }}>
+              <div>
+                <strong>{store.name}</strong>
+                {store.location && <span style={{ color: 'var(--theme-fg-muted)', marginLeft: '0.5rem' }}>({store.location})</span>}
+              </div>
+              <button onClick={() => handleDeleteStore(store.id)}
+                style={{ backgroundColor: 'transparent', color: 'red', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
+                Delete
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+            {/* ========================================= */}
+      {/*         MATCHMAKING & PAIRINGS          */}
+      {/* ========================================= */}
+{/* ── MATCHMAKING & PAIRINGS MANAGEMENT ── */}
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <h2 style={{ marginBottom: '0.5rem' }}>Matchups & Pairings Management</h2>
+        <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1.5rem' }}>
+          Generate algorithmic pairings, create manual narrative matchups, and override match results.
+        </p>
+
+        {matchupMessage && (
+          <div style={{ marginBottom: '1rem', padding: '0.75rem', border: '1px solid var(--theme-accent)', color: 'var(--theme-accent)', fontSize: '0.85rem' }}>
+            {matchupMessage}
+          </div>
+        )}
+
+<button onClick={handleGenerateMatches} className="btn secondary" style={{ marginBottom: '1rem' }}>
           Simulate Pairings via Algorithm
         </button>
         {generatedMatches.length > 0 && (
@@ -1365,7 +1253,139 @@ export default function AdminDashboard() {
           })()}
         </div>
 
-        {/* Active Pairings Overview right inside Matchmaking Engine */}
+        
+{/* Edit form */}
+        {editingMatchup && (
+          <div style={{ marginBottom: '2rem', padding: '1.25rem', border: '1px solid var(--theme-accent)', borderRadius: '6px', backgroundColor: 'var(--theme-bg-secondary)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1rem' }}>
+                Editing Matchup Override
+              </h3>
+              <button onClick={() => setEditingMatchup(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--theme-fg-muted)' }}>✕ Cancel</button>
+            </div>
+            <form onSubmit={handleSaveMatchup} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--theme-border)' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Player 1</label>
+                  <select
+                    value={editingMatchup.p1_id}
+                    onChange={e => {
+                      const u = users.find(user => user.id === e.target.value);
+                      setEditingMatchup(prev => prev ? {
+                        ...prev,
+                        p1_id: e.target.value,
+                        p1_profile: u ? { commander_name: u.commander_name, army_faction: u.army_faction } : prev.p1_profile
+                      } : null);
+                    }}
+                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  >
+                    {users.map(u => (
+                      <option key={u.id} value={u.id}>{u.commander_name} ({u.army_faction})</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Player 2</label>
+                  <select
+                    value={editingMatchup.p2_id}
+                    onChange={e => {
+                      const u = users.find(user => user.id === e.target.value);
+                      setEditingMatchup(prev => prev ? {
+                        ...prev,
+                        p2_id: e.target.value,
+                        p2_profile: u ? { commander_name: u.commander_name, army_faction: u.army_faction } : prev.p2_profile
+                      } : null);
+                    }}
+                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  >
+                    {users.map(u => (
+                      <option key={u.id} value={u.id}>{u.commander_name} ({u.army_faction})</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Assigned War Zone</label>
+                  <input
+                    type="text"
+                    value={editingMatchup.theatre_name || ''}
+                    onChange={e => setEditingMatchup(prev => prev ? { ...prev, theatre_name: e.target.value } : null)}
+                    placeholder="e.g. The Hive Spires - Outer Wall"
+                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>
+                    {editingMatchup.p1_profile?.commander_name || 'Player 1'} VP
+                  </label>
+                  <input type="number" min={0}
+                    value={editingMatchup.p1_score}
+                    onChange={e => setEditingMatchup(prev => prev ? { ...prev, p1_score: parseInt(e.target.value) || '' } : null)}
+                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>
+                    {editingMatchup.p2_profile?.commander_name || 'Player 2'} VP
+                  </label>
+                  <input type="number" min={0}
+                    value={editingMatchup.p2_score}
+                    onChange={e => setEditingMatchup(prev => prev ? { ...prev, p2_score: parseInt(e.target.value) || '' } : null)}
+                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Result</label>
+                  <select
+                    value={editingMatchup.game_result}
+                    onChange={e => setEditingMatchup(prev => prev ? { ...prev, game_result: e.target.value } : null)}
+                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  >
+                    <option value="">— None —</option>
+                    <option value="p1_win">{editingMatchup.p1_profile?.commander_name || 'Player 1'} Wins</option>
+                    <option value="p2_win">{editingMatchup.p2_profile?.commander_name || 'Player 2'} Wins</option>
+                    <option value="draw">Draw</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Status</label>
+                  <select
+                    value={editingMatchup.status}
+                    onChange={e => setEditingMatchup(prev => prev ? { ...prev, status: e.target.value } : null)}
+                    style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                  >
+                    <option value="scheduled">Scheduled</option>
+                    <option value="completed">Completed</option>
+                    <option value="verified">Verified</option>
+                  </select>
+                </div>
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '1px' }}>Honour Ratings (1–5)</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
+                {[
+                  { key: 'p1_temperament' as const, label: `${editingMatchup.p1_profile?.commander_name || 'P1'} Temperament` },
+                  { key: 'p1_rules_engagement' as const, label: `${editingMatchup.p1_profile?.commander_name || 'P1'} Spirit` },
+                  { key: 'p2_temperament' as const, label: `${editingMatchup.p2_profile?.commander_name || 'P2'} Temperament` },
+                  { key: 'p2_rules_engagement' as const, label: `${editingMatchup.p2_profile?.commander_name || 'P2'} Spirit` },
+                ].map(({ key, label }) => (
+                  <div key={key}>
+                    <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>{label}</label>
+                    <input type="number" min={1} max={5}
+                      value={editingMatchup[key]}
+                      onChange={e => setEditingMatchup(prev => prev ? { ...prev, [key]: parseInt(e.target.value) || '' } : null)}
+                      style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                ))}
+              </div>
+              <button type="submit" className="btn primary" style={{ alignSelf: 'flex-start' }}>Save Override</button>
+            </form>
+          </div>
+        )}
+
+        
+{/* Active Pairings Overview right inside Matchmaking Engine */}
         <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--theme-border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h3 style={{ margin: 0 }}>Active Pairings Overview ({allMatchups.length})</h3>
@@ -1381,6 +1401,7 @@ export default function AdminDashboard() {
                     <th style={{ padding: '0.5rem' }}>Player 2</th>
                     <th style={{ padding: '0.5rem' }}>War Zone</th>
                     <th style={{ padding: '0.5rem', textAlign: 'center' }}>Score</th>
+                    <th style={{ padding: '0.5rem', textAlign: 'center' }}>Result</th>
                     <th style={{ padding: '0.5rem', textAlign: 'center' }}>Status</th>
                     <th style={{ padding: '0.5rem' }}></th>
                   </tr>
@@ -1405,17 +1426,23 @@ export default function AdminDashboard() {
                         <td style={{ padding: '0.5rem', textAlign: 'center', color: 'var(--theme-fg-muted)' }}>
                           {m.p1_score !== '' ? m.p1_score : '—'} : {m.p2_score !== '' ? m.p2_score : '—'}
                         </td>
+                        <td style={{ padding: '0.5rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--theme-fg-muted)' }}>
+                          {m.game_result || '—'}
+                        </td>
                         <td style={{ padding: '0.5rem', textAlign: 'center' }}>
                           <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '3px', backgroundColor: m.status === 'completed' ? '#166534' : '#713f12', color: '#fff' }}>
                             {m.status}
                           </span>
                         </td>
-                        <td style={{ padding: '0.5rem', textAlign: 'right' }}>
+                        <td style={{ padding: '0.5rem', textAlign: 'right', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', alignItems: 'center' }}>
                           <button onClick={() => {
                             handleEditMatchup(m);
                             window.scrollTo({ top: 400, behavior: 'smooth' });
                           }} className="btn secondary" style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem' }}>
                             Adjust / Override
+                          </button>
+                          <button onClick={() => handleDeleteMatchup(m.id)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '0.75rem' }}>
+                            Delete
                           </button>
                         </td>
                       </tr>
@@ -1431,6 +1458,7 @@ export default function AdminDashboard() {
                       </td>
                       <td style={{ padding: '0.5rem', color: '#f87171' }}>Undeployed</td>
                       <td style={{ padding: '0.5rem', textAlign: 'center', color: 'var(--theme-fg-muted)' }}>— : —</td>
+                      <td style={{ padding: '0.5rem', textAlign: 'center', color: 'var(--theme-fg-muted)' }}>—</td>
                       <td style={{ padding: '0.5rem', textAlign: 'center' }}>
                         <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '3px', backgroundColor: '#991b1b', color: '#fff', fontWeight: 'bold' }}>
                           UNASSIGNED
@@ -1454,37 +1482,10 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── SANCTIONED VENUES ── */}
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <h2>Sanctioned Venue Control (Game Stores)</h2>
-        <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1rem' }}>
-          Manage global store endpoints where physical operations map via Registration forms.
-        </p>
-        <form onSubmit={handleAddStore} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
-          <input type="text" placeholder="Store Name" value={newStoreName}
-            onChange={e => setNewStoreName(e.target.value)} required style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box' }} />
-          <input type="text" placeholder="Location (Optional)" value={newStoreLoc}
-            onChange={e => setNewStoreLoc(e.target.value)} style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box' }} />
-          <button type="submit" className="btn primary">Add Venue</button>
-        </form>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {stores.length === 0 && <span style={{ color: 'var(--theme-fg-muted)' }}>No Active Stores Connected...</span>}
-          {stores.map(store => (
-            <li key={store.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem', borderBottom: '1px solid var(--theme-border)' }}>
-              <div>
-                <strong>{store.name}</strong>
-                {store.location && <span style={{ color: 'var(--theme-fg-muted)', marginLeft: '0.5rem' }}>({store.location})</span>}
-              </div>
-              <button onClick={() => handleDeleteStore(store.id)}
-                style={{ backgroundColor: 'transparent', color: 'red', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
-                Delete
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* ── MUNITORUM FIELD MANUAL (UNIT POINTS) ── */}
+            {/* ========================================= */}
+      {/*           REGISTRIES & LOGS             */}
+      {/* ========================================= */}
+{/* ── MUNITORUM FIELD MANUAL (UNIT POINTS) ── */}
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h2>Munitorum Field Manual (Unit Points Registry)</h2>
         <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1.5rem' }}>
@@ -1565,61 +1566,6 @@ export default function AdminDashboard() {
             </table>
           </div>
         )}
-      </div>
-
-      {/* ── GLOBAL EVENTS ENGINE ── */}
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <h2>Global Events Override</h2>
-        <p style={{ color: 'var(--theme-fg-muted)', marginBottom: '1rem' }}>
-          Trigger narrative conditions. You can now apply events globally or specifically to an individual Theatre of War.
-        </p>
-        
-        {eventMessage && (
-          <div style={{ marginBottom: '1rem', padding: '0.75rem', border: '1px solid var(--theme-accent)', color: 'var(--theme-accent)', fontSize: '0.85rem' }}>
-            {eventMessage}
-          </div>
-        )}
-
-        <form onSubmit={handleAddEvent} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
-          <input type="text" placeholder="Event Title (e.g. Warp Storm)" value={newEventTitle}
-            onChange={e => setNewEventTitle(e.target.value)} required style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box', minWidth: '150px' }} />
-          <input type="text" placeholder="Narrative Description / Rules" value={newEventDesc}
-            onChange={e => setNewEventDesc(e.target.value)} required style={{ flex: 2, padding: '0.75rem', boxSizing: 'border-box', minWidth: '200px' }} />
-          <select value={newEventTheatre} onChange={e => setNewEventTheatre(e.target.value)} style={{ padding: '0.75rem', boxSizing: 'border-box' }}>
-            <option value="">Global Event (All Theatres)</option>
-            <option value="Hive Primus">Hive Primus</option>
-            <option value="The Ash Wastes">The Ash Wastes</option>
-            <option value="Magma Forges">Magma Forges</option>
-            <option value="Orbital Tether">Orbital Tether</option>
-            <option value="The Sump">The Sump</option>
-            <option value="Rad-Zone Gamma">Rad-Zone Gamma</option>
-          </select>
-          <button type="submit" className="btn primary">Stage Event</button>
-        </form>
-
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {globalEvents.length === 0 && <span style={{ color: 'var(--theme-fg-muted)' }}>No narrative events in the ledger.</span>}
-          {globalEvents.map(event => (
-            <li key={event.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '1rem', borderBottom: '1px solid var(--theme-border)', backgroundColor: event.is_active ? 'rgba(168, 85, 247, 0.1)' : 'transparent', borderLeft: event.is_active ? '4px solid #a855f7' : '4px solid transparent' }}>
-              <div style={{ flex: 1 }}>
-                <strong style={{ color: event.is_active ? '#a855f7' : 'var(--theme-fg)', fontSize: '1.1rem' }}>{event.title}</strong>
-                {event.theatre_name && <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', padding: '2px 6px', backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-accent)', border: '1px solid var(--theme-accent)', borderRadius: '4px' }}>{event.theatre_name}</span>}
-                {event.is_active && <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', padding: '2px 6px', backgroundColor: '#a855f7', color: 'white', borderRadius: '4px', textTransform: 'uppercase' }}>Active</span>}
-                <div style={{ color: 'var(--theme-fg-muted)', marginTop: '0.25rem', fontSize: '0.9rem' }}>{event.description}</div>
-              </div>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <button onClick={() => handleToggleEvent(event.id, event.is_active)}
-                  style={{ backgroundColor: event.is_active ? 'transparent' : '#a855f7', color: event.is_active ? '#a855f7' : 'white', border: `1px solid ${event.is_active ? '#a855f7' : 'transparent'}`, padding: '4px 12px', borderRadius: '4px', cursor: 'pointer' }}>
-                  {event.is_active ? 'Deactivate' : 'Trigger'}
-                </button>
-                <button onClick={() => handleDeleteEvent(event.id)}
-                  style={{ backgroundColor: 'transparent', color: 'red', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
-                  Delete
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
       </div>
 
       {/* ── CAMPAIGN VOTES ── */}

@@ -1245,3 +1245,26 @@ Tasks:
 - 8/8 tests passing, build successful, code committed and pushed.
 Follow-ups:
 - None.
+
+Date: 2026-08-03 (Remove All Edit Locking)
+Tasks:
+- Removed all locking behavior from the battle report UI. Previously, once a match reached `status === 'completed'`, all inputs were disabled (`isLocked`), the "Finalize Battle" button was hidden, and the "Save VP Progress" button was hidden. This meant the second player couldn't edit their scores, lore, TL;DR, or finalize.
+- Removed `isLocked` variable entirely — all fields (VP scores, lore, TL;DR) are always editable.
+- "Finalize Battle →" button is always visible regardless of match status.
+- "Save VP Progress" button is always visible.
+- Removed dead "Awaiting opponent" panel and `hasFinalized` variable (no longer used).
+- Also pushed a second DB migration (`20260728000000_reapply_score_trigger.sql`) that explicitly DROPs and recreates the `enforce_matchup_update` trigger, ensuring cross-player VP score writes work.
+- 8/8 tests passing, build successful, committed and pushed.
+Follow-ups:
+- None.
+
+Date: 2026-08-03
+Tasks:
+- Refactored AdminDashboard.tsx to reduce clutter.
+- Removed the duplicate Matchup Command Override table.
+- Enhanced the Active Pairings Overview table with the Result column and Delete button from the old table to create a single source of truth for matchups.
+- Reorganized the admin UI into logical groupings (Campaign & Lore, Roster & Venues, Matchmaking & Pairings, Registries & Logs).
+- Verified tests and build are successful.
+
+Follow-ups:
+- None

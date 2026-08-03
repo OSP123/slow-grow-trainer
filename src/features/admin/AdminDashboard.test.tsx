@@ -114,7 +114,7 @@ describe('AdminDashboard (RBAC)', () => {
     render(<AdminDashboard />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Matchup Command Override/i)).toBeInTheDocument();
+      expect(screen.getByText(/Matchups & Pairings Management/i)).toBeInTheDocument();
       expect(screen.getByText(/Manual Narrative Pairing/i)).toBeInTheDocument();
       expect(screen.getByText(/Munitorum Field Manual/i)).toBeInTheDocument();
       expect(screen.getByText(/Campaign Voting Tallies/i)).toBeInTheDocument();
