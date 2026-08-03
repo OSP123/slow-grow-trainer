@@ -221,10 +221,8 @@ export default function CampaignBattles() {
 
   const activeMatchData = allMatchups.find(m => m.id === activeMatch);
   const isP1Active = activeMatchData?.p1_id === userId;
-  const hasFinalized = activeMatchData 
-    ? (isP1Active ? activeMatchData.p2_temperament != null : activeMatchData.p1_temperament != null)
-    : false;
-  const isLocked = activeMatchData?.status === 'completed';
+
+
 
   const getTopCommanders = () => {
     const scores: Record<string, { name: string, totalTemp: number, countTemp: number, totalSpirit: number, countSpirit: number, games: number }> = {};
@@ -545,8 +543,7 @@ export default function CampaignBattles() {
                 {' '}<span style={{ color: 'var(--theme-fg-muted)', fontWeight: 'normal' }}>vs</span>{' '}
                 {isP1Active ? activeMatchData.p2_profile?.commander_name : activeMatchData.p1_profile?.commander_name}
               </h2>
-              {activeMatchData.status !== 'completed' && (
-                <button
+              <button
                   type="button"
                   onClick={() => { setIsFinalizing(!isFinalizing); setMessage(''); }}
                   className="btn"
@@ -559,10 +556,6 @@ export default function CampaignBattles() {
                 >
                   {isFinalizing ? '← Back to VP Tracker' : 'Finalize Battle →'}
                 </button>
-              )}
-              {activeMatchData.status === 'completed' && (
-                <span style={{ fontSize: '0.8rem', color: 'var(--theme-fg-muted)', letterSpacing: '1px' }}>SEALED</span>
-              )}
             </div>
             
             {activeMatchData.theatre_name && (
@@ -622,8 +615,7 @@ export default function CampaignBattles() {
                     <input
                       id="myScore" type="number" min={0} value={myScore}
                       onChange={e => setMyScore(parseInt(e.target.value) || '')}
-                      disabled={isLocked}
-                      style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box', opacity: isLocked ? 0.5 : 1 }}
+                      style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }}
                     />
                   </div>
                   <div>
@@ -631,8 +623,7 @@ export default function CampaignBattles() {
                     <input
                       id="oppScore" type="number" min={0} value={oppScore}
                       onChange={e => setOppScore(parseInt(e.target.value) || '')}
-                      disabled={isLocked}
-                      style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box', opacity: isLocked ? 0.5 : 1 }}
+                      style={{ width: '100%', padding: '0.75rem', boxSizing: 'border-box' }}
                     />
                   </div>
                 </div>
@@ -641,47 +632,33 @@ export default function CampaignBattles() {
                   <input
                     id="tldr" type="text" value={myTldr}
                     onChange={e => setMyTldr(e.target.value.slice(0, 200))}
-                    disabled={isLocked}
                     maxLength={200}
                     placeholder="One-line summary of this battle (optional)"
                     style={{
                       width: '100%', padding: '0.75rem',
                       backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-fg)',
                       border: '1px solid var(--theme-border)', boxSizing: 'border-box',
-                      opacity: isLocked ? 0.5 : 1,
                     }}
                   />
-                  {!isLocked && (
-                    <div style={{ fontSize: '0.7rem', color: 'var(--theme-fg-muted)', textAlign: 'right', marginTop: '2px' }}>
-                      {myTldr.length}/200
-                    </div>
-                  )}
+                  <div style={{ fontSize: '0.7rem', color: 'var(--theme-fg-muted)', textAlign: 'right', marginTop: '2px' }}>
+                    {myTldr.length}/200
+                  </div>
                 </div>
                 <div>
                   <label htmlFor="lore" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem' }}>Narrative Perspective</label>
                   <textarea
                     id="lore" value={myLore} onChange={e => setMyLore(e.target.value)}
-                    disabled={isLocked}
                     placeholder="Describe the flow of battle, key moments, lore implications..."
                     style={{
                       width: '100%', height: '100px', padding: '1rem',
                       backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-fg)',
                       border: '1px solid var(--theme-border)', boxSizing: 'border-box',
-                      opacity: isLocked ? 0.5 : 1,
                     }}
                   />
                 </div>
-                {!isLocked && (
-                  <button type="submit" className="btn primary">Save VP Progress</button>
-                )}
+                <button type="submit" className="btn primary">Save VP Progress</button>
                 {message && <div style={{ color: 'var(--theme-accent)', fontSize: '0.9rem' }}>{message}</div>}
               </form>
-            ) : hasFinalized && activeMatchData.status !== 'completed' ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--theme-accent)', border: '1px solid var(--theme-accent)', borderRadius: '8px', backgroundColor: 'var(--theme-bg-secondary)' }}>
-                <h3 style={{ margin: '0 0 1rem 0' }}>Report Sealed</h3>
-                <p style={{ color: 'var(--theme-fg-muted)' }}>Your battle report and honour ratings have been securely logged.</p>
-                <p style={{ color: 'var(--theme-fg-muted)' }}>Awaiting your opponent to submit their report to conclude the match.</p>
-              </div>
             ) : (
               /* ── Phase 2: Final Assessment — Honour ratings FIRST ── */
               <form onSubmit={handleFinalizeMatch} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
