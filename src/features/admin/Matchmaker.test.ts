@@ -146,8 +146,14 @@ describe('Matchmaker Simulation Algorithm Engine', () => {
       { id: '3', location: 'Santa Monica, 90036', experience_level: 'expert', army_faction: 'Orks', commander_name: 'P3' },
     ];
 
+    // Mock random so sorting preserves the original order (P1 first)
+    const originalRandom = Math.random;
+    Math.random = () => 0.1; // 0.1 - 0.5 = -0.4, preserves order
+    
     // In Round 2, P1 should pair with P3 because of matching zip code 90036 (+100), overriding Attacker vs Defender (+20) with Chaos P2
     const results = generateMatchups(pool, 2);
+    
+    Math.random = originalRandom;
     expect(results).toHaveLength(1);
     const pairedIDs = [results[0].p1.id, results[0].p2.id];
     expect(pairedIDs).toContain('1');

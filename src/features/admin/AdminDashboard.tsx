@@ -1139,7 +1139,7 @@ export default function AdminDashboard() {
                     Locations: {m.p1.location || '?'} vs {m.p2.location || '?'}, Tiers: {m.p1.experience_level} vs {m.p2.experience_level} <span style={{ color: 'gray', marginLeft: '0.5rem' }}>[Fit Score: {m.score}]</span>
                   </div>
                   <div style={{ marginTop: '0.5rem', padding: '4px 8px', backgroundColor: 'rgba(59, 130, 246, 0.15)', borderRadius: '4px', border: '1px solid rgba(59, 130, 246, 0.3)', fontSize: '0.85rem', color: '#60a5fa' }}>
-                    📍 Deployed War Zone: <strong style={{ color: '#fff' }}>{m.theatre_name}</strong> <span style={{ marginLeft: '8px', color: '#fbbf24' }}>[{(campaignState?.current_month || 1) * 400} PTS]</span>
+                    📍 Deployed War Zone: <strong style={{ color: '#fff' }}>{m.theatre_name}</strong> <span style={{ marginLeft: '8px', color: '#fbbf24' }}>[{campaignState?.points_limit || 400} PTS]</span>
                   </div>
                 </li>
               ))}
