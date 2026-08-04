@@ -24,8 +24,8 @@ describe('Matchmaker Simulation Algorithm Engine', () => {
     Math.random = () => 0.99;
     
     const results = generateMatchups(pool);
+    Math.random = originalRandom; // Restore immediately after use
     
-    Math.random = originalRandom;
     const highestScoreMatch = results.find(r => r.score === 30); // 10 (loc) + 20 (attacker vs defender)
     expect(highestScoreMatch).toBeDefined();
     

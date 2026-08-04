@@ -1268,3 +1268,18 @@ Tasks:
 
 Follow-ups:
 - None
+
+Date: 2026-08-04
+Tasks:
+- Created Supabase migration `20260804000000_add_campaign_month.sql` to add `campaign_month` to `matchups` table.
+- Updated `Matchmaker.ts` to accept `previousMatchups` and heavily penalize rematches (-500 points).
+- Updated `AdminDashboard.tsx` to pass `allMatchups` to the Matchmaker algorithm, ensuring it evaluates history before generating new pairings.
+- Added `campaign_month` payload to Admin Matchmaking saves so the phase is accurately recorded.
+- Overhauled "Active Pairings Overview" in the Admin Dashboard to display the active Phase.
+- Updated `CampaignBattles.tsx` to display Phase tags on matchup assignments for both the Global Warzone Board and personal Assignment list.
+- Mocked `localStorage` in `setupTests.ts` to fix broken Login/App routing test suite.
+- Re-stubbed and restored `Math.random` properly in `Matchmaker.test.ts` to resolve flaky deterministic tests.
+- All 96 tests passing and production build passing perfectly.
+
+Follow-ups:
+- The user must run the `20260804000000_add_campaign_month.sql` migration in the Supabase SQL editor before scheduling Phase 2 matchups.

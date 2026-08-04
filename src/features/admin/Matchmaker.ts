@@ -59,7 +59,7 @@ const checkLocationSynergy = (p1: CommanderProfile, p2: CommanderProfile): boole
   return false;
 };
 
-export function generateMatchups(pool: CommanderProfile[], currentMonth: number = 1): MatchPair[] {
+export function generateMatchups(pool: CommanderProfile[], currentMonth: number = 1, previousMatchups: { p1_id: string, p2_id: string }[] = []): MatchPair[] {
   const unresolved = [...pool];
   const matchups: MatchPair[] = [];
 
@@ -69,7 +69,7 @@ export function generateMatchups(pool: CommanderProfile[], currentMonth: number 
   while (unresolved.length > 1) {
     const p1 = unresolved.shift()!;
     let bestMatchIndex = -1;
-    let highestScore = -1;
+    let highestScore = -10000; // Allow negative scores to be chosen if no other option
 
     for (let i = 0; i < unresolved.length; i++) {
       const p2 = unresolved[i];
@@ -93,6 +93,14 @@ export function generateMatchups(pool: CommanderProfile[], currentMonth: number 
       // Chaos vs Chaos penalty: allowed, but heavily penalized so Chaos vs non-Chaos is preferred
       if (a1 === 'Chaos' && a2 === 'Chaos') {
         matchScore -= 50;
+      }
+
+      // Rematch penalty: heavily penalize playing the same opponent again
+      const hasPlayed = previousMatchups.some(m => 
+        (m.p1_id === p1.id && m.p2_id === p2.id) || (m.p1_id === p2.id && m.p2_id === p1.id)
+      );
+      if (hasPlayed) {
+        matchScore -= 500;
       }
 
       // Geospatial proximity priority: From round 2 onwards (+100 pts) based on location preferences

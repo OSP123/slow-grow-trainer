@@ -41,6 +41,7 @@ interface EditableMatchup {
   id: string;
   p1_id: string;
   p2_id: string;
+  campaign_month?: number;
   theatre_name?: string;
   p1_score: number | '';
   p2_score: number | '';
@@ -340,7 +341,7 @@ export default function AdminDashboard() {
   const handleGenerateMatches = async () => {
     const { data } = await supabase.from('profiles').select('id, location, experience_level, army_faction, commander_name, preferred_store_id, deployed_theatre, deployed_location_id').eq('campaign_status', 'active');
     if (data) {
-      const pairings = generateMatchups(data, campaignState?.current_month || 1);
+      const pairings = generateMatchups(data, campaignState?.current_month || 1, allMatchups);
       setGeneratedMatches(pairings);
     }
   };
@@ -353,7 +354,8 @@ export default function AdminDashboard() {
       p1_id: m.p1.id, 
       p2_id: m.p2.id, 
       status: 'scheduled',
-      theatre_name: m.theatre_name 
+      theatre_name: m.theatre_name,
+      campaign_month: campaignState?.current_month || 1
     }));
     const { error } = await supabase.from('matchups').insert(payload);
     if (!error) {
@@ -1399,6 +1401,7 @@ export default function AdminDashboard() {
                   <tr style={{ borderBottom: '2px solid var(--theme-border)', textAlign: 'left' }}>
                     <th style={{ padding: '0.5rem' }}>Player 1</th>
                     <th style={{ padding: '0.5rem' }}>Player 2</th>
+                    <th style={{ padding: '0.5rem' }}>Phase</th>
                     <th style={{ padding: '0.5rem' }}>War Zone</th>
                     <th style={{ padding: '0.5rem', textAlign: 'center' }}>Score</th>
                     <th style={{ padding: '0.5rem', textAlign: 'center' }}>Result</th>
@@ -1421,6 +1424,9 @@ export default function AdminDashboard() {
                         </td>
                         <td style={{ padding: '0.5rem' }}>
                           <strong>{p2Name}</strong> <span style={{ fontSize: '0.75rem', color: 'var(--theme-accent)' }}>[{p2Faction}]</span>
+                        </td>
+                        <td style={{ padding: '0.5rem' }}>
+                          <span style={{ color: 'var(--theme-accent)', fontWeight: 'bold' }}>Phase {m.campaign_month || 1}</span>
                         </td>
                         <td style={{ padding: '0.5rem', color: '#60a5fa' }}>{m.theatre_name || 'Undeployed'}</td>
                         <td style={{ padding: '0.5rem', textAlign: 'center', color: 'var(--theme-fg-muted)' }}>

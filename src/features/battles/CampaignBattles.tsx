@@ -15,6 +15,7 @@ export interface MatchupData {
   p2_tldr?: string;
   game_result?: string;
   status?: string;
+  campaign_month?: number;
   theatre_name?: string;
   p1_temperament?: number;
   p2_temperament?: number;
@@ -378,7 +379,7 @@ export default function CampaignBattles() {
                       fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px',
                       color: m.status === 'completed' ? 'var(--theme-fg-muted)' : 'var(--theme-accent)',
                     }}>
-                      {m.status === 'completed' ? 'Concluded' : 'Active'}
+                      {m.status === 'completed' ? 'Concluded' : 'Active'} • Phase {m.campaign_month || 1}
                     </span>
                     {result && (
                       <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: result.color, letterSpacing: '1px' }}>
@@ -497,8 +498,9 @@ export default function CampaignBattles() {
                     }}
                   >
                     {/* Opponent name */}
-                    <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>
-                      vs {isP1 ? formatCommanderWithDiscord(m.p2_profile, 'Unknown') : formatCommanderWithDiscord(m.p1_profile, 'Unknown')}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                      <span style={{ fontWeight: 'bold' }}>vs {isP1 ? formatCommanderWithDiscord(m.p2_profile, 'Unknown') : formatCommanderWithDiscord(m.p1_profile, 'Unknown')}</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--theme-accent)' }}>Phase {m.campaign_month || 1}</span>
                     </div>
 
                     {/* ── PRIMARY: My Honour ratings ── */}
