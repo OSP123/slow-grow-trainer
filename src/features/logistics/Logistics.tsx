@@ -61,8 +61,8 @@ export default function Logistics() {
         return;
       }
 
-      const fileName = `${userId}-${Math.random()}.jpg`;
-      const filePath = `milestones/${fileName}`;
+      const fileName = `${Math.random().toString(36).slice(2)}.jpg`;
+      const filePath = `${userId}/milestones/${fileName}`;
 
       const { error: uploadErr } = await supabase.storage
         .from('hobby_photos')

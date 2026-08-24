@@ -75,6 +75,9 @@ describe('Logistics & Deployment Tracker', () => {
     await waitFor(() => {
       expect(supabase.storage.from).toHaveBeenCalledWith('hobby_photos');
       expect(mockUpload).toHaveBeenCalled();
+      // Verify the path starts with the user ID (RLS requirement)
+      const uploadPath = mockUpload.mock.calls[0][0];
+      expect(uploadPath).toMatch(/^test-user-id\/milestones\//);
     });
   });
 });

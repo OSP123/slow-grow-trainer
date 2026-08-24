@@ -1283,3 +1283,12 @@ Tasks:
 
 Follow-ups:
 - The user must run the `20260804000000_add_campaign_month.sql` migration in the Supabase SQL editor before scheduling Phase 2 matchups.
+
+Date: 2026-08-24
+Tasks:
+  - Fixed clearance request image upload failure. The security audit migration (20260617000001) required storage paths to start with the user's auth UID as the first folder segment, but `Logistics.tsx` was uploading to `milestones/{userId}-{random}.jpg` — making the first folder `milestones`, which violated the RLS policy. Changed upload path to `{userId}/milestones/{random}.jpg`.
+  - Updated `Logistics.test.tsx` to assert the corrected path structure.
+  - All 3 logistics tests passing, TypeScript compiles clean.
+
+Follow-ups:
+  - None
