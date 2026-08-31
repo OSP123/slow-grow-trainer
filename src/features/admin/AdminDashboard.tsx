@@ -47,6 +47,7 @@ interface EditableMatchup {
   p2_score: number | '';
   game_result: string;
   status: string;
+  needs_reassignment?: boolean;
   p1_temperament: number | '';
   p2_temperament: number | '';
   p1_rules_engagement: number | '';
@@ -73,6 +74,9 @@ export default function AdminDashboard() {
   const [manualP2, setManualP2] = useState('');
   const [manualTheatre, setManualTheatre] = useState('');
   const [manualMessage, setManualMessage] = useState('');
+  // Records a frontline whose opponent has already withdrawn, so the remaining
+  // commander can claim it uncontested and still file a battle report.
+  const [manualUncontested, setManualUncontested] = useState(false);
 
   const [stores, setStores] = useState<GameStore[]>([]);
   const [newStoreName, setNewStoreName] = useState('');
@@ -250,6 +254,7 @@ export default function AdminDashboard() {
       p2_rules_engagement: m.p2_rules_engagement ?? '',
       game_result: m.game_result ?? '',
       status: m.status ?? 'scheduled',
+      needs_reassignment: m.needs_reassignment ?? false,
       theatre_name: m.theatre_name ?? ''
     })));
   };
@@ -329,8 +334,22 @@ export default function AdminDashboard() {
     if (error) {
       setUserMessage('Error updating user status. Ensure the SQL migration for campaign_status has been run.');
     } else {
+      // Flag rather than delete: deleting took the opponent's frontline with it,
+      // silently stripping an active commander of their assignment.
       if (newStatus === 'paused' || newStatus === 'removed') {
-        await supabase.from('matchups').delete().eq('status', 'scheduled').or(`p1_id.eq.${confirmAction.userId},p2_id.eq.${confirmAction.userId}`);
+        await supabase
+          .from('matchups')
+          .update({ needs_reassignment: true })
+          .eq('status', 'scheduled')
+          .or(`p1_id.eq.${confirmAction.userId},p2_id.eq.${confirmAction.userId}`);
+        fetchAllMatchups();
+      } else if (newStatus === 'active') {
+        // Reinstated — their pairings stand again.
+        await supabase
+          .from('matchups')
+          .update({ needs_reassignment: false })
+          .eq('status', 'scheduled')
+          .or(`p1_id.eq.${confirmAction.userId},p2_id.eq.${confirmAction.userId}`);
         fetchAllMatchups();
       }
       fetchUsers();
@@ -395,14 +414,21 @@ export default function AdminDashboard() {
       p1_id: manualP1,
       p2_id: manualP2,
       status: 'scheduled',
-      theatre_name: fullTheatreName
+      theatre_name: fullTheatreName,
+      campaign_month: campaignState?.current_month || 1,
+      needs_reassignment: manualUncontested
     }]);
     if (!error) {
-      await supabase.from('profiles').update({ deployed_theatre: fullTheatreName }).in('id', [manualP1, manualP2]);
-      setManualMessage('Manual narrative pairing successfully scheduled!');
+      // Only deploy the commander who is actually taking the field.
+      const toDeploy = manualUncontested ? [manualP1] : [manualP1, manualP2];
+      await supabase.from('profiles').update({ deployed_theatre: fullTheatreName }).in('id', toDeploy);
+      setManualMessage(manualUncontested
+        ? 'Uncontested frontline recorded. Player 1 can now claim it and file their battle report.'
+        : 'Manual narrative pairing successfully scheduled!');
       setManualP1('');
       setManualP2('');
       setManualTheatre('');
+      setManualUncontested(false);
       fetchAllMatchups();
     } else {
       setManualMessage('Error creating manual pairing: ' + error.message);
@@ -588,14 +614,22 @@ export default function AdminDashboard() {
     );
   }
 
+  // Scoped to the CURRENT phase. Counting every phase meant that once a
+  // commander had played Phase 1 they were treated as paired forever, so a
+  // commander left out of a later phase could never surface here.
+  const currentMonth = campaignState?.current_month || 1;
   const pairedUserIds = new Set<string>();
   allMatchups.forEach(m => {
-    if (m.status !== 'cancelled') {
-      if (m.p1_id) pairedUserIds.add(m.p1_id);
-      if (m.p2_id) pairedUserIds.add(m.p2_id);
-    }
+    if (m.status === 'cancelled') return;
+    if ((m.campaign_month || 1) !== currentMonth) return;
+    // A pairing awaiting reassignment does not count as a live assignment.
+    if (m.needs_reassignment) return;
+    if (m.p1_id) pairedUserIds.add(m.p1_id);
+    if (m.p2_id) pairedUserIds.add(m.p2_id);
   });
   const unassignedUsers = users.filter(u => u.campaign_status !== 'removed' && u.campaign_status !== 'paused' && !pairedUserIds.has(u.id));
+  // Pairings a withdrawal has broken, newest phase first.
+  const reassignmentNeeded = allMatchups.filter(m => m.needs_reassignment && m.status !== 'completed');
 
   return (
     <div style={{ padding: '2rem', position: 'relative' }}>
@@ -1227,9 +1261,12 @@ export default function AdminDashboard() {
                     <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Player 2</label>
                     <select value={manualP2} onChange={e => setManualP2(e.target.value)} required style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}>
                       <option value="">Select Commander...</option>
-                      {users.filter(u => u.campaign_status !== 'removed').map(u => {
+                      {/* Recording an uncontested frontline means naming the commander who
+                          withdrew, so paused and removed commanders must be selectable. */}
+                      {users.filter(u => manualUncontested || u.campaign_status !== 'removed').map(u => {
+                        const withdrawn = u.campaign_status === 'removed' || u.campaign_status === 'paused';
                         const isPaired = pairedUserIds.has(u.id);
-                        const statusLabel = isPaired ? ' [Already Paired]' : ' [UNASSIGNED]';
+                        const statusLabel = withdrawn ? ' [WITHDRAWN]' : isPaired ? ' [Already Paired]' : ' [UNASSIGNED]';
                         return (
                           <option key={u.id} value={u.id}>{u.commander_name} [{u.army_faction || 'No Faction'}]{statusLabel} (Record: {getUserRecord(u.id)})</option>
                         );
@@ -1248,7 +1285,27 @@ export default function AdminDashboard() {
                       <option value="Orbital Relay Station">Orbital Relay Station</option>
                     </select>
                   </div>
-                  <button type="submit" className="btn primary" style={{ padding: '0.6rem 1.25rem' }}>Schedule Pairing</button>
+                  <button type="submit" className="btn primary" style={{ padding: '0.6rem 1.25rem' }}>
+                    {manualUncontested ? 'Record Uncontested Frontline' : 'Schedule Pairing'}
+                  </button>
+                  <div style={{ flex: '1 1 100%' }}>
+                    <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={manualUncontested}
+                        onChange={e => setManualUncontested(e.target.checked)}
+                        style={{ marginTop: '3px' }}
+                      />
+                      <span>
+                        <strong style={{ color: '#f59e0b' }}>Player 2 has withdrawn (uncontested frontline)</strong>
+                        <span style={{ display: 'block', color: 'var(--theme-fg-muted)' }}>
+                          Use this to restore a frontline whose opponent dropped out. Player 1 keeps a visible
+                          assignment and can claim an uncontested victory — full VP plus a battle report — without
+                          rating an opponent who never showed. Withdrawn commanders become selectable as Player 2.
+                        </span>
+                      </span>
+                    </label>
+                  </div>
                 </form>
               </>
             );
@@ -1392,6 +1449,17 @@ export default function AdminDashboard() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h3 style={{ margin: 0 }}>Active Pairings Overview ({allMatchups.length})</h3>
           </div>
+          {reassignmentNeeded.length > 0 && (
+            <div style={{
+              marginBottom: '1rem', padding: '0.75rem 1rem', borderRadius: '6px',
+              backgroundColor: 'rgba(245, 158, 11, 0.12)', border: '1px solid #f59e0b',
+              color: '#f59e0b', fontSize: '0.85rem',
+            }}>
+              <strong>⚠ {reassignmentNeeded.length} pairing{reassignmentNeeded.length === 1 ? '' : 's'} need{reassignmentNeeded.length === 1 ? 's' : ''} reassignment.</strong>{' '}
+              A commander in {reassignmentNeeded.length === 1 ? 'it' : 'them'} has withdrawn. Their opponent still holds the frontline
+              but cannot play it — re-pair them below.
+            </div>
+          )}
           {allMatchups.length === 0 && unassignedUsers.length === 0 ? (
             <p style={{ color: 'var(--theme-fg-muted)', fontSize: '0.85rem' }}>No active pairings committed yet.</p>
           ) : (
@@ -1417,8 +1485,20 @@ export default function AdminDashboard() {
                     const p2Obj = m.p2_profile || users.find(u => u.id === m.p2_id);
                     const p2Name = formatCommanderWithDiscord(p2Obj, 'Unknown');
                     const p2Faction = p2Obj?.army_faction || 'No Faction';
+                    const needsReassignment = !!m.needs_reassignment && m.status !== 'completed';
+                    // The commander who is still in the campaign is the one to re-pair.
+                    const isStillActive = (id: string) => {
+                      const u = users.find(x => x.id === id);
+                      return !u || (u.campaign_status !== 'paused' && u.campaign_status !== 'removed');
+                    };
+                    const strandedId = needsReassignment
+                      ? (isStillActive(m.p1_id) ? m.p1_id : isStillActive(m.p2_id) ? m.p2_id : '')
+                      : '';
                     return (
-                      <tr key={m.id} style={{ borderBottom: '1px solid var(--theme-border)' }}>
+                      <tr key={m.id} style={{
+                        borderBottom: '1px solid var(--theme-border)',
+                        backgroundColor: needsReassignment ? 'rgba(245, 158, 11, 0.1)' : undefined,
+                      }}>
                         <td style={{ padding: '0.5rem' }}>
                           <strong>{p1Name}</strong> <span style={{ fontSize: '0.75rem', color: 'var(--theme-accent)' }}>[{p1Faction}]</span>
                         </td>
@@ -1436,8 +1516,12 @@ export default function AdminDashboard() {
                           {m.game_result || '—'}
                         </td>
                         <td style={{ padding: '0.5rem', textAlign: 'center' }}>
-                          <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '3px', backgroundColor: m.status === 'completed' ? '#166534' : '#713f12', color: '#fff' }}>
-                            {m.status}
+                          <span style={{
+                            fontSize: '0.7rem', padding: '2px 6px', borderRadius: '3px', color: '#fff',
+                            fontWeight: needsReassignment ? 'bold' : 'normal',
+                            backgroundColor: needsReassignment ? '#b45309' : m.status === 'completed' ? '#166534' : '#713f12',
+                          }}>
+                            {needsReassignment ? 'NEEDS REASSIGNMENT' : m.status}
                           </span>
                         </td>
                         <td style={{ padding: '0.5rem', textAlign: 'right', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', alignItems: 'center' }}>
@@ -1447,6 +1531,14 @@ export default function AdminDashboard() {
                           }} className="btn secondary" style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem' }}>
                             Adjust / Override
                           </button>
+                          {needsReassignment && strandedId && (
+                            <button onClick={() => {
+                              setManualP1(strandedId);
+                              document.getElementById('manual-narrative-pairing-section')?.scrollIntoView({ behavior: 'smooth' });
+                            }} className="btn secondary" style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderColor: '#f59e0b', color: '#f59e0b' }}>
+                              Re-pair ↓
+                            </button>
+                          )}
                           <button onClick={() => handleDeleteMatchup(m.id)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '0.75rem' }}>
                             Delete
                           </button>

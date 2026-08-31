@@ -266,3 +266,23 @@
   }
 }
 
+
+/* ─────────────────────────────────────────────
+   CAMPAIGN BATTLES — Frontlines + Detail Panel
+   Two columns on wide screens; stacks on mobile so
+   the detail panel (and its "Finalize Battle" button)
+   is never pushed outside the viewport.
+   ───────────────────────────────────────────── */
+.frontlines-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) 2fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .frontlines-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

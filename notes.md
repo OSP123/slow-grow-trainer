@@ -1292,3 +1292,40 @@ Tasks:
 
 Follow-ups:
   - None
+
+Date: 2026-08-31 (Missing Phase 2 Finalize Option — Malakas the Dissonant)
+Tasks:
+- Investigated a report that the option to finalize the Phase 2 battle report was gone from My Assigned Frontlines. Confirmed the deployed bundle on slow-grow-trainer.onrender.com renders the button unconditionally, so the code was not hiding it.
+- Found and fixed a mobile layout bug: the Frontlines/Detail grid in `CampaignBattles.tsx` used an inline `gridTemplateColumns: 'minmax(280px, 1fr) 2fr'`, which no media query can override. Measured in headless Chrome at 390px: the "Finalize Battle" button sat at x=511-647 with the viewport only 390 wide, reachable only by a 273px sideways scroll inside `.main-content`. Moved to a `.frontlines-layout` class in `App.css` that collapses to one column below 900px. Verified: horizontal overflow now 0.
+- Root cause of the disappearing frontline: `executeConfirmAction` in `AdminDashboard.tsx` DELETED every scheduled matchup involving a paused/removed commander, which took the opponent's frontline with it. An active commander silently lost their assignment. Matchups are now flagged `needs_reassignment` instead of deleted, and the flag is cleared if the commander is reinstated.
+- The admin dashboard could not surface this: `pairedUserIds` was built from matchups in ALL phases, so once a commander played Phase 1 they counted as paired forever and `unassignedUsers` was empty by construction. Scoped it to `campaignState.current_month` and excluded pairings flagged for reassignment.
+- Added an admin banner, a NEEDS REASSIGNMENT row state, and a "Re-pair" button that pre-fills Manual Narrative Pairing with the stranded commander.
+- Player side: a frontline whose opponent withdrew now reads "Awaiting reassignment" and explains that no battle report is required, instead of prompting for one.
+- Added an outstanding-report banner for the case where the opponent sealed the match first. Three Phase 2 matchups in production are `completed` with only one side's honour ratings, because the "Concluded / Honour Roll" panel gave the second player no cue they still owed a rating.
+- Fixed `handleCreateManualPairing`, which never set `campaign_month`, so hand-made Phase 2 pairings were labelled Phase 1.
+- 100 tests passing (6 new), production build passing.
+
+Follow-ups:
+- Run `20260831000000_matchup_needs_reassignment.sql` in the Supabase SQL editor. Until it is applied, pausing or removing a commander will fail to flag their pairings.
+- The five commanders already missing a Phase 2 assignment were orphaned by the OLD delete behaviour and those rows are gone for good. They need manual pairings now; this fix only prevents a recurrence. Identify them with:
+    select p.commander_name, p.campaign_status from profiles p
+    where p.campaign_status = 'active'
+      and not exists (select 1 from matchups m
+                      where (m.p1_id = p.id or m.p2_id = p.id) and m.campaign_month = 2);
+
+Date: 2026-08-31 (Uncontested Victory for Stranded Commanders)
+Tasks:
+- Added an uncontested-victory path so a commander whose opponent withdrew is not simply left with a dead frontline. From the withdrawal notice they can claim the ground, which awards `UNCONTESTED_VICTORY_VP` (100) VP, records their TL;DR and narrative, sets `status = 'completed'` and `game_result` to their win, and marks the row `uncontested`.
+- No honour ratings are requested or recorded — there was no opponent to rate — so `handleFinalizeMatch`'s rating requirement is bypassed entirely by a separate `handleClaimUncontested`.
+- A resolved uncontested match shows an "⚑ Uncontested Victory" panel in place of the honour roll (which would otherwise read "Not rated" for both commanders), "Uncontested victory" in the frontlines list, and "Uncontested" on the Global Warzone Board.
+- `getTopCommanders` no longer credits the withdrawn commander with a game for an uncontested match; the claiming commander's 100 VP still counts toward megafaction standings.
+- Added `uncontested` to the same pending migration, `20260831000000_matchup_needs_reassignment.sql`.
+- 102 tests passing (3 new), production build passing. Claim flow verified in headless Chrome at 390px: no horizontal overflow, submit button within the viewport.
+
+- Migration `20260831000000_matchup_needs_reassignment.sql` was applied to Supabase; both columns verified present on the live `matchups` table.
+- Added an "Player 2 has withdrawn (uncontested frontline)" toggle to Manual Narrative Pairing. Without it there was no way to help the commanders already orphaned by the OLD delete behaviour: their matchup rows are gone, and `p2_id` is NOT NULL so a one-sided matchup cannot exist. The toggle makes paused/removed commanders selectable as Player 2 (tagged [WITHDRAWN]) and creates the pairing pre-flagged `needs_reassignment`, so Player 1 immediately sees the uncontested claim flow. Only Player 1 gets deployed to the theatre.
+- 103 tests passing (1 new).
+
+Follow-ups:
+- Deployed via push to `main` (Render builds from git). Do NOT mark a commander as withdrawn on a build older than this commit — the previous code deletes their opponent's pairing.
+- Once deployed, restore the five orphaned commanders via Admin -> Active Pairings Overview. They now appear as UNASSIGNED (the phase-scoping fix revived that row), so: Pair Manually -> tick "Player 2 has withdrawn" -> select the commander who dropped -> Record Uncontested Frontline.

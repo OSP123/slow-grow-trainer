@@ -96,7 +96,7 @@ describe('Campaign Battles Integrations', () => {
     await waitFor(() => screen.getByText(/Live VP Tracker/i));
 
     // Click Finalize to switch to the assessment panel
-    const finalizeBtn = await screen.findByText(/Finalize Battle/i);
+    const finalizeBtn = await screen.findByText(/^Finalize Battle →$/);
     fireEvent.click(finalizeBtn);
 
     await waitFor(() => {
@@ -233,5 +233,196 @@ describe('Campaign Battles Integrations', () => {
       expect(screen.getByText(/The Space Marines charged fearlessly/i)).toBeInTheDocument();
       expect(screen.getByText(/The Orks held the line/i)).toBeInTheDocument();
     });
+  });
+  it('still offers finalization when the opponent sealed the match first', async () => {
+    // Reported bug: P2 finalized, flipping status to 'completed'. P1 had never
+    // rated their opponent, but the panel read as a finished record so P1
+    // could not tell the report was still owed.
+    const opponentSealed = [{
+      ...mockMatchups[0],
+      status: 'completed',
+      campaign_month: 2,
+      game_result: 'p1_win',
+      p1_score: 80,
+      p2_score: 75,
+      // Ratings P1 received from P2 are present; the ones P1 owes are not.
+      p1_temperament: 5,
+      p1_rules_engagement: 5,
+      p2_temperament: null,
+      p2_rules_engagement: null,
+    }];
+    (supabase.from as Mock).mockImplementation(() => ({
+      select: vi.fn().mockReturnValue({
+        order: vi.fn().mockResolvedValue({ data: opponentSealed, error: null }),
+      }),
+      update: vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ error: null }),
+      }),
+    }));
+
+    render(<CampaignBattles />);
+    await waitFor(() => screen.getByText('My Assigned Frontlines'));
+
+    const sidebarItem = await screen.findByText(/vs Commander Beta/i);
+    fireEvent.click(sidebarItem.closest('li')!);
+
+    // The outstanding-report prompt tells P1 they still owe their ratings.
+    const prompt = await screen.findByText(/Your battle report is still outstanding/i);
+    expect(prompt).toBeInTheDocument();
+
+    // And it leads straight into the honour-rating form.
+    fireEvent.click(screen.getByText(/^Finalize Battle Report →$/));
+    await waitFor(() => {
+      expect(screen.getByText(/Rate Your Opponent's Honour/i)).toBeInTheDocument();
+      expect(screen.getByText(/Seal Battle Report/i)).toBeInTheDocument();
+    });
+  });
+
+  it('hides the outstanding-report prompt once this Commander has rated', async () => {
+    const bothSubmitted = [{
+      ...mockMatchups[0],
+      status: 'completed',
+      p1_temperament: 5,
+      p1_rules_engagement: 5,
+      p2_temperament: 4,
+      p2_rules_engagement: 4,
+    }];
+    (supabase.from as Mock).mockImplementation(() => ({
+      select: vi.fn().mockReturnValue({
+        order: vi.fn().mockResolvedValue({ data: bothSubmitted, error: null }),
+      }),
+      update: vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ error: null }),
+      }),
+    }));
+
+    render(<CampaignBattles />);
+    await waitFor(() => screen.getByText('My Assigned Frontlines'));
+
+    const sidebarItem = await screen.findByText(/vs Commander Beta/i);
+    fireEvent.click(sidebarItem.closest('li')!);
+
+    await waitFor(() => screen.getByText(/Live VP Tracker/i));
+    expect(screen.queryByText(/Your battle report is still outstanding/i)).not.toBeInTheDocument();
+    // The header entry point remains available for edits.
+    expect(screen.getByText(/^Finalize Battle →$/)).toBeInTheDocument();
+  });
+  it('explains a withdrawn opponent instead of demanding a battle report', async () => {
+    // A dropped commander no longer deletes the pairing, so the surviving
+    // Commander keeps a visible frontline and is told why it is idle.
+    const opponentWithdrew = [{
+      ...mockMatchups[0],
+      campaign_month: 2,
+      needs_reassignment: true,
+    }];
+    (supabase.from as Mock).mockImplementation(() => ({
+      select: vi.fn().mockReturnValue({
+        order: vi.fn().mockResolvedValue({ data: opponentWithdrew, error: null }),
+      }),
+      update: vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ error: null }),
+      }),
+    }));
+
+    render(<CampaignBattles />);
+    await waitFor(() => screen.getByText('My Assigned Frontlines'));
+
+    // The frontline is still listed, flagged as awaiting reassignment.
+    expect(screen.getByText(/Awaiting reassignment/i)).toBeInTheDocument();
+
+    const sidebarItem = await screen.findByText(/vs Commander Beta/i);
+    fireEvent.click(sidebarItem.closest('li')!);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Your opponent has withdrawn from the campaign/i)).toBeInTheDocument();
+    });
+    // No report is owed for a match that cannot be fought.
+    expect(screen.queryByText(/Your battle report is still outstanding/i)).not.toBeInTheDocument();
+  });
+  it('lets a stranded commander claim 100 VP and file a report when the opponent drops', async () => {
+    const mockUpdate = vi.fn().mockReturnValue({
+      eq: vi.fn().mockResolvedValue({ error: null }),
+    });
+    const opponentWithdrew = [{
+      ...mockMatchups[0],
+      campaign_month: 2,
+      needs_reassignment: true,
+    }];
+    (supabase.from as Mock).mockImplementation(() => ({
+      select: vi.fn().mockReturnValue({
+        order: vi.fn().mockResolvedValue({ data: opponentWithdrew, error: null }),
+      }),
+      update: mockUpdate,
+    }));
+
+    const { container } = render(<CampaignBattles />);
+    await waitFor(() => screen.getByText('My Assigned Frontlines'));
+
+    const sidebarItem = await screen.findByText(/vs Commander Beta/i);
+    fireEvent.click(sidebarItem.closest('li')!);
+
+    await waitFor(() => screen.getByText(/Your opponent has withdrawn/i));
+    fireEvent.click(screen.getByText(/Claim Uncontested Victory/i));
+
+    // The commander can still write their chronicle of the advance.
+    // Query by id: the VP tracker below carries identically-labelled fields.
+    await waitFor(() => expect(container.querySelector('#uncontestedTldr')).toBeTruthy());
+    fireEvent.change(container.querySelector('#uncontestedTldr')!, {
+      target: { value: 'The Ash Wastes fell silent.' },
+    });
+    fireEvent.change(container.querySelector('#uncontestedLore')!, {
+      target: { value: 'No enemy stood against us.' },
+    });
+
+    fireEvent.click(screen.getByText(/Record 100 VP Uncontested Victory/i));
+
+    await waitFor(() => {
+      expect(mockUpdate).toHaveBeenCalled();
+      const payload = mockUpdate.mock.calls[0][0];
+      // P1 user takes the full award; the withdrawn opponent scores nothing.
+      expect(payload.p1_score).toBe(100);
+      expect(payload.p2_score).toBe(0);
+      expect(payload.status).toBe('completed');
+      expect(payload.game_result).toBe('p1_win');
+      expect(payload.uncontested).toBe(true);
+      expect(payload.p1_tldr).toBe('The Ash Wastes fell silent.');
+      expect(payload.p1_lore).toBe('No enemy stood against us.');
+      // Nobody is rated for a battle that never happened.
+      expect(payload).not.toHaveProperty('p2_temperament');
+      expect(payload).not.toHaveProperty('p2_rules_engagement');
+    });
+  });
+
+  it('shows an uncontested result instead of an empty honour roll', async () => {
+    const claimed = [{
+      ...mockMatchups[0],
+      status: 'completed',
+      campaign_month: 2,
+      needs_reassignment: true,
+      uncontested: true,
+      game_result: 'p1_win',
+      p1_score: 100,
+      p2_score: 0,
+    }];
+    (supabase.from as Mock).mockImplementation(() => ({
+      select: vi.fn().mockReturnValue({
+        order: vi.fn().mockResolvedValue({ data: claimed, error: null }),
+      }),
+      update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
+    }));
+
+    render(<CampaignBattles />);
+    await waitFor(() => screen.getByText('My Assigned Frontlines'));
+    expect(screen.getByText(/Uncontested victory/i)).toBeInTheDocument();
+
+    const sidebarItem = await screen.findByText(/vs Commander Beta/i);
+    fireEvent.click(sidebarItem.closest('li')!);
+
+    await waitFor(() => {
+      expect(screen.getByText(/⚑ Uncontested Victory/i)).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/Honour Roll/i)).not.toBeInTheDocument();
+    // Already resolved, so no lingering claim prompt.
+    expect(screen.queryByText(/Claim Uncontested Victory/i)).not.toBeInTheDocument();
   });
 });

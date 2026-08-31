@@ -211,4 +211,121 @@ describe('AdminDashboard (RBAC)', () => {
       expect(screen.getAllByText(/Deployed War Zone:/i).length).toBeGreaterThan(0);
     });
   });
+  it('flags a dropped commander\u2019s pairings for reassignment instead of deleting them', async () => {
+    // Deleting the row took the *opponent's* frontline with it, silently
+    // stripping an active commander of their Phase 2 assignment.
+    (supabase.auth.getUser as import('vitest').Mock).mockResolvedValue({
+      data: { user: { id: 'admin_123', email: 'omarpatel123@gmail.com' } }
+    });
+
+    const matchupUpdate = vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({ or: vi.fn().mockResolvedValue({ error: null }) }),
+    });
+    const matchupDelete = vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({ or: vi.fn().mockResolvedValue({ error: null }) }),
+    });
+
+    const customMockFrom = (table: string) => {
+      if (table === 'profiles') {
+        const chainable = Promise.resolve({
+          data: [{ id: 'quitter', commander_name: 'Deserter Prime', campaign_status: 'active' }],
+          error: null,
+        }) as any;
+        chainable.eq = vi.fn().mockReturnValue(chainable);
+        chainable.single = vi.fn().mockResolvedValue({ data: { role: 'admin' }, error: null });
+        chainable.order = vi.fn().mockReturnValue(chainable);
+        return {
+          select: vi.fn().mockReturnValue(chainable),
+          update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
+        };
+      }
+      if (table === 'matchups') {
+        return {
+          select: vi.fn().mockReturnValue({
+            order: vi.fn().mockResolvedValue({ data: [], error: null }),
+          }),
+          update: matchupUpdate,
+          delete: matchupDelete,
+        };
+      }
+      return mockFromUnlocked(table);
+    };
+    (supabase.from as import('vitest').Mock).mockImplementation(customMockFrom);
+
+    render(<AdminDashboard />);
+    await waitFor(() => expect(screen.getAllByText(/Deserter Prime/i).length).toBeGreaterThan(0));
+
+    fireEvent.click(screen.getByRole('button', { name: /^Pause$/i }));
+    await waitFor(() => expect(screen.getByText(/Pause Player\?/i)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /^Confirm$/i }));
+
+    await waitFor(() => {
+      expect(matchupUpdate).toHaveBeenCalledWith({ needs_reassignment: true });
+    });
+    // The pairing must survive so the opponent keeps a visible frontline.
+    expect(matchupDelete).not.toHaveBeenCalled();
+  });
+  it('records an uncontested frontline so a stranded commander can still report', async () => {
+    // Restores a frontline whose opponent dropped out: the pairing is created
+    // pre-flagged so Player 1 sees the uncontested claim flow.
+    (supabase.auth.getUser as import('vitest').Mock).mockResolvedValue({
+      data: { user: { id: 'admin_123', email: 'omarpatel123@gmail.com' } }
+    });
+
+    const matchupInsert = vi.fn().mockResolvedValue({ error: null });
+    const customMockFrom = (table: string) => {
+      if (table === 'profiles') {
+        const chainable = Promise.resolve({
+          data: [
+            { id: 'stranded', commander_name: 'Malakas the Dissonant', army_faction: 'Chaos Space Marines', campaign_status: 'active' },
+            { id: 'quitter', commander_name: 'Deserter Prime', army_faction: 'Orks', campaign_status: 'removed' },
+          ],
+          error: null,
+        }) as any;
+        chainable.eq = vi.fn().mockReturnValue(chainable);
+        chainable.single = vi.fn().mockResolvedValue({ data: { role: 'admin' }, error: null });
+        chainable.order = vi.fn().mockReturnValue(chainable);
+        return {
+          select: vi.fn().mockReturnValue(chainable),
+          update: vi.fn().mockReturnValue({ in: vi.fn().mockResolvedValue({ error: null }), eq: vi.fn().mockResolvedValue({ error: null }) }),
+        };
+      }
+      if (table === 'matchups') {
+        return {
+          select: vi.fn().mockReturnValue({ order: vi.fn().mockResolvedValue({ data: [], error: null }) }),
+          insert: matchupInsert,
+          update: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ or: vi.fn().mockResolvedValue({ error: null }) }) }),
+          delete: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
+        };
+      }
+      return mockFromUnlocked(table);
+    };
+    (supabase.from as import('vitest').Mock).mockImplementation(customMockFrom);
+
+    const { container } = render(<AdminDashboard />);
+    await waitFor(() => expect(screen.getAllByText(/Malakas the Dissonant/i).length).toBeGreaterThan(0));
+
+    // A removed commander is not selectable as an opponent by default.
+    const selects = container.querySelectorAll('#manual-narrative-pairing-section select');
+    const p2Select = selects[1] as HTMLSelectElement;
+    expect(p2Select.textContent).not.toMatch(/Deserter Prime/);
+
+    // Flagging the opponent as withdrawn makes them selectable.
+    fireEvent.click(screen.getByRole('checkbox', { name: /has withdrawn/i }));
+    await waitFor(() => expect(p2Select.textContent).toMatch(/Deserter Prime/));
+    expect(p2Select.textContent).toMatch(/\[WITHDRAWN\]/);
+
+    fireEvent.change(selects[0] as HTMLSelectElement, { target: { value: 'stranded' } });
+    fireEvent.change(p2Select, { target: { value: 'quitter' } });
+    fireEvent.click(screen.getByRole('button', { name: /Record Uncontested Frontline/i }));
+
+    await waitFor(() => {
+      expect(matchupInsert).toHaveBeenCalled();
+      const [row] = matchupInsert.mock.calls[0][0];
+      expect(row.p1_id).toBe('stranded');
+      expect(row.p2_id).toBe('quitter');
+      expect(row.needs_reassignment).toBe(true);
+      expect(row.status).toBe('scheduled');
+    });
+  });
 });

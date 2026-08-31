@@ -15,6 +15,8 @@ export interface MatchupData {
   p2_tldr?: string;
   game_result?: string;
   status?: string;
+  needs_reassignment?: boolean;
+  uncontested?: boolean;
   campaign_month?: number;
   theatre_name?: string;
   p1_temperament?: number;
@@ -24,6 +26,10 @@ export interface MatchupData {
   p1_profile?: { commander_name: string; army_faction?: string };
   p2_profile?: { commander_name: string; army_faction?: string };
 }
+
+// Victory points awarded when an opponent withdraws and the engagement
+// cannot be fought. The stranded commander still files a battle report.
+const UNCONTESTED_VICTORY_VP = 100;
 
 // Render filled/empty stars for display (read-only)
 function StarDisplay({ value, size = '1rem' }: { value?: number; size?: string }) {
@@ -82,6 +88,7 @@ export default function CampaignBattles() {
   const [myTldr, setMyTldr] = useState('');
   const [oppTemperament, setOppTemperament] = useState<number | ''>('');
   const [oppRulesEngagement, setOppRulesEngagement] = useState<number | ''>('');
+  const [isClaimingUncontested, setIsClaimingUncontested] = useState(false);
 
   const fetchBattles = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -108,6 +115,7 @@ export default function CampaignBattles() {
   const handleSelectMatch = (m: MatchupData) => {
     setActiveMatch(m.id);
     setIsFinalizing(false);
+    setIsClaimingUncontested(false);
     setMessage('');
     const isP1 = m.p1_id === userId;
     setMyScore(isP1 ? (m.p1_score ?? '') : (m.p2_score ?? ''));
@@ -212,6 +220,47 @@ export default function CampaignBattles() {
     }
   };
 
+  // The opponent withdrew, so there is no game to score and nobody to rate.
+  // The stranded commander still files a report and takes full victory points.
+  const handleClaimUncontested = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeMatch) return;
+    const match = allMatchups.find(m => m.id === activeMatch);
+    if (!match) return;
+    const isP1 = match.p1_id === userId;
+
+    type UncontestedPayload = {
+      status: string; game_result: string; uncontested: boolean;
+      p1_score: number; p2_score: number;
+      p1_lore?: string; p2_lore?: string;
+      p1_tldr?: string; p2_tldr?: string;
+    };
+
+    const payload: UncontestedPayload = {
+      status: 'completed',
+      uncontested: true,
+      game_result: isP1 ? 'p1_win' : 'p2_win',
+      p1_score: isP1 ? UNCONTESTED_VICTORY_VP : 0,
+      p2_score: isP1 ? 0 : UNCONTESTED_VICTORY_VP,
+    };
+    if (isP1) {
+      payload.p1_lore = myLore;
+      payload.p1_tldr = myTldr;
+    } else {
+      payload.p2_lore = myLore;
+      payload.p2_tldr = myTldr;
+    }
+
+    const { error } = await supabase.from('matchups').update(payload).eq('id', activeMatch);
+    if (error) {
+      setMessage('Error: ' + error.message);
+    } else {
+      setMessage(`Uncontested victory recorded. ${UNCONTESTED_VICTORY_VP} VP awarded to your command.`);
+      setIsClaimingUncontested(false);
+      fetchBattles();
+    }
+  };
+
   const getResultLabel = (m: MatchupData, uid: string | null) => {
     if (!m.game_result || !uid) return null;
     const isP1 = m.p1_id === uid;
@@ -222,6 +271,11 @@ export default function CampaignBattles() {
 
   const activeMatchData = allMatchups.find(m => m.id === activeMatch);
   const isP1Active = activeMatchData?.p1_id === userId;
+  // Ratings this Commander gives are stored on the *opponent's* columns, so
+  // "have I filed my report?" is answered by the opponent's rating fields.
+  const myRatingsSubmitted = isP1Active
+    ? activeMatchData?.p2_temperament != null && activeMatchData?.p2_rules_engagement != null
+    : activeMatchData?.p1_temperament != null && activeMatchData?.p1_rules_engagement != null;
 
 
 
@@ -237,8 +291,13 @@ export default function CampaignBattles() {
     
     allMatchups.forEach(m => {
       if (m.status !== 'completed') return;
-      
-      if (m.p1_id && m.p1_profile) {
+      // In an uncontested victory only the commander who claimed it took the
+      // field; the withdrawn opponent is not credited with a game.
+      const withdrewId = m.uncontested
+        ? (m.game_result === 'p1_win' ? m.p2_id : m.p1_id)
+        : null;
+
+      if (m.p1_id && m.p1_profile && m.p1_id !== withdrewId) {
         if (!scores[m.p1_id]) scores[m.p1_id] = { name: m.p1_profile.commander_name, totalTemp: 0, countTemp: 0, totalSpirit: 0, countSpirit: 0, games: 0 };
         scores[m.p1_id].games++;
         if (m.p1_temperament) { scores[m.p1_id].totalTemp += m.p1_temperament; scores[m.p1_id].countTemp++; }
@@ -247,7 +306,7 @@ export default function CampaignBattles() {
         if (!playerVPs[m.p1_id]) playerVPs[m.p1_id] = { vp: 0, megafaction: getMegafaction(m.p1_profile.army_faction) };
         if (m.p1_score) playerVPs[m.p1_id].vp += m.p1_score;
       }
-      if (m.p2_id && m.p2_profile) {
+      if (m.p2_id && m.p2_profile && m.p2_id !== withdrewId) {
         if (!scores[m.p2_id]) scores[m.p2_id] = { name: m.p2_profile.commander_name, totalTemp: 0, countTemp: 0, totalSpirit: 0, countSpirit: 0, games: 0 };
         scores[m.p2_id].games++;
         if (m.p2_temperament) { scores[m.p2_id].totalTemp += m.p2_temperament; scores[m.p2_id].countTemp++; }
@@ -379,7 +438,7 @@ export default function CampaignBattles() {
                       fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px',
                       color: m.status === 'completed' ? 'var(--theme-fg-muted)' : 'var(--theme-accent)',
                     }}>
-                      {m.status === 'completed' ? 'Concluded' : 'Active'} • Phase {m.campaign_month || 1}
+                      {m.uncontested ? 'Uncontested' : m.status === 'completed' ? 'Concluded' : 'Active'} • Phase {m.campaign_month || 1}
                     </span>
                     {result && (
                       <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: result.color, letterSpacing: '1px' }}>
@@ -468,7 +527,7 @@ export default function CampaignBattles() {
       </div>
 
       {/* ── My Frontlines + Detail Panel ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 1fr) 2fr', gap: '2rem', alignItems: 'start' }}>
+      <div className="frontlines-layout">
         <div className="card">
           <h2 style={{ marginBottom: '1rem', borderBottom: '1px solid var(--theme-border)', paddingBottom: '0.5rem' }}>
             My Assigned Frontlines
@@ -517,6 +576,14 @@ export default function CampaignBattles() {
                             <StarDisplay value={myRules} size="0.75rem" />
                           </div>
                         </div>
+                      </div>
+                    ) : m.uncontested ? (
+                      <div style={{ fontSize: '0.7rem', color: '#f59e0b', fontStyle: 'italic', marginBottom: '0.25rem' }}>
+                        Uncontested victory
+                      </div>
+                    ) : m.needs_reassignment ? (
+                      <div style={{ fontSize: '0.7rem', color: '#f59e0b', fontStyle: 'italic', marginBottom: '0.25rem' }}>
+                        Awaiting reassignment
                       </div>
                     ) : m.status !== 'completed' ? (
                       <div style={{ fontSize: '0.7rem', color: 'var(--theme-fg-muted)', fontStyle: 'italic', marginBottom: '0.25rem' }}>
@@ -567,8 +634,28 @@ export default function CampaignBattles() {
               </div>
             )}
 
+            {/* Uncontested: there was no engagement, so no honour to record */}
+            {activeMatchData.status === 'completed' && activeMatchData.uncontested && (
+              <div style={{
+                backgroundColor: 'var(--theme-bg-secondary)',
+                border: '1px solid #f59e0b',
+                borderRadius: '8px',
+                padding: '1.25rem',
+                marginBottom: '1.5rem',
+              }}>
+                <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', color: '#f59e0b', marginBottom: '0.75rem' }}>
+                  ⚑ Uncontested Victory
+                </div>
+                <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--theme-fg-muted)' }}>
+                  The opposing commander withdrew from the campaign. The ground was taken without a
+                  shot fired and <strong style={{ color: 'var(--theme-accent)' }}>{UNCONTESTED_VICTORY_VP} VP</strong> awarded.
+                  No honour ratings are recorded for an engagement that was never fought.
+                </p>
+              </div>
+            )}
+
             {/* Completed match: show honour ratings as the primary display */}
-            {activeMatchData.status === 'completed' && (
+            {activeMatchData.status === 'completed' && !activeMatchData.uncontested && (
               <div style={{
                 backgroundColor: 'var(--theme-bg-secondary)',
                 border: '1px solid var(--theme-accent)',
@@ -602,6 +689,117 @@ export default function CampaignBattles() {
                   <span>Battle Score — {activeMatchData.p1_profile?.commander_name}: {activeMatchData.p1_score ?? '—'} VP</span>
                   <span>{activeMatchData.p2_profile?.commander_name}: {activeMatchData.p2_score ?? '—'} VP</span>
                 </div>
+              </div>
+            )}
+
+            {/* Opponent withdrew: claim the ground uncontested, or await reassignment */}
+            {activeMatchData.needs_reassignment && activeMatchData.status !== 'completed' && (
+              <div style={{
+                backgroundColor: 'var(--theme-bg-secondary)',
+                border: '1px solid #f59e0b',
+                borderLeft: '4px solid #f59e0b',
+                borderRadius: '6px',
+                padding: '1rem',
+                marginBottom: '1.5rem',
+              }}>
+                <div style={{ color: '#f59e0b', fontWeight: 'bold', marginBottom: '0.35rem' }}>
+                  ⚠ Your opponent has withdrawn from the campaign
+                </div>
+                <p style={{ margin: '0 0 0.75rem 0', fontSize: '0.85rem', color: 'var(--theme-fg-muted)' }}>
+                  This engagement cannot be fought as assigned. You may claim the ground uncontested —
+                  you will be awarded <strong style={{ color: 'var(--theme-accent)' }}>{UNCONTESTED_VICTORY_VP} VP</strong> and
+                  may still record your chronicle of the advance. There is no opponent to rate.
+                </p>
+
+                {!isClaimingUncontested ? (
+                  <button
+                    type="button"
+                    onClick={() => { setIsClaimingUncontested(true); setMessage(''); }}
+                    className="btn primary"
+                    style={{ fontSize: '0.85rem' }}
+                  >
+                    ⚑ Claim Uncontested Victory
+                  </button>
+                ) : (
+                  <form onSubmit={handleClaimUncontested} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div>
+                      <label htmlFor="uncontestedTldr" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem' }}>
+                        Battle Summary (TL;DR)
+                      </label>
+                      <input
+                        id="uncontestedTldr" type="text" value={myTldr}
+                        onChange={e => setMyTldr(e.target.value.slice(0, 200))}
+                        maxLength={200}
+                        placeholder="One-line summary of your uncontested advance (optional)"
+                        style={{
+                          width: '100%', padding: '0.75rem',
+                          backgroundColor: 'var(--theme-bg)', color: 'var(--theme-fg)',
+                          border: '1px solid var(--theme-border)', boxSizing: 'border-box',
+                        }}
+                      />
+                      <div style={{ fontSize: '0.7rem', color: 'var(--theme-fg-muted)', textAlign: 'right', marginTop: '2px' }}>
+                        {myTldr.length}/200
+                      </div>
+                    </div>
+                    <div>
+                      <label htmlFor="uncontestedLore" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem' }}>
+                        Narrative Perspective
+                      </label>
+                      <textarea
+                        id="uncontestedLore" value={myLore} onChange={e => setMyLore(e.target.value)}
+                        placeholder="How did your forces secure the objective with no enemy to meet them?"
+                        style={{
+                          width: '100%', height: '90px', padding: '1rem',
+                          backgroundColor: 'var(--theme-bg)', color: 'var(--theme-fg)',
+                          border: '1px solid var(--theme-border)', boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                      <button type="submit" className="btn primary" style={{ fontSize: '0.85rem' }}>
+                        ⚑ Record {UNCONTESTED_VICTORY_VP} VP Uncontested Victory
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setIsClaimingUncontested(false); setMessage(''); }}
+                        className="btn secondary"
+                        style={{ fontSize: '0.85rem' }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                )}
+                {message && <div style={{ marginTop: '0.75rem', color: 'var(--theme-accent)', fontSize: '0.9rem' }}>{message}</div>}
+              </div>
+            )}
+
+            {/* Opponent sealed first: this Commander still owes their Honour ratings */}
+            {!isFinalizing && !myRatingsSubmitted && !activeMatchData.needs_reassignment && (
+              <div style={{
+                backgroundColor: 'var(--theme-bg-secondary)',
+                border: '1px solid #f59e0b',
+                borderLeft: '4px solid #f59e0b',
+                borderRadius: '6px',
+                padding: '1rem',
+                marginBottom: '1.5rem',
+              }}>
+                <div style={{ color: '#f59e0b', fontWeight: 'bold', marginBottom: '0.35rem' }}>
+                  ⚠ Your battle report is still outstanding
+                </div>
+                <p style={{ margin: '0 0 0.75rem 0', fontSize: '0.85rem', color: 'var(--theme-fg-muted)' }}>
+                  {activeMatchData.status === 'completed'
+                    ? 'Your opponent has already filed theirs. You have not yet rated their Honour — do so now to complete the record.'
+                    : 'Rate your opponent\u2019s Honour to file your report for this engagement.'}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setIsFinalizing(true); setMessage(''); }}
+                  className="btn primary"
+                  style={{ fontSize: '0.85rem' }}
+                >
+                  Finalize Battle Report →
+                </button>
               </div>
             )}
 
