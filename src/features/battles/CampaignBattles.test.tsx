@@ -425,4 +425,54 @@ describe('Campaign Battles Integrations', () => {
     // Already resolved, so no lingering claim prompt.
     expect(screen.queryByText(/Claim Uncontested Victory/i)).not.toBeInTheDocument();
   });
+  it('lets a commander with no opponent at all claim the uncontested victory', async () => {
+    // A bye: p2_id is null because the opponent withdrew and the original
+    // pairing was already gone, so there is nobody to name or rate.
+    const mockUpdate = vi.fn().mockReturnValue({
+      eq: vi.fn().mockResolvedValue({ error: null }),
+    });
+    const bye = [{
+      ...mockMatchups[0],
+      p2_id: null,
+      p2_profile: null,
+      campaign_month: 2,
+      needs_reassignment: true,
+    }];
+    (supabase.from as Mock).mockImplementation(() => ({
+      select: vi.fn().mockReturnValue({
+        order: vi.fn().mockResolvedValue({ data: bye, error: null }),
+      }),
+      update: mockUpdate,
+    }));
+
+    const { container } = render(<CampaignBattles />);
+    await waitFor(() => screen.getByText('My Assigned Frontlines'));
+
+    // The frontline is listed with no opponent rather than "vs Unknown".
+    // The same label also appears on the Global Warzone Board, so scope to the list.
+    const sidebarItem = await waitFor(() => {
+      const li = [...container.querySelectorAll('li')]
+        .find(el => /No opponent \(withdrew\)/i.test(el.textContent || ''));
+      expect(li).toBeTruthy();
+      return li!;
+    });
+    fireEvent.click(sidebarItem);
+
+    await waitFor(() => screen.getByText(/Your opponent has withdrawn/i));
+    fireEvent.click(screen.getByText(/Claim Uncontested Victory/i));
+
+    await waitFor(() => expect(container.querySelector('#uncontestedTldr')).toBeTruthy());
+    fireEvent.change(container.querySelector('#uncontestedTldr')!, {
+      target: { value: 'We held the line alone.' },
+    });
+    fireEvent.click(screen.getByText(/Record 100 VP Uncontested Victory/i));
+
+    await waitFor(() => {
+      const payload = mockUpdate.mock.calls[0][0];
+      expect(payload.p1_score).toBe(100);
+      expect(payload.status).toBe('completed');
+      expect(payload.uncontested).toBe(true);
+      expect(payload.p1_tldr).toBe('We held the line alone.');
+    });
+  });
 });

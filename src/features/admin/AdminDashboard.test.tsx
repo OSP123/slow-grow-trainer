@@ -328,4 +328,53 @@ describe('AdminDashboard (RBAC)', () => {
       expect(row.status).toBe('scheduled');
     });
   });
+  it('grants a bye frontline in one click to a commander whose opponent dropped', async () => {
+    // The original pairing was deleted, so there is no opponent left to name.
+    // A bye (p2_id null) gives the stranded commander something to claim.
+    (supabase.auth.getUser as import('vitest').Mock).mockResolvedValue({
+      data: { user: { id: 'admin_123', email: 'omarpatel123@gmail.com' } }
+    });
+
+    const matchupInsert = vi.fn().mockResolvedValue({ error: null });
+    const customMockFrom = (table: string) => {
+      if (table === 'profiles') {
+        const chainable = Promise.resolve({
+          data: [{ id: 'stranded', commander_name: 'Malakas the Dissonant', army_faction: 'Chaos Space Marines', campaign_status: 'active' }],
+          error: null,
+        }) as any;
+        chainable.eq = vi.fn().mockReturnValue(chainable);
+        chainable.single = vi.fn().mockResolvedValue({ data: { role: 'admin' }, error: null });
+        chainable.order = vi.fn().mockReturnValue(chainable);
+        return {
+          select: vi.fn().mockReturnValue(chainable),
+          update: vi.fn().mockReturnValue({ in: vi.fn().mockResolvedValue({ error: null }), eq: vi.fn().mockResolvedValue({ error: null }) }),
+        };
+      }
+      if (table === 'matchups') {
+        return {
+          select: vi.fn().mockReturnValue({ order: vi.fn().mockResolvedValue({ data: [], error: null }) }),
+          insert: matchupInsert,
+          update: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ or: vi.fn().mockResolvedValue({ error: null }) }) }),
+          delete: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
+        };
+      }
+      return mockFromUnlocked(table);
+    };
+    (supabase.from as import('vitest').Mock).mockImplementation(customMockFrom);
+
+    render(<AdminDashboard />);
+    await waitFor(() => expect(screen.getAllByText(/Malakas the Dissonant/i).length).toBeGreaterThan(0));
+
+    // The unassigned row offers the grant directly — no opponent to look up.
+    fireEvent.click(screen.getByRole('button', { name: /Grant Uncontested/i }));
+
+    await waitFor(() => {
+      expect(matchupInsert).toHaveBeenCalled();
+      const [row] = matchupInsert.mock.calls[0][0];
+      expect(row.p1_id).toBe('stranded');
+      expect(row.p2_id).toBeNull();
+      expect(row.needs_reassignment).toBe(true);
+      expect(row.status).toBe('scheduled');
+    });
+  });
 });

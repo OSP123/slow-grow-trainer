@@ -37,10 +37,27 @@ export interface GameStore {
   location?: string;
 }
 
+const REAL_SECTORS: Record<string, string[]> = {
+  'The Hive Spires': ['Outer Wall', 'Hab Districts', 'Merchant Quarter', 'Administratum', 'Spire Apex'],
+  'The Ash Wastes': ['Rad Perimeter', 'Nomad Trail', 'Storm Corridor', 'Scavenger Dens', 'Dead Zone'],
+  'The Magma Forges': ['Cooling Vents', 'Extraction Bay', 'Foundry Floor', 'Slag Channels', 'Forge Core'],
+  'Orbital Relay Station': ['Docking Pylons', 'Comms Array', 'Weapons Battery', 'Engineering Deck', 'Command Bridge'],
+  'The Sump Ruins': ['Crater Rim', 'Outer Ruins', 'Collapsed Tunnels', 'Warp Fissure', 'Buried Tomb'],
+  'The Toxic Oceans': ['Shore Batteries', 'Tidal Zone', 'Deep Channels', 'Leviathan Depths', 'Abyssal Trench']
+};
+
+function buildTheatreName(theatre: string, currentMonth: number): string {
+  const chosenTheatre = theatre || 'The Ash Wastes';
+  const sectorList = REAL_SECTORS[chosenTheatre] || ['Rad Perimeter'];
+  const monthIdx = Math.min(Math.max(1, currentMonth), sectorList.length) - 1;
+  return `${chosenTheatre} - ${sectorList[monthIdx]}`;
+}
+
 interface EditableMatchup {
   id: string;
   p1_id: string;
-  p2_id: string;
+  /** NULL on a bye: the opponent withdrew and no replacement was assigned. */
+  p2_id: string | null;
   campaign_month?: number;
   theatre_name?: string;
   p1_score: number | '';
@@ -390,25 +407,35 @@ export default function AdminDashboard() {
     setCommittingMatches(false);
   };
 
+  // Give a commander whose opponent withdrew a frontline of their own. There is
+  // no opponent to name, so this is a genuine bye: p2_id stays null and the row
+  // is pre-flagged so the commander immediately sees the uncontested claim.
+  const handleGrantUncontested = async (userId: string, commanderName: string) => {
+    setMatchupMessage('');
+    const month = campaignState?.current_month || 1;
+    const { error } = await supabase.from('matchups').insert([{
+      p1_id: userId,
+      p2_id: null,
+      status: 'scheduled',
+      theatre_name: buildTheatreName('', month),
+      campaign_month: month,
+      needs_reassignment: true,
+    }]);
+    if (error) {
+      setMatchupMessage('Error granting uncontested frontline: ' + error.message);
+    } else {
+      setMatchupMessage(`Uncontested frontline granted to ${commanderName}. They can now claim it and file a battle report.`);
+      fetchAllMatchups();
+    }
+  };
+
   const handleCreateManualPairing = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualP1 || !manualP2 || manualP1 === manualP2) {
       setManualMessage('Please select two distinct commanders.');
       return;
     }
-    const REAL_SECTORS: Record<string, string[]> = {
-      'The Hive Spires': ['Outer Wall', 'Hab Districts', 'Merchant Quarter', 'Administratum', 'Spire Apex'],
-      'The Ash Wastes': ['Rad Perimeter', 'Nomad Trail', 'Storm Corridor', 'Scavenger Dens', 'Dead Zone'],
-      'The Magma Forges': ['Cooling Vents', 'Extraction Bay', 'Foundry Floor', 'Slag Channels', 'Forge Core'],
-      'Orbital Relay Station': ['Docking Pylons', 'Comms Array', 'Weapons Battery', 'Engineering Deck', 'Command Bridge'],
-      'The Sump Ruins': ['Crater Rim', 'Outer Ruins', 'Collapsed Tunnels', 'Warp Fissure', 'Buried Tomb'],
-      'The Toxic Oceans': ['Shore Batteries', 'Tidal Zone', 'Deep Channels', 'Leviathan Depths', 'Abyssal Trench']
-    };
-    const chosenTheatre = manualTheatre || 'The Ash Wastes';
-    const sectorList = REAL_SECTORS[chosenTheatre] || ['Rad Perimeter'];
-    const monthIdx = Math.min(Math.max(1, campaignState?.current_month || 1), sectorList.length) - 1;
-    const assignedSector = sectorList[monthIdx];
-    const fullTheatreName = `${chosenTheatre} - ${assignedSector}`;
+    const fullTheatreName = buildTheatreName(manualTheatre, campaignState?.current_month || 1);
 
     const { error } = await supabase.from('matchups').insert([{
       p1_id: manualP1,
@@ -1285,10 +1312,7 @@ export default function AdminDashboard() {
                       <option value="Orbital Relay Station">Orbital Relay Station</option>
                     </select>
                   </div>
-                  <button type="submit" className="btn primary" style={{ padding: '0.6rem 1.25rem' }}>
-                    {manualUncontested ? 'Record Uncontested Frontline' : 'Schedule Pairing'}
-                  </button>
-                  <div style={{ flex: '1 1 100%' }}>
+                  <div style={{ flex: '1 1 100%', order: -1 }}>
                     <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
                       <input
                         type="checkbox"
@@ -1306,6 +1330,9 @@ export default function AdminDashboard() {
                       </span>
                     </label>
                   </div>
+                  <button type="submit" className="btn primary" style={{ padding: '0.6rem 1.25rem' }}>
+                    {manualUncontested ? 'Record Uncontested Frontline' : 'Schedule Pairing'}
+                  </button>
                 </form>
               </>
             );
@@ -1346,7 +1373,7 @@ export default function AdminDashboard() {
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Player 2</label>
                   <select
-                    value={editingMatchup.p2_id}
+                    value={editingMatchup.p2_id ?? ''}
                     onChange={e => {
                       const u = users.find(user => user.id === e.target.value);
                       setEditingMatchup(prev => prev ? {
@@ -1482,6 +1509,7 @@ export default function AdminDashboard() {
                     const p1Obj = m.p1_profile || users.find(u => u.id === m.p1_id);
                     const p1Name = formatCommanderWithDiscord(p1Obj, 'Unknown');
                     const p1Faction = p1Obj?.army_faction || 'No Faction';
+                    const isBye = !m.p2_id;
                     const p2Obj = m.p2_profile || users.find(u => u.id === m.p2_id);
                     const p2Name = formatCommanderWithDiscord(p2Obj, 'Unknown');
                     const p2Faction = p2Obj?.army_faction || 'No Faction';
@@ -1492,7 +1520,7 @@ export default function AdminDashboard() {
                       return !u || (u.campaign_status !== 'paused' && u.campaign_status !== 'removed');
                     };
                     const strandedId = needsReassignment
-                      ? (isStillActive(m.p1_id) ? m.p1_id : isStillActive(m.p2_id) ? m.p2_id : '')
+                      ? (isStillActive(m.p1_id) ? m.p1_id : m.p2_id && isStillActive(m.p2_id) ? m.p2_id : '')
                       : '';
                     return (
                       <tr key={m.id} style={{
@@ -1503,7 +1531,11 @@ export default function AdminDashboard() {
                           <strong>{p1Name}</strong> <span style={{ fontSize: '0.75rem', color: 'var(--theme-accent)' }}>[{p1Faction}]</span>
                         </td>
                         <td style={{ padding: '0.5rem' }}>
-                          <strong>{p2Name}</strong> <span style={{ fontSize: '0.75rem', color: 'var(--theme-accent)' }}>[{p2Faction}]</span>
+                          {isBye ? (
+                            <em style={{ color: '#f59e0b' }}>— Opponent withdrew —</em>
+                          ) : (
+                            <><strong>{p2Name}</strong> <span style={{ fontSize: '0.75rem', color: 'var(--theme-accent)' }}>[{p2Faction}]</span></>
+                          )}
                         </td>
                         <td style={{ padding: '0.5rem' }}>
                           <span style={{ color: 'var(--theme-accent)', fontWeight: 'bold' }}>Phase {m.campaign_month || 1}</span>
@@ -1563,13 +1595,23 @@ export default function AdminDashboard() {
                         </span>
                       </td>
                       <td style={{ padding: '0.5rem', textAlign: 'right' }}>
-                        <button onClick={() => {
-                          setManualP1(u.id);
-                          const pairingSection = document.getElementById('manual-narrative-pairing-section');
-                          if (pairingSection) pairingSection.scrollIntoView({ behavior: 'smooth' });
-                        }} className="btn secondary" style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderColor: '#ef4444', color: '#ef4444' }}>
-                          Pair Manually ↓
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                          <button onClick={() => {
+                            setManualP1(u.id);
+                            const pairingSection = document.getElementById('manual-narrative-pairing-section');
+                            if (pairingSection) pairingSection.scrollIntoView({ behavior: 'smooth' });
+                          }} className="btn secondary" style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderColor: '#ef4444', color: '#ef4444' }}>
+                            Pair Manually ↓
+                          </button>
+                          <button
+                            onClick={() => handleGrantUncontested(u.id, u.commander_name || 'Commander')}
+                            className="btn secondary"
+                            style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderColor: '#f59e0b', color: '#f59e0b' }}
+                            title="Their opponent withdrew: give them a frontline to claim uncontested — full VP plus a battle report."
+                          >
+                            ⚑ Grant Uncontested
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

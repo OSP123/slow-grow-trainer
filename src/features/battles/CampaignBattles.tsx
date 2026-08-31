@@ -6,7 +6,8 @@ import { formatCommanderWithDiscord } from '../../utils/commanderUtils';
 export interface MatchupData {
   id: string;
   p1_id: string;
-  p2_id: string;
+  /** NULL on a bye: the opponent withdrew and no replacement was assigned. */
+  p2_id: string | null;
   p1_score?: number;
   p2_score?: number;
   p1_lore?: string;
@@ -30,6 +31,9 @@ export interface MatchupData {
 // Victory points awarded when an opponent withdraws and the engagement
 // cannot be fought. The stranded commander still files a battle report.
 const UNCONTESTED_VICTORY_VP = 100;
+
+// Shown wherever an opponent would be named on a bye.
+const NO_OPPONENT = 'No opponent (withdrew)';
 
 // Render filled/empty stars for display (read-only)
 function StarDisplay({ value, size = '1rem' }: { value?: number; size?: string }) {
@@ -451,7 +455,9 @@ export default function CampaignBattles() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>{formatCommanderWithDiscord(m.p1_profile, 'Unknown')}</span>
                     <span style={{ color: 'var(--theme-fg-muted)', fontSize: '0.8rem' }}>vs</span>
-                    <span style={{ fontWeight: 'bold', fontSize: '0.95rem', textAlign: 'right' }}>{formatCommanderWithDiscord(m.p2_profile, 'Unknown')}</span>
+                    <span style={{ fontWeight: 'bold', fontSize: '0.95rem', textAlign: 'right', color: m.p2_id ? undefined : 'var(--theme-fg-muted)' }}>
+                      {m.p2_id ? formatCommanderWithDiscord(m.p2_profile, 'Unknown') : NO_OPPONENT}
+                    </span>
                   </div>
 
                   {/* ── Match Status Indicator ── */}
@@ -558,7 +564,9 @@ export default function CampaignBattles() {
                   >
                     {/* Opponent name */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                      <span style={{ fontWeight: 'bold' }}>vs {isP1 ? formatCommanderWithDiscord(m.p2_profile, 'Unknown') : formatCommanderWithDiscord(m.p1_profile, 'Unknown')}</span>
+                      <span style={{ fontWeight: 'bold' }}>
+                        vs {isP1 ? (m.p2_id ? formatCommanderWithDiscord(m.p2_profile, 'Unknown') : NO_OPPONENT) : formatCommanderWithDiscord(m.p1_profile, 'Unknown')}
+                      </span>
                       <span style={{ fontSize: '0.75rem', color: 'var(--theme-accent)' }}>Phase {m.campaign_month || 1}</span>
                     </div>
 
@@ -610,7 +618,9 @@ export default function CampaignBattles() {
               <h2 style={{ margin: 0, fontSize: '1.1rem' }}>
                 {isP1Active ? activeMatchData.p1_profile?.commander_name : activeMatchData.p2_profile?.commander_name}
                 {' '}<span style={{ color: 'var(--theme-fg-muted)', fontWeight: 'normal' }}>vs</span>{' '}
-                {isP1Active ? activeMatchData.p2_profile?.commander_name : activeMatchData.p1_profile?.commander_name}
+                {isP1Active
+                  ? (activeMatchData.p2_id ? activeMatchData.p2_profile?.commander_name : NO_OPPONENT)
+                  : activeMatchData.p1_profile?.commander_name}
               </h2>
               <button
                   type="button"

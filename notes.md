@@ -1329,3 +1329,16 @@ Tasks:
 Follow-ups:
 - Deployed via push to `main` (Render builds from git). Do NOT mark a commander as withdrawn on a build older than this commit — the previous code deletes their opponent's pairing.
 - Once deployed, restore the five orphaned commanders via Admin -> Active Pairings Overview. They now appear as UNASSIGNED (the phase-scoping fix revived that row), so: Pair Manually -> tick "Player 2 has withdrawn" -> select the commander who dropped -> Record Uncontested Frontline.
+
+Date: 2026-08-31 (Bye Frontlines — One-Click Uncontested Grant)
+Tasks:
+- The previous uncontested flow was the wrong shape. It could only attach to an existing matchup row, and `p2_id` was NOT NULL, so helping a commander whose row had already been deleted meant remembering and naming the opponent who dropped. Unusable across several orphans, and impossible where the pairing could not be reconstructed.
+- Migration `20260831010000_allow_bye_matchups.sql` drops NOT NULL from `matchups.p2_id`, so a bye is representable honestly: there is no opponent, rather than a fabricated one. Verified applied — an anon insert with `p2_id: null` now fails on RLS (42501) rather than not-null (23502).
+- Added a one-click "⚑ Grant Uncontested" button on every UNASSIGNED row in Active Pairings Overview. It inserts a bye (`p2_id: null`) for the current phase, pre-flagged `needs_reassignment`, so the commander immediately sees the claim — 100 VP plus a battle report. No opponent lookup, no checkbox, no jumping to another form.
+- Byes render as "— Opponent withdrew —" in the admin pairings table and "No opponent (withdrew)" in the player's frontlines list, Warzone Board, and detail heading, instead of "vs Unknown".
+- `Matchmaker.ts` (`previousMatchups`) and the matchup edit form now accept a null opponent.
+- Moved the "Player 2 has withdrawn" checkbox above the submit button in Manual Narrative Pairing; it had been rendering after the button, which likely read as absent.
+- 105 tests passing (2 new), production build passing.
+
+Follow-ups:
+- None. Both migrations applied and the code is deployed.

@@ -59,7 +59,7 @@ const checkLocationSynergy = (p1: CommanderProfile, p2: CommanderProfile): boole
   return false;
 };
 
-export function generateMatchups(pool: CommanderProfile[], currentMonth: number = 1, previousMatchups: { p1_id: string, p2_id: string }[] = []): MatchPair[] {
+export function generateMatchups(pool: CommanderProfile[], currentMonth: number = 1, previousMatchups: { p1_id: string, p2_id: string | null }[] = []): MatchPair[] {
   const unresolved = [...pool];
   const matchups: MatchPair[] = [];
 
