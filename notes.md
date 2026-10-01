@@ -1342,3 +1342,20 @@ Tasks:
 
 Follow-ups:
 - None. Both migrations applied and the code is deployed.
+
+Date: 2026-10-01 (Action-Based Campaign Engine)
+Tasks:
+- Investigated whether the Xenos tracking (Necrons / Leagues of Votann / T'au) had ever worked. It had not, and neither had any other faction's. Nothing has been recorded on the campaign map for the entire campaign.
+- Three independent faults in the existing outcome-driven engine: (1) `public.territories` does not exist -- `20260621000000_campaign_engine.sql` creates `campaign_state` AND `territories` but only the former is in the database, so that migration was applied partially; (2) `trigger_process_match_outcome` sits at the end of that same file and was never attached (provable: the function reads `territories` unconditionally on finalize, so if it were attached every finalize would abort with 42P01, yet 47 matches finalized fine); (3) the lookup matched `territories.name` against `matchups.theatre_name`, but the former is a bare theatre ('The Ash Wastes') and the latter always carries a sub-sector ('The Ash Wastes - Nomad Trail') -- zero of 36 matchups matched. A fourth mismatch: the seed said 'Orbital Defense Grid', the app says 'Orbital Relay Station'.
+- The engine was also built on the wrong premise. Rewards are meant to come from the deeds commanders describe in their battle reports, not from who won. Rebuilt around that.
+- New migration `20261001000000_action_based_campaign_engine.sql`: drops the outcome trigger and its function; creates `territories` with the six names the app actually uses; adds a `campaign_awards` ledger (one row per effect, admin-only writes, readable by all); and derives the map via `recalculate_campaign_map()`, which resets to baseline and replays the ledger. A statement-level trigger on `campaign_awards` keeps the map in step, so awards can be corrected or withdrawn and the map just recomputes.
+- Validated against a throwaway local Postgres 14 before handing it over: outcomes move nothing; a Necron awakening credits both the war zone and the Sump Ruins tomb world; Votann resources tally campaign-wide; withdrawing an award recomputes correctly; values clamp to 0-100; an invalid metric is rejected by CHECK; a non-admin cannot insert.
+- `src/data/campaignDeeds.ts` holds the deed catalogue (faction-scoped, each deed expanding to one or more effects). Edit it to retune the campaign; existing awards keep the value they were granted at.
+- `src/features/admin/ReportAdjudication.tsx` is the admin screen: lists submitted reports, shows the narrative to read, offers only the deeds defined for that commander's faction, and lists/withdraws awards. Sides that submitted no report are skipped.
+- Rewrote the Dynamic Campaign Mechanics section of `Briefing.tsx`. It previously told players the opposite -- "the outcome directly affects the control of the territory", "Xenos Wins", "Winning any match secures critical resources" -- so players had been optimising for a model that was never going to be implemented.
+- Gave `.adjudication-layout` a real breakpoint rather than an inline grid, so it cannot repeat the off-viewport bug from the frontlines panel.
+- 114 tests passing (9 new), production build passing.
+
+Follow-ups:
+- Apply `20261001000000_action_based_campaign_engine.sql` in the Supabase SQL editor, then deploy.
+- 55 narrative reports and 64 TL;DRs across 47 completed matches are waiting to be adjudicated. Nothing is backfilled automatically -- by design, since deeds are read from the prose.

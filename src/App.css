@@ -286,3 +286,23 @@
     gap: 1rem;
   }
 }
+
+/* ─────────────────────────────────────────────
+   ADMIN — Battle Report Adjudication
+   Report list beside the reading pane on wide
+   screens; stacks on narrow ones so the deed
+   controls are never pushed off-viewport.
+   ───────────────────────────────────────────── */
+.adjudication-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) 2fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .adjudication-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

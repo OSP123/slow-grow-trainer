@@ -82,18 +82,30 @@ export default function Briefing() {
           Dynamic Campaign Mechanics
         </h3>
         <p style={{ lineHeight: '1.6', marginBottom: '1rem' }}>
-          The planetary map features <strong>6 key Territories</strong>. As you play games and log battle reports, the outcome directly affects the control of the territory your match took place in:
+          The planetary map features <strong>6 key Territories</strong>. What moves them is{' '}
+          <strong>what you did, not whether you won</strong>. Winning a game earns you victory points
+          and Honour ratings; it does not shift a single percentage point on the map. The map answers
+          only to the deeds you describe in your battle report.
+        </p>
+        <p style={{ lineHeight: '1.6', marginBottom: '1rem' }}>
+          So write the report properly. Tell Command what your forces actually <em>did</em> out there —
+          what they seized, broke, excavated, defiled or defended. Campaign Command reads every
+          submitted report and credits the deeds it finds. A crushing victory described in one line
+          earns your faction nothing; a narrow defeat where you still cracked open a tomb seal earns
+          the Awakening all the same.
         </p>
         <ul style={{ paddingLeft: '1.5rem', lineHeight: '1.6', marginBottom: '1rem' }}>
-          <li><strong>Imperium Wins:</strong> Increase Imperium Control and push back Chaos Corruption.</li>
-          <li><strong>Chaos Wins:</strong> Increase Chaos Corruption and lower Imperium Control.</li>
-          <li><strong>Xenos Wins (Orks, T'au, Aeldari/Drukhari, Tyranids, Genestealer Cults):</strong> Increase their respective faction footholds in that war zone.</li>
-          <li><strong>Necrons Awakening:</strong> Whenever Necrons gain a battle victory anywhere on the planet, their victory fuels the awakening of ancient subterranean tomb complexes beneath Vespera Prime, actively increasing Necron control specifically in <strong>The Sump Ruins</strong> where their primary tomb world lies (as well as the contested war zone).</li>
-          <li><strong>T'au Empire vs Chaos:</strong> A T'au win against Chaos forces actively reduces Chaos Corruption in the sector (representing the neutralization of warp rituals).</li>
-          <li><strong>Leagues of Votann:</strong> Winning any match secures critical resources for the Ancestor Cores. Winning in industrial sectors (The Magma Forges or The Sump Ruins) yields bonus resources!</li>
+          <li><strong>Necrons — the Awakening:</strong> Describe rousing a dynasty, breaching a tomb seal or reclaiming lost technology. Waking a tomb complex stirs the great tomb world beneath <strong>The Sump Ruins</strong> as well as the war zone you fought in, wherever on the planet that was.</li>
+          <li><strong>Leagues of Votann — the Ancestor Cores:</strong> Describe extracting, stripping or escorting materiel. Securing a promethium cache, dismantling heavy industry or bringing a mining convoy through all feed the Cores. The richer the haul you describe, the more you bank.</li>
+          <li><strong>T'au Empire — the Greater Good:</strong> Describe breaking up a warp ritual to drive Corruption out of the sector, or winning over the local populace and embedding stealth cadres to widen the T'au foothold.</li>
+          <li><strong>Other Xenos:</strong> Orks loot scrap hauls, Aeldari anchor webway raids, Tyranids consume biomass, Genestealer Cults seed new broods — each widening that faction's foothold in the war zone.</li>
+          <li><strong>Imperium:</strong> Describe reinforcing defences or purging corruption to raise Imperium Control and burn back the warp.</li>
+          <li><strong>Chaos:</strong> Describe completing a dark ritual or despoiling an Imperial holding to spread Corruption and break Imperial order.</li>
         </ul>
         <p style={{ lineHeight: '1.6' }}>
-          The Campaign Engine automatically recalculates influence percentages the moment both players verify the match.
+          Deeds are credited by Campaign Command after your report is read, so the map updates shortly
+          after you submit rather than the instant you log a result. Every award is recorded and can be
+          revisited, so if you think a deed was missed, say so.
         </p>
       </div>
 

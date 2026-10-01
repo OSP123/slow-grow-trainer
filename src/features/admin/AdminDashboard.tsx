@@ -4,6 +4,7 @@ import { generateMatchups, type MatchPair } from './Matchmaker';
 import { getFactionsGrouped } from '../../data/warhammer40k';
 import { useUnitRegistry } from '../../hooks/useUnitRegistry';
 import { getGrandAlliance } from '../../components/TacticalSectorMap';
+import ReportAdjudication from './ReportAdjudication';
 import { formatCommanderWithDiscord } from '../../utils/commanderUtils';
 
 export interface UnitPoint {
@@ -1338,6 +1339,8 @@ export default function AdminDashboard() {
             );
           })()}
         </div>
+
+        <ReportAdjudication />
 
         
 {/* Edit form */}
