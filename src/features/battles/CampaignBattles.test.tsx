@@ -45,7 +45,7 @@ describe('Campaign Battles Integrations', () => {
 
     (supabase.from as Mock).mockImplementation(() => ({
       select: vi.fn().mockReturnValue({
-        order: vi.fn().mockResolvedValue({
+        eq: vi.fn().mockResolvedValue({ data: [], error: null }), order: vi.fn().mockResolvedValue({
           data: mockMatchups,
           error: null,
         }),
@@ -144,7 +144,7 @@ describe('Campaign Battles Integrations', () => {
       if (table === 'matchups') {
         return {
           select: vi.fn().mockReturnValue({
-            order: vi.fn().mockResolvedValue({
+            eq: vi.fn().mockResolvedValue({ data: [], error: null }), order: vi.fn().mockResolvedValue({
               data: mockMatchups,
               error: null,
             }),
@@ -154,7 +154,7 @@ describe('Campaign Battles Integrations', () => {
       }
       return {
         select: vi.fn().mockReturnValue({
-          order: vi.fn().mockResolvedValue({ data: [], error: null }),
+          eq: vi.fn().mockResolvedValue({ data: [], error: null }), order: vi.fn().mockResolvedValue({ data: [], error: null }),
         }),
         update: vi.fn().mockReturnValue({
           eq: vi.fn().mockResolvedValue({ error: null }),
@@ -204,7 +204,7 @@ describe('Campaign Battles Integrations', () => {
     }];
     (supabase.from as Mock).mockImplementation(() => ({
       select: vi.fn().mockReturnValue({
-        order: vi.fn().mockResolvedValue({
+        eq: vi.fn().mockResolvedValue({ data: [], error: null }), order: vi.fn().mockResolvedValue({
           data: matchupWithLore,
           error: null,
         }),
@@ -253,7 +253,7 @@ describe('Campaign Battles Integrations', () => {
     }];
     (supabase.from as Mock).mockImplementation(() => ({
       select: vi.fn().mockReturnValue({
-        order: vi.fn().mockResolvedValue({ data: opponentSealed, error: null }),
+        eq: vi.fn().mockResolvedValue({ data: [], error: null }), order: vi.fn().mockResolvedValue({ data: opponentSealed, error: null }),
       }),
       update: vi.fn().mockReturnValue({
         eq: vi.fn().mockResolvedValue({ error: null }),
@@ -289,7 +289,7 @@ describe('Campaign Battles Integrations', () => {
     }];
     (supabase.from as Mock).mockImplementation(() => ({
       select: vi.fn().mockReturnValue({
-        order: vi.fn().mockResolvedValue({ data: bothSubmitted, error: null }),
+        eq: vi.fn().mockResolvedValue({ data: [], error: null }), order: vi.fn().mockResolvedValue({ data: bothSubmitted, error: null }),
       }),
       update: vi.fn().mockReturnValue({
         eq: vi.fn().mockResolvedValue({ error: null }),
@@ -317,7 +317,7 @@ describe('Campaign Battles Integrations', () => {
     }];
     (supabase.from as Mock).mockImplementation(() => ({
       select: vi.fn().mockReturnValue({
-        order: vi.fn().mockResolvedValue({ data: opponentWithdrew, error: null }),
+        eq: vi.fn().mockResolvedValue({ data: [], error: null }), order: vi.fn().mockResolvedValue({ data: opponentWithdrew, error: null }),
       }),
       update: vi.fn().mockReturnValue({
         eq: vi.fn().mockResolvedValue({ error: null }),
@@ -350,7 +350,7 @@ describe('Campaign Battles Integrations', () => {
     }];
     (supabase.from as Mock).mockImplementation(() => ({
       select: vi.fn().mockReturnValue({
-        order: vi.fn().mockResolvedValue({ data: opponentWithdrew, error: null }),
+        eq: vi.fn().mockResolvedValue({ data: [], error: null }), order: vi.fn().mockResolvedValue({ data: opponentWithdrew, error: null }),
       }),
       update: mockUpdate,
     }));
@@ -406,7 +406,7 @@ describe('Campaign Battles Integrations', () => {
     }];
     (supabase.from as Mock).mockImplementation(() => ({
       select: vi.fn().mockReturnValue({
-        order: vi.fn().mockResolvedValue({ data: claimed, error: null }),
+        eq: vi.fn().mockResolvedValue({ data: [], error: null }), order: vi.fn().mockResolvedValue({ data: claimed, error: null }),
       }),
       update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
     }));
@@ -440,7 +440,7 @@ describe('Campaign Battles Integrations', () => {
     }];
     (supabase.from as Mock).mockImplementation(() => ({
       select: vi.fn().mockReturnValue({
-        order: vi.fn().mockResolvedValue({ data: bye, error: null }),
+        eq: vi.fn().mockResolvedValue({ data: [], error: null }), order: vi.fn().mockResolvedValue({ data: bye, error: null }),
       }),
       update: mockUpdate,
     }));
@@ -474,5 +474,66 @@ describe('Campaign Battles Integrations', () => {
       expect(payload.uncontested).toBe(true);
       expect(payload.p1_tldr).toBe('We held the line alone.');
     });
+  });
+  it('shows battlefield conditions in force for this engagement', async () => {
+    // Round-bound environmental effects apply to BOTH players. A commander must
+    // see the campaign-wide ones plus any pinned to the war zone they fight in,
+    // and must not see effects pinned to a different war zone.
+    const effects = [
+      { id: 'e1', title: 'Promethium Storms', description: 'The refineries burn unchecked.', rules_text: 'Ranged attacks beyond 18" suffer -1 to hit.', theatre_name: null, campaign_month: 4 },
+      { id: 'e2', title: 'Rising Floodwaters', description: 'The sump drowns.', rules_text: 'Halve Advance rolls.', theatre_name: 'The Sump Ruins', campaign_month: 4 },
+      { id: 'e3', title: 'Hab-Block Collapse', description: 'Elsewhere entirely.', rules_text: 'Not here.', theatre_name: 'The Hive Spires', campaign_month: 4 },
+    ];
+    const match = [{ ...mockMatchups[0], theatre_name: 'The Sump Ruins - Crater Rim', campaign_month: 4 }];
+
+    (supabase.from as Mock).mockImplementation((table: string) => {
+      if (table === 'global_events') {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ data: effects, error: null }),
+          }),
+        };
+      }
+      return {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ data: [], error: null }), order: vi.fn().mockResolvedValue({ data: match, error: null }),
+        }),
+        update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
+      };
+    });
+
+    render(<CampaignBattles />);
+    await waitFor(() => screen.getByText('My Assigned Frontlines'));
+    fireEvent.click((await screen.findByText(/vs Commander Beta/i)).closest('li')!);
+
+    await waitFor(() => {
+      expect(screen.getByText(/both players apply these/i)).toBeInTheDocument();
+    });
+    // Campaign-wide effect applies everywhere.
+    expect(screen.getByText('Promethium Storms')).toBeInTheDocument();
+    expect(screen.getByText(/Ranged attacks beyond 18" suffer -1 to hit/)).toBeInTheDocument();
+    // Pinned to this war zone, matched on the base theatre of 'The Sump Ruins - Crater Rim'.
+    expect(screen.getByText('Rising Floodwaters')).toBeInTheDocument();
+    // Pinned somewhere else entirely.
+    expect(screen.queryByText('Hab-Block Collapse')).not.toBeInTheDocument();
+  });
+
+  it('shows no conditions panel when nothing is in force', async () => {
+    (supabase.from as Mock).mockImplementation((table: string) => {
+      if (table === 'global_events') {
+        return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ data: [], error: null }) }) };
+      }
+      return {
+        select: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ data: [], error: null }), order: vi.fn().mockResolvedValue({ data: mockMatchups, error: null }) }),
+        update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
+      };
+    });
+
+    render(<CampaignBattles />);
+    await waitFor(() => screen.getByText('My Assigned Frontlines'));
+    fireEvent.click((await screen.findByText(/vs Commander Beta/i)).closest('li')!);
+
+    await waitFor(() => screen.getByText(/Live VP Tracker/i));
+    expect(screen.queryByText(/both players apply these/i)).not.toBeInTheDocument();
   });
 });

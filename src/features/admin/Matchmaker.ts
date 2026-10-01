@@ -1,3 +1,4 @@
+import { THEATRE_NAMES, THEATRE_SECTORS, asTheatreName, type TheatreName } from '../../data/theatres';
 /**
  * Matchmaker Engine calculating Campaign Pairings based on User Parameters.
  * 
@@ -129,26 +130,20 @@ export function generateMatchups(pool: CommanderProfile[], currentMonth: number 
     if (bestMatchIndex !== -1) {
       const p2 = unresolved.splice(bestMatchIndex, 1)[0];
       
-      const REAL_THEATRE_SECTORS: Record<string, string[]> = {
-        'The Hive Spires': ['Outer Wall', 'Hab Districts', 'Merchant Quarter', 'Administratum', 'Spire Apex'],
-        'The Ash Wastes': ['Rad Perimeter', 'Nomad Trail', 'Storm Corridor', 'Scavenger Dens', 'Dead Zone'],
-        'The Magma Forges': ['Cooling Vents', 'Extraction Bay', 'Foundry Floor', 'Slag Channels', 'Forge Core'],
-        'Orbital Relay Station': ['Docking Pylons', 'Comms Array', 'Weapons Battery', 'Engineering Deck', 'Command Bridge'],
-        'The Sump Ruins': ['Crater Rim', 'Outer Ruins', 'Collapsed Tunnels', 'Warp Fissure', 'Buried Tomb'],
-        'The Toxic Oceans': ['Shore Batteries', 'Tidal Zone', 'Deep Channels', 'Leviathan Depths', 'Abyssal Trench']
-      };
+      const theatreKeys = THEATRE_NAMES;
+      let baseTheatre: TheatreName;
 
-      const theatreKeys = Object.keys(REAL_THEATRE_SECTORS);
-      let baseTheatre: string;
-      
       // If both players explicitly selected the same non-default theatre, honor it; otherwise distribute across all theatres
-      if (p1.deployed_theatre && p2.deployed_theatre && p1.deployed_theatre === p2.deployed_theatre && p1.deployed_theatre !== 'The Ash Wastes' && REAL_THEATRE_SECTORS[p1.deployed_theatre]) {
-        baseTheatre = p1.deployed_theatre;
+      const shared = p1.deployed_theatre && p1.deployed_theatre === p2.deployed_theatre
+        ? asTheatreName(p1.deployed_theatre)
+        : undefined;
+      if (shared && shared !== 'The Ash Wastes') {
+        baseTheatre = shared;
       } else {
         baseTheatre = theatreKeys[matchups.length % theatreKeys.length];
       }
 
-      const sectors = REAL_THEATRE_SECTORS[baseTheatre];
+      const sectors = THEATRE_SECTORS[baseTheatre];
       const sectorIndex = Math.min(Math.max(1, currentMonth), sectors.length) - 1;
       const subSector = sectors[sectorIndex];
       

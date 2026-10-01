@@ -1359,3 +1359,18 @@ Tasks:
 Follow-ups:
 - Apply `20261001000000_action_based_campaign_engine.sql` in the Supabase SQL editor, then deploy.
 - 55 narrative reports and 64 TL;DRs across 47 completed matches are waiting to be adjudicated. Nothing is backfilled automatically -- by design, since deeds are read from the prose.
+
+Date: 2026-10-01 (Round Environmental Effects)
+Tasks:
+- Checked whether advancing a round applies environmental effects. It does not, and never did. `handleUpdateCampaign` runs a single `UPDATE campaign_state SET current_month = n` with no trigger behind it; the only month-specific logic in the whole app was a label (`current_month === 4 && 'The Siege of Vespera'`) plus a hardcoded month-5 banner. `global_events` had no way to be tied to a round and carried narrative text only -- nothing read it to modify a match. Zero events had ever been created.
+- Found a fourth name-drift bug of the same class that killed the campaign map: the global event theatre dropdown offered 'Hive Primus', 'Magma Forges', 'Orbital Tether', 'The Sump' and 'Rad-Zone Gamma'. Only one of six was a real war zone, and 'The Toxic Oceans' was missing entirely, so a per-theatre event could never have attached to a match.
+- Root-caused the drift: the six names were retyped in four places. Added `src/data/theatres.ts` as the single source, exporting them as a `const` tuple with a `TheatreName` union. AdminDashboard, Matchmaker and Dashboard now import it, and `THEATRES_OF_WAR` is typed `Record<TheatreName, ...>`, so a rename is a compile error instead of a silent mismatch. Deleted the local copies in AdminDashboard and Matchmaker.
+- New migration `20261001010000_round_environmental_effects.sql`: adds `campaign_month` (NULL = staged by hand) and `rules_text` to `global_events`, repairs the bogus theatre names on any existing rows, and adds a trigger on `campaign_state` that activates the new round's effects and retires the rest whenever `current_month` changes. A DB trigger rather than client code, so it holds no matter what moves the round.
+- Admin event form gained a round selector and a separate rules field. An effect authored for the round already in progress is inserted active, since the trigger only fires on a round change.
+- Players see a "Battlefield Conditions -- both players apply these" panel on their matchup, showing campaign-wide effects plus any pinned to their war zone (matched on the base theatre), and the Dashboard banner now shows the rules text.
+- Validated the migration on a throwaway local Postgres: advancing 3 -> 4 activates both round-4 effects and leaves round 3 off; rolling back retires round 4 and restores round 3; manual (NULL round) events are never touched; changing an unrelated column does not disturb anything; and the legacy name repair maps 'The Sump' -> 'The Sump Ruins', 'Hive Primus' -> 'The Hive Spires', 'Rad-Zone Gamma' -> campaign-wide.
+- 124 tests passing (9 new), production build passing.
+
+Follow-ups:
+- Apply `20261001010000_round_environmental_effects.sql` in the Supabase SQL editor, then deploy.
+- No round-4 effects exist yet. Author them in Admin -> Global Events Override with Round 4 selected before advancing the campaign.

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { FACTIONS } from '../../data/warhammer40k';
 import { formatCommanderWithDiscord } from '../../utils/commanderUtils';
+import { baseTheatre } from '../../data/theatres';
 
 export interface MatchupData {
   id: string;
@@ -26,6 +27,15 @@ export interface MatchupData {
   p2_rules_engagement?: number;
   p1_profile?: { commander_name: string; army_faction?: string };
   p2_profile?: { commander_name: string; army_faction?: string };
+}
+
+interface EnvironmentalEffect {
+  id: string;
+  title: string;
+  description: string;
+  rules_text?: string | null;
+  theatre_name?: string | null;
+  campaign_month?: number | null;
 }
 
 // Victory points awarded when an opponent withdraws and the engagement
@@ -93,6 +103,7 @@ export default function CampaignBattles() {
   const [oppTemperament, setOppTemperament] = useState<number | ''>('');
   const [oppRulesEngagement, setOppRulesEngagement] = useState<number | ''>('');
   const [isClaimingUncontested, setIsClaimingUncontested] = useState(false);
+  const [activeEffects, setActiveEffects] = useState<EnvironmentalEffect[]>([]);
 
   const fetchBattles = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -108,6 +119,14 @@ export default function CampaignBattles() {
       setAllMatchups(all);
       setMyMatchups(all.filter(m => m.p1_id === user.id || m.p2_id === user.id));
     }
+
+    // Environmental effects in force this round. Both players apply these.
+    const { data: effects } = await supabase
+      .from('global_events')
+      .select('id, title, description, rules_text, theatre_name, campaign_month')
+      .eq('is_active', true);
+    if (effects) setActiveEffects(effects as EnvironmentalEffect[]);
+
     setLoading(false);
   };
 
@@ -637,6 +656,48 @@ export default function CampaignBattles() {
                 </button>
             </div>
             
+            {/* In force for this engagement: campaign-wide effects plus any pinned
+                to this war zone. Both commanders apply these at the table. */}
+            {(() => {
+              const here = baseTheatre(activeMatchData.theatre_name);
+              const inForce = activeEffects.filter(
+                e => !e.theatre_name || e.theatre_name === here
+              );
+              if (inForce.length === 0) return null;
+              return (
+                <div style={{
+                  marginBottom: '1.5rem',
+                  border: '1px solid #a855f7',
+                  borderLeft: '4px solid #a855f7',
+                  borderRadius: '6px',
+                  padding: '1rem',
+                  backgroundColor: 'var(--theme-bg-secondary)',
+                }}>
+                  <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', color: '#a855f7', marginBottom: '0.75rem' }}>
+                    ☢ Battlefield Conditions — both players apply these
+                  </div>
+                  {inForce.map(e => (
+                    <div key={e.id} style={{ marginBottom: '0.75rem' }}>
+                      <div style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        {e.title}
+                        <span style={{ fontSize: '0.65rem', padding: '1px 6px', borderRadius: '3px', border: '1px solid var(--theme-border)', color: 'var(--theme-fg-muted)', fontWeight: 'normal' }}>
+                          {e.theatre_name ? e.theatre_name : 'Campaign-wide'}
+                        </span>
+                      </div>
+                      {e.description && (
+                        <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', fontStyle: 'italic', color: 'var(--theme-fg-muted)' }}>{e.description}</p>
+                      )}
+                      {e.rules_text && (
+                        <p style={{ margin: '0.35rem 0 0', fontSize: '0.9rem', color: '#f59e0b' }}>
+                          <strong>Rules:</strong> {e.rules_text}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
             {activeMatchData.theatre_name && (
               <div style={{ marginBottom: '1.5rem', fontSize: '0.85rem', color: 'var(--theme-accent)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--theme-accent)' }}></span>

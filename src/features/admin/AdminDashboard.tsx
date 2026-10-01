@@ -5,6 +5,7 @@ import { getFactionsGrouped } from '../../data/warhammer40k';
 import { useUnitRegistry } from '../../hooks/useUnitRegistry';
 import { getGrandAlliance } from '../../components/TacticalSectorMap';
 import ReportAdjudication from './ReportAdjudication';
+import { THEATRE_NAMES, buildTheatreName } from '../../data/theatres';
 import { formatCommanderWithDiscord } from '../../utils/commanderUtils';
 
 export interface UnitPoint {
@@ -21,6 +22,10 @@ export interface GlobalEvent {
   description: string;
   is_active: boolean;
   theatre_name?: string;
+  /** The round this effect belongs to. Null means it is staged and retired by hand. */
+  campaign_month?: number | null;
+  /** The modifier both players apply at the table. */
+  rules_text?: string | null;
   created_at: string;
 }
 
@@ -36,22 +41,6 @@ export interface GameStore {
   id: string;
   name: string;
   location?: string;
-}
-
-const REAL_SECTORS: Record<string, string[]> = {
-  'The Hive Spires': ['Outer Wall', 'Hab Districts', 'Merchant Quarter', 'Administratum', 'Spire Apex'],
-  'The Ash Wastes': ['Rad Perimeter', 'Nomad Trail', 'Storm Corridor', 'Scavenger Dens', 'Dead Zone'],
-  'The Magma Forges': ['Cooling Vents', 'Extraction Bay', 'Foundry Floor', 'Slag Channels', 'Forge Core'],
-  'Orbital Relay Station': ['Docking Pylons', 'Comms Array', 'Weapons Battery', 'Engineering Deck', 'Command Bridge'],
-  'The Sump Ruins': ['Crater Rim', 'Outer Ruins', 'Collapsed Tunnels', 'Warp Fissure', 'Buried Tomb'],
-  'The Toxic Oceans': ['Shore Batteries', 'Tidal Zone', 'Deep Channels', 'Leviathan Depths', 'Abyssal Trench']
-};
-
-function buildTheatreName(theatre: string, currentMonth: number): string {
-  const chosenTheatre = theatre || 'The Ash Wastes';
-  const sectorList = REAL_SECTORS[chosenTheatre] || ['Rad Perimeter'];
-  const monthIdx = Math.min(Math.max(1, currentMonth), sectorList.length) - 1;
-  return `${chosenTheatre} - ${sectorList[monthIdx]}`;
 }
 
 interface EditableMatchup {
@@ -105,6 +94,9 @@ export default function AdminDashboard() {
   const [newEventTitle, setNewEventTitle] = useState('');
   const [newEventDesc, setNewEventDesc] = useState('');
   const [newEventTheatre, setNewEventTheatre] = useState('');
+  const [newEventRules, setNewEventRules] = useState('');
+  // '' = not round-bound (staged and retired by hand); a number binds it to that round.
+  const [newEventRound, setNewEventRound] = useState<number | ''>('');
   const [eventMessage, setEventMessage] = useState('');
 
   // Matchup management
@@ -482,8 +474,12 @@ export default function AdminDashboard() {
     try {
       const { error } = await supabase.from('global_events').insert({ 
         title: newEventTitle, 
-        description: newEventDesc, 
-        is_active: false,
+        description: newEventDesc,
+        rules_text: newEventRules || null,
+        campaign_month: newEventRound === '' ? null : newEventRound,
+        // The round trigger only fires when the round CHANGES, so an effect
+        // authored for the round we are already on must go live immediately.
+        is_active: newEventRound !== '' && newEventRound === (campaignState?.current_month || 1),
         theatre_name: newEventTheatre || null
       });
       if (error) setEventMessage('Error: ' + error.message);
@@ -492,6 +488,8 @@ export default function AdminDashboard() {
         setNewEventTitle('');
         setNewEventDesc('');
         setNewEventTheatre('');
+        setNewEventRules('');
+        setNewEventRound('');
         fetchGlobalEvents();
       }
     } catch (err) {
@@ -758,16 +756,24 @@ export default function AdminDashboard() {
         <form onSubmit={handleAddEvent} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
           <input type="text" placeholder="Event Title (e.g. Warp Storm)" value={newEventTitle}
             onChange={e => setNewEventTitle(e.target.value)} required style={{ flex: 1, padding: '0.75rem', boxSizing: 'border-box', minWidth: '150px' }} />
-          <input type="text" placeholder="Narrative Description / Rules" value={newEventDesc}
+          <input type="text" placeholder="Narrative description (flavour)" value={newEventDesc}
             onChange={e => setNewEventDesc(e.target.value)} required style={{ flex: 2, padding: '0.75rem', boxSizing: 'border-box', minWidth: '200px' }} />
+          <input type="text" placeholder="Rules both players apply (e.g. -1 to hit beyond 18&quot;)" value={newEventRules}
+            onChange={e => setNewEventRules(e.target.value)} style={{ flex: 2, padding: '0.75rem', boxSizing: 'border-box', minWidth: '200px' }} />
+          <select
+            aria-label="Campaign round"
+            value={newEventRound}
+            onChange={e => setNewEventRound(e.target.value === '' ? '' : parseInt(e.target.value))}
+            style={{ padding: '0.75rem', boxSizing: 'border-box' }}
+          >
+            <option value="">Manual (no round)</option>
+            {[1, 2, 3, 4, 5].map(r => (
+              <option key={r} value={r}>Round {r}{r === (campaignState?.current_month || 1) ? ' (current)' : ''}</option>
+            ))}
+          </select>
           <select value={newEventTheatre} onChange={e => setNewEventTheatre(e.target.value)} style={{ padding: '0.75rem', boxSizing: 'border-box' }}>
-            <option value="">Global Event (All Theatres)</option>
-            <option value="Hive Primus">Hive Primus</option>
-            <option value="The Ash Wastes">The Ash Wastes</option>
-            <option value="Magma Forges">Magma Forges</option>
-            <option value="Orbital Tether">Orbital Tether</option>
-            <option value="The Sump">The Sump</option>
-            <option value="Rad-Zone Gamma">Rad-Zone Gamma</option>
+            <option value="">Campaign-Wide (All War Zones)</option>
+            {THEATRE_NAMES.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
           <button type="submit" className="btn primary">Stage Event</button>
         </form>
@@ -780,7 +786,13 @@ export default function AdminDashboard() {
                 <strong style={{ color: event.is_active ? '#a855f7' : 'var(--theme-fg)', fontSize: '1.1rem' }}>{event.title}</strong>
                 {event.theatre_name && <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', padding: '2px 6px', backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-accent)', border: '1px solid var(--theme-accent)', borderRadius: '4px' }}>{event.theatre_name}</span>}
                 {event.is_active && <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', padding: '2px 6px', backgroundColor: '#a855f7', color: 'white', borderRadius: '4px', textTransform: 'uppercase' }}>Active</span>}
+                {event.campaign_month != null && <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', padding: '2px 6px', backgroundColor: 'var(--theme-bg-secondary)', color: '#f59e0b', border: '1px solid #f59e0b', borderRadius: '4px' }}>Round {event.campaign_month}</span>}
                 <div style={{ color: 'var(--theme-fg-muted)', marginTop: '0.25rem', fontSize: '0.9rem' }}>{event.description}</div>
+                {event.rules_text && (
+                  <div style={{ marginTop: '0.35rem', fontSize: '0.85rem', color: '#f59e0b', borderLeft: '3px solid #f59e0b', paddingLeft: '0.5rem' }}>
+                    <strong>Rules:</strong> {event.rules_text}
+                  </div>
+                )}
               </div>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                 <button onClick={() => handleToggleEvent(event.id, event.is_active)}
@@ -1305,12 +1317,7 @@ export default function AdminDashboard() {
                     <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--theme-fg-muted)', marginBottom: '4px' }}>Theatre of War</label>
                     <select value={manualTheatre} onChange={e => setManualTheatre(e.target.value)} style={{ width: '100%', padding: '0.6rem', boxSizing: 'border-box' }}>
                       <option value="">Default (The Ash Wastes)</option>
-                      <option value="The Hive Spires">The Hive Spires</option>
-                      <option value="The Magma Forges">The Magma Forges</option>
-                      <option value="The Sump Ruins">The Sump Ruins</option>
-                      <option value="The Ash Wastes">The Ash Wastes</option>
-                      <option value="The Toxic Oceans">The Toxic Oceans</option>
-                      <option value="Orbital Relay Station">Orbital Relay Station</option>
+                      {THEATRE_NAMES.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
                   <div style={{ flex: '1 1 100%', order: -1 }}>
