@@ -9,6 +9,7 @@ import { getTransformUrl } from '../../utils/imageCompression';
 import { formatCommanderWithDiscord } from '../../utils/commanderUtils';
 import TacticalSectorMap, { getFactionColor, getGrandAlliance } from '../../components/TacticalSectorMap';
 import { THEATRE_NAMES, type TheatreName } from '../../data/theatres';
+import { territoryInfluence } from '../../data/territoryInfluence';
 
 // Keyed by the canonical war zone names. Typed as Record<TheatreName, ...>, so
 // renaming or dropping a theatre in src/data/theatres.ts is a compile error here
@@ -31,12 +32,6 @@ if (import.meta.env.DEV) {
     console.error('THEATRES_OF_WAR does not match the canonical war zones', { listed, expected });
   }
 }
-
-const FACTION_COLORS = {
-  imperium: '#3b82f6', // Blue
-  chaos: '#ef4444',    // Red
-  xenos: '#22c55e'     // Green
-};
 
 // Deterministic scatter offsets
 function getDeterministicOffset(seedStr: string) {
@@ -724,107 +719,36 @@ export default function Dashboard() {
             <div>
               <p style={{ fontStyle: 'italic', color: '#ccc', marginBottom: '2rem', fontSize: '1.1rem', lineHeight: 1.6 }}>"{selectedTheatre.narrative}"</p>
               
-              {/* Influence Bars based on `territories` db data */}
-              {territoryStats.find(t => t.name === selectedTheatre.name) && (
-                <div style={{ marginBottom: '2rem', padding: '1.5rem', backgroundColor: 'var(--theme-bg)', borderRadius: '8px', border: '1px solid var(--theme-border)' }}>
-                  <h3 style={{ margin: '0 0 1rem 0', color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '1px' }}>Territory Influence</h3>
-                  {(() => {
-                    const t = territoryStats.find(t => t.name === selectedTheatre.name);
-                    return (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
-                            <span style={{ color: FACTION_COLORS.imperium }}>Imperium Control</span>
-                            <span>{t.imperium_control}%</span>
-                          </div>
-                          <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
-                            <div style={{ width: `${t.imperium_control}%`, height: '100%', background: FACTION_COLORS.imperium, transition: 'width 0.5s ease-out' }}></div>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
-                            <span style={{ color: FACTION_COLORS.chaos }}>Warp Corruption</span>
-                            <span>{t.chaos_corruption}%</span>
-                          </div>
-                          <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
-                            <div style={{ width: `${t.chaos_corruption}%`, height: '100%', background: FACTION_COLORS.chaos, transition: 'width 0.5s ease-out' }}></div>
-                          </div>
-                        </div>
-                        
-                        {t.ork_foothold > 0 && (
-                          <div>
+              {/* Share of influence per faction, from `territories` db data */}
+              {(() => {
+                const row = territoryStats.find(t => t.name === selectedTheatre.name);
+                if (!row) return null;
+                const { shares, controller } = territoryInfluence(row);
+                return (
+                  <div style={{ marginBottom: '2rem', padding: '1.5rem', backgroundColor: 'var(--theme-bg)', borderRadius: '8px', border: '1px solid var(--theme-border)' }}>
+                    <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '1px' }}>Territory Influence</h3>
+                    <p style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 'bold', color: controller ? getFactionColor(controller.colorFaction) : '#ccc' }}>
+                      {controller ? `Controlled by ${controller.label}` : shares.length ? 'Contested' : 'No faction holds this territory'}
+                    </p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {shares.map(s => {
+                        const color = getFactionColor(s.colorFaction);
+                        return (
+                          <div key={s.metric}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
-                              <span style={{ color: getFactionColor('Orks') }}>Ork Foothold</span>
-                              <span>{t.ork_foothold}%</span>
+                              <span style={{ color }}>{s.label}</span>
+                              <span>{s.share}%</span>
                             </div>
                             <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
-                              <div style={{ width: `${t.ork_foothold}%`, height: '100%', background: getFactionColor('Orks'), transition: 'width 0.5s ease-out' }}></div>
+                              <div style={{ width: `${s.share}%`, height: '100%', background: color, transition: 'width 0.5s ease-out' }}></div>
                             </div>
                           </div>
-                        )}
-
-
-                        {t.tau_foothold > 0 && (
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
-                              <span style={{ color: getFactionColor("T'au Empire") }}>T'au Foothold</span>
-                              <span>{t.tau_foothold}%</span>
-                            </div>
-                            <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
-                              <div style={{ width: `${t.tau_foothold}%`, height: '100%', background: getFactionColor("T'au Empire"), transition: 'width 0.5s ease-out' }}></div>
-                            </div>
-                          </div>
-                        )}
-                        {t.aeldari_foothold > 0 && (
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
-                              <span style={{ color: getFactionColor('Aeldari') }}>Aeldari Foothold</span>
-                              <span>{t.aeldari_foothold}%</span>
-                            </div>
-                            <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
-                              <div style={{ width: `${t.aeldari_foothold}%`, height: '100%', background: getFactionColor('Aeldari'), transition: 'width 0.5s ease-out' }}></div>
-                            </div>
-                          </div>
-                        )}
-                        {t.necron_foothold > 0 && (
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
-                              <span style={{ color: getFactionColor('Necrons') }}>Necron Awakening</span>
-                              <span>{t.necron_foothold}%</span>
-                            </div>
-                            <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
-                              <div style={{ width: `${t.necron_foothold}%`, height: '100%', background: getFactionColor('Necrons'), transition: 'width 0.5s ease-out' }}></div>
-                            </div>
-                          </div>
-                        )}
-                        {t.tyranid_foothold > 0 && (
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
-                              <span style={{ color: getFactionColor('Tyranids') }}>Tyranid Infestation</span>
-                              <span>{t.tyranid_foothold}%</span>
-                            </div>
-                            <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
-                              <div style={{ width: `${t.tyranid_foothold}%`, height: '100%', background: getFactionColor('Tyranids'), transition: 'width 0.5s ease-out' }}></div>
-                            </div>
-                          </div>
-                        )}
-                        {t.genestealer_foothold > 0 && (
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '6px', fontWeight: 'bold' }}>
-                              <span style={{ color: getFactionColor('Genestealer Cults') }}>Cult Uprising</span>
-                              <span>{t.genestealer_foothold}%</span>
-                            </div>
-                            <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '6px', overflow: 'hidden' }}>
-                              <div style={{ width: `${t.genestealer_foothold}%`, height: '100%', background: getFactionColor('Genestealer Cults'), transition: 'width 0.5s ease-out' }}></div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </div>
-              )}
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Battle Reports for the chosen area */}
               {selectedTheatre.warlord ? (

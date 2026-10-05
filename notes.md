@@ -1374,3 +1374,16 @@ Tasks:
 Follow-ups:
 - Apply `20261001010000_round_environmental_effects.sql` in the Supabase SQL editor, then deploy.
 - No round-4 effects exist yet. Author them in Admin -> Global Events Override with Round 4 selected before advancing the campaign.
+
+Date: 2026-10-05 (Faction Territory Control)
+Tasks:
+- Checked why every war zone read Imperium 50% / Warp Corruption 50%. That is the ledger baseline, so it is correct while no deeds are credited. But the model itself was a two-way fight: each faction had an independent 0-100 meter, xenos started at 0 and their bars were hidden until they scored, and nothing compared the meters, so no faction ever "controlled" a territory.
+- Control is now a share of influence. New `src/data/territoryInfluence.ts` turns a `territories` row into per-faction shares summing to exactly 100% (largest-remainder rounding) and names the largest share as controller ("Contested" on a tie at the top). The Dashboard's Territory Influence panel renders that list instead of ten hand-written bars.
+- Baseline kept at Imperium 50 / Chaos 50, xenos 0, by choice: the Imperial world under Chaos threat, with everyone else fighting their way on.
+- New migration `20261005000000_faction_territory_control.sql`: adds `votann_foothold` and `drukhari_foothold`, widens the `campaign_awards.metric` CHECK, drops the 100 cap from `recalculate_campaign_map` (shares are relative, so a capped score could never pull ahead), and re-points past Aeldari awards made by Drukhari commanders onto the Drukhari meter.
+- New deeds: "Staked a mining claim" (Votann, +5 territory; resource deeds unchanged) and "Led a realspace raid" (Drukhari). Aeldari deeds are no longer offered to Drukhari. Briefing updated to explain shared control.
+- Validated the migration on a throwaway local Postgres on top of the previous campaign migration: the cap lifts (12 fortify awards -> 110), Drukhari awards move and Aeldari ones stay, new metrics are accepted and bogus ones rejected, and re-running it is harmless.
+- 131 tests passing (7 new), production build passing.
+
+Follow-ups:
+- Apply `20261005000000_faction_territory_control.sql` in the Supabase SQL editor, then deploy. The deployed Dashboard expects the new columns; until the migration runs, Votann and Drukhari simply never appear.

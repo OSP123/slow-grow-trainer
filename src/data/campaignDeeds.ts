@@ -16,9 +16,11 @@ export type AwardMetric =
   | 'ork_foothold'
   | 'tau_foothold'
   | 'aeldari_foothold'
+  | 'drukhari_foothold'
   | 'necron_foothold'
   | 'tyranid_foothold'
   | 'genestealer_foothold'
+  | 'votann_foothold'
   | 'votann_resources';
 
 /**
@@ -48,7 +50,8 @@ const NECRONS = ['Necrons'];
 const VOTANN = ['Leagues of Votann'];
 const TAU = ["T'au Empire"];
 const ORKS = ['Orks'];
-const AELDARI = ['Aeldari', 'Drukhari'];
+const AELDARI = ['Aeldari'];
+const DRUKHARI = ['Drukhari'];
 const TYRANIDS = ['Tyranids'];
 const GENESTEALER = ['Genestealer Cults'];
 
@@ -94,7 +97,8 @@ export const CAMPAIGN_DEEDS: Deed[] = [
   },
 
   // ── Leagues of Votann ────────────────────────────────────────────────────
-  // Resources are a campaign-wide tally for the Ancestor Cores, not territory.
+  // Resources are a campaign-wide tally for the Ancestor Cores; mining claims
+  // are what give the Kin a hold on the territory itself.
   {
     id: 'votann-secure-cache',
     label: 'Secured a promethium cache',
@@ -115,6 +119,13 @@ export const CAMPAIGN_DEEDS: Deed[] = [
     description: 'A extraction convoy brought through hostile ground intact.',
     factions: VOTANN,
     effects: [{ metric: 'votann_resources', delta: 5, target: 'campaign' }],
+  },
+  {
+    id: 'votann-stake-claim',
+    label: 'Staked a mining claim',
+    description: 'A Hold-claim planted and fortified, giving the Kin a lasting stake in the war zone.',
+    factions: VOTANN,
+    effects: [{ metric: 'votann_foothold', delta: 5, target: 'battle' }],
   },
 
   // ── T'au Empire ──────────────────────────────────────────────────────────
@@ -154,6 +165,13 @@ export const CAMPAIGN_DEEDS: Deed[] = [
     description: 'A webway portal anchored, granting the Aeldari free passage.',
     factions: AELDARI,
     effects: [{ metric: 'aeldari_foothold', delta: 5, target: 'battle' }],
+  },
+  {
+    id: 'drukhari-realspace-raid',
+    label: 'Led a realspace raid',
+    description: 'Captives taken back through the webway, leaving the war zone bled and terrified.',
+    factions: DRUKHARI,
+    effects: [{ metric: 'drukhari_foothold', delta: 5, target: 'battle' }],
   },
   {
     id: 'tyranid-consume-biomass',
@@ -232,8 +250,10 @@ export const METRIC_LABELS: Record<AwardMetric, string> = {
   ork_foothold: 'Ork Foothold',
   tau_foothold: "T'au Foothold",
   aeldari_foothold: 'Aeldari Foothold',
+  drukhari_foothold: 'Drukhari Foothold',
   necron_foothold: 'Necron Awakening',
   tyranid_foothold: 'Tyranid Foothold',
   genestealer_foothold: 'Genestealer Foothold',
+  votann_foothold: 'Votann Foothold',
   votann_resources: 'Votann Resources',
 };

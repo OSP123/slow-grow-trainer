@@ -96,12 +96,18 @@ export default function Briefing() {
         </p>
         <ul style={{ paddingLeft: '1.5rem', lineHeight: '1.6', marginBottom: '1rem' }}>
           <li><strong>Necrons — the Awakening:</strong> Describe rousing a dynasty, breaching a tomb seal or reclaiming lost technology. Waking a tomb complex stirs the great tomb world beneath <strong>The Sump Ruins</strong> as well as the war zone you fought in, wherever on the planet that was.</li>
-          <li><strong>Leagues of Votann — the Ancestor Cores:</strong> Describe extracting, stripping or escorting materiel. Securing a promethium cache, dismantling heavy industry or bringing a mining convoy through all feed the Cores. The richer the haul you describe, the more you bank.</li>
+          <li><strong>Leagues of Votann — the Ancestor Cores:</strong> Describe extracting, stripping or escorting materiel. Securing a promethium cache, dismantling heavy industry or bringing a mining convoy through all feed the Cores. The richer the haul you describe, the more you bank. Staking a mining claim gives the Kin a hold on the war zone itself.</li>
           <li><strong>T'au Empire — the Greater Good:</strong> Describe breaking up a warp ritual to drive Corruption out of the sector, or winning over the local populace and embedding stealth cadres to widen the T'au foothold.</li>
-          <li><strong>Other Xenos:</strong> Orks loot scrap hauls, Aeldari anchor webway raids, Tyranids consume biomass, Genestealer Cults seed new broods — each widening that faction's foothold in the war zone.</li>
+          <li><strong>Other Xenos:</strong> Orks loot scrap hauls, Aeldari anchor webway raids, Drukhari lead realspace raids, Tyranids consume biomass, Genestealer Cults seed new broods — each widening that faction's foothold in the war zone.</li>
           <li><strong>Imperium:</strong> Describe reinforcing defences or purging corruption to raise Imperium Control and burn back the warp.</li>
           <li><strong>Chaos:</strong> Describe completing a dark ritual or despoiling an Imperial holding to spread Corruption and break Imperial order.</li>
         </ul>
+        <p style={{ lineHeight: '1.6', marginBottom: '1rem' }}>
+          Every war zone is split between the factions with a presence there, always adding up to
+          100%. Each deed grows your faction's share at the expense of everyone else's, and whoever
+          holds the largest share controls the territory. The Imperium and Chaos begin evenly
+          matched; every other faction has to fight its way onto the map.
+        </p>
         <p style={{ lineHeight: '1.6' }}>
           Deeds are credited by Campaign Command after your report is read, so the map updates shortly
           after you submit rather than the instant you log a result. Every award is recorded and can be
