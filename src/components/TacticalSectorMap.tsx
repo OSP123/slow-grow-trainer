@@ -168,37 +168,42 @@ interface TacticalSectorMapProps {
 export default function TacticalSectorMap({ theatre, commanders, matchups }: TacticalSectorMapProps) {
   const [selectedSector, setSelectedSector] = useState<number | null>(null);
 
-  const getCommanderTheatre = (c: any) => {
-    if (matchups) {
-      const activeMatch = matchups.find(m => (m.p1_id === c.id || m.p2_id === c.id) && m.status !== 'cancelled');
-      if (activeMatch && activeMatch.theatre_name) return activeMatch.theatre_name;
-    }
-    return c.deployed_theatre || null;
-  };
-
-  const deployedCommanders = commanders.filter(c => {
-    const t = getCommanderTheatre(c);
-    return t && (t === theatre.name || t.startsWith(`${theatre.name} -`));
-  });
   const sectors = THEATRE_SECTORS[theatre.name] || DEFAULT_SECTORS;
 
-  const getSectorForCommander = (cmdId: string) => {
-    const cmd = commanders.find(c => c.id === cmdId);
-    if (cmd) {
-      const t = getCommanderTheatre(cmd);
-      if (t && t.includes(' - ')) {
-        const sectorName = t.split(' - ')[1].trim().toLowerCase();
-        const foundIdx = sectors.findIndex(s => s.name.toLowerCase() === sectorName);
-        if (foundIdx !== -1) return sectors[foundIdx].id;
-      }
+  // Each sector is one round, and a commander fights a matchup in every round,
+  // so a commander belongs in EVERY sector they fought in -- not just one.
+  // Built from the matchups themselves; commanders who are paused or removed
+  // are absent from `commanders` and drop out here too.
+  const commandersById = new Map(commanders.map(c => [c.id, c]));
+  const occupants: Map<number, any>[] = sectors.map(() => new Map());
+  for (const m of matchups ?? []) {
+    if (m.status === 'cancelled' || !m.theatre_name?.startsWith(`${theatre.name} -`)) continue;
+    const sectorName = m.theatre_name.split(' - ')[1].trim().toLowerCase();
+    const idx = sectors.findIndex(s => s.name.toLowerCase() === sectorName);
+    if (idx === -1) continue;
+    for (const id of [m.p1_id, m.p2_id]) {
+      const c = commandersById.get(id);
+      if (c) occupants[idx].set(c.id, c);
     }
+  }
+
+  // Commanders with no matchup placed anywhere yet but deployed to this theatre
+  // get a stable, arbitrary sector so they still show on the map.
+  const placed = new Set(occupants.flatMap(o => [...o.keys()]));
+  const hasPlacedMatchup = (id: string) => matchups?.some(m =>
+    m.status !== 'cancelled' && m.theatre_name && (m.p1_id === id || m.p2_id === id));
+  for (const c of commanders) {
+    if (placed.has(c.id) || hasPlacedMatchup(c.id)) continue;
+    if (c.deployed_theatre !== theatre.name && !c.deployed_theatre?.startsWith(`${theatre.name} -`)) continue;
     let hash = 0;
-    for (let i = 0; i < cmdId.length; i++) hash = ((hash << 5) - hash) + cmdId.charCodeAt(i);
-    return Math.abs(hash) % sectors.length;
-  };
+    for (let i = 0; i < c.id.length; i++) hash = ((hash << 5) - hash) + c.id.charCodeAt(i);
+    occupants[Math.abs(hash) % sectors.length].set(c.id, c);
+  }
+
+  const deployedCommanders = [...new Map(occupants.flatMap(o => [...o])).values()];
 
   const getSectorControl = (sectorId: number) => {
-    const sectorCmds = deployedCommanders.filter(c => getSectorForCommander(c.id) === sectorId);
+    const sectorCmds = [...occupants[sectorId].values()];
     if (sectorCmds.length === 0) return { faction: null, color: '#4b5563', status: 'UNCONTESTED', count: 0, commanders: [] };
 
     const factionCounts: Record<string, number> = {};

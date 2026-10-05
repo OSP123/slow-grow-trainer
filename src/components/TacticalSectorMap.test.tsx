@@ -154,6 +154,46 @@ describe('TacticalSectorMap & Helper Tests', () => {
     });
   });
 
+  describe('commanders across rounds', () => {
+    const hive = { name: 'The Hive Spires', narrative: 'Test', color: '#3b82f6' };
+    const cmdrs = [
+      { id: 'a', commander_name: 'Calgar', army_faction: 'Ultramarines' },
+      { id: 'b', commander_name: 'Kharn', army_faction: 'World Eaters' },
+      { id: 'c', commander_name: 'Imotekh', army_faction: 'Necrons' },
+    ];
+    // Calgar fights in round 1 and round 2 of the same theatre.
+    const rounds = [
+      { id: 'r1', status: 'completed', theatre_name: 'The Hive Spires - Outer Wall', p1_id: 'a', p2_id: 'b' },
+      { id: 'r2', status: 'completed', theatre_name: 'The Hive Spires - Hab Districts', p1_id: 'c', p2_id: 'a' },
+    ];
+    const open = (sector: string) => {
+      const g = screen.getByText(sector).closest('g');
+      if (g) fireEvent.click(g);
+    };
+
+    it('shows a commander in every sector they fought in, not just their first', () => {
+      renderWithRouter(<TacticalSectorMap theatre={hive} commanders={cmdrs} mapLocations={[]} matchups={rounds} />);
+      open('Outer Wall');
+      expect(screen.getByText(/2 Commander\(s\)/)).toBeInTheDocument();
+      open('Hab Districts');
+      expect(screen.getByText(/2 Commander\(s\)/)).toBeInTheDocument();
+      expect(screen.getByText(/Imotekh/, { selector: 'a' })).toBeInTheDocument();
+      expect(screen.getByText(/Calgar/, { selector: 'a' })).toBeInTheDocument();
+    });
+
+    it('leaves rounds nobody has fought yet empty', () => {
+      renderWithRouter(<TacticalSectorMap theatre={hive} commanders={cmdrs} mapLocations={[]} matchups={rounds} />);
+      open('Spire Apex');
+      expect(screen.getByText(/0 Commander\(s\)/)).toBeInTheDocument();
+    });
+
+    it('drops commanders who are not in the active roster', () => {
+      renderWithRouter(<TacticalSectorMap theatre={hive} commanders={cmdrs.filter(c => c.id !== 'b')} mapLocations={[]} matchups={rounds} />);
+      open('Outer Wall');
+      expect(screen.getByText(/1 Commander\(s\)/)).toBeInTheDocument();
+    });
+  });
+
   describe('getFactionNarrativeGoal', () => {
     it('returns appropriate narrative outcomes for win/tie/loss by faction', () => {
       expect(getFactionNarrativeGoal('Orks', 'win')).toBe('Sector Wrecked & Looted');

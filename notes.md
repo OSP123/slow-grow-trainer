@@ -1399,3 +1399,12 @@ Follow-ups:
 - Applied `20261005010000_legends_units.sql` (live registry: 1814 units, T'au 62).
 - Apply `20261005020000_fix_unit_name_casing.sql` in the Supabase SQL editor: case-only fixes for names the title-case rule mangled (TX42 Piranha, Aun’Va, ‘Iron Hand’ Straken, ...). The import script now applies the same fixes.
 - The live registry is out of date beyond Legends. Comparing the site to `unit_points`: 206 units have different points (GW points update since June, e.g. Dominion Squad 100 -> 90), 30 have different model-count tiers, 43 non-Legends units are missing (Harlequins and Ynnari sections, Clanblade, ...), and the table holds junk rows parsed from detachment names (e.g. "Anvil Siege Force2dp").
+
+Date: 2026-10-05 (War Effort Map Rounds)
+Tasks:
+- Fixed the War Effort tactical map showing most round sectors empty. Each theatre's five sectors are the five rounds, and most commanders have a matchup in each of rounds 1-4, but `TacticalSectorMap` placed every commander in a single sector (the first matchup `find` returned). Sectors are now built from the matchups themselves: both players of every matchup fought in a sector are listed there. Paused/removed commanders still drop out; commanders with no placed matchup still fall back to their deployed theatre.
+- Replaying live matchups: every theatre now shows commanders in rounds 1-4 (typically 4-10 per sector); round 5 is empty until it is played.
+- 134 tests passing (3 new; the main one fails on the old code), type check passing.
+
+Follow-ups:
+- None for this change.
