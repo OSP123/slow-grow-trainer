@@ -1387,3 +1387,15 @@ Tasks:
 
 Follow-ups:
 - Apply `20261005000000_faction_territory_control.sql` in the Supabase SQL editor, then deploy. The deployed Dashboard expects the new columns; until the migration runs, Votann and Drukhari simply never appear.
+
+Date: 2026-10-05 (Legends Units)
+Tasks:
+- Investigated missing T'au Legends units. Every faction's Legends were missing, not just T'au: the 11th Edition seed (`scratch/parse_mfm_html.cjs`) wiped `unit_points` and refilled it from pages saved with the site's "Show Legends" toggle off.
+- That toggle is a server action that sets an `isLegendsDisplayed=true` cookie. Sending the cookie makes mfm.warhammer-community.com render a LEGENDS section on each faction page with current points, so no manual re-saving is needed.
+- New `scripts/import_mfm_legends.mjs` fetches all 30 faction pages with the cookie, tags every unit card with the section heading it sits under, and writes a migration for the LEGENDS units. Names use the same title-case rule as the existing registry (verified: 0 casing mismatches against live data).
+- New migration `20261005010000_legends_units.sql`: 417 Legends units across 21 factions (Custodes, both Knights, both Titan Legions, Votann, Emperor's Children, Thousand Sons and World Eaters have none). Rows the registry already holds (75, matched on faction + name ignoring case) are skipped, so existing rows and admin-edited points are never touched. Tested against a copy of live `unit_points`: 1472 -> 1814 rows, a second run inserts nothing, 0 existing rows changed, T'au 43 -> 62.
+
+Follow-ups:
+- Applied `20261005010000_legends_units.sql` (live registry: 1814 units, T'au 62).
+- Apply `20261005020000_fix_unit_name_casing.sql` in the Supabase SQL editor: case-only fixes for names the title-case rule mangled (TX42 Piranha, Aun’Va, ‘Iron Hand’ Straken, ...). The import script now applies the same fixes.
+- The live registry is out of date beyond Legends. Comparing the site to `unit_points`: 206 units have different points (GW points update since June, e.g. Dominion Squad 100 -> 90), 30 have different model-count tiers, 43 non-Legends units are missing (Harlequins and Ynnari sections, Clanblade, ...), and the table holds junk rows parsed from detachment names (e.g. "Anvil Siege Force2dp").
