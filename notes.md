@@ -1420,3 +1420,14 @@ Follow-ups:
 - Applied `20261008000000_legendary_moments.sql` (verified live: table reachable, anonymous inserts blocked by RLS). Deploy to make it visible.
 - Battlefield Conditions drafted for round 4/5: "The Wound in the Sky" (Orbital Relay rift), "The Tomb Stirs" (Sump tremors) and "The Veil Thins" (campaign-wide warp whispers, chosen). A Huron-based draft was dropped: campaign events should not have named characters intervene. Add them in Admin -> Global Events; none exist yet.
 - Possible later: a "Moment of the Round" vote. Assessments votes on commanders, not moments, so it needs its own table.
+
+Date: 2026-10-09 (Credited Deeds and Deed Log)
+Tasks:
+- Lowered the Imperium/Chaos starting influence from 50 to 20 (`20261009000000_lower_influence_baseline.sql`). At 50, three rounds of deeds left no faction above 53% anywhere; at 20 the same deeds shift control visibly and xenos become contenders.
+- Credited 23 deeds (31 ledger rows) drafted from the round 1-3 battle reports and approved by Omar (`20261009000100_credit_round_1_3_deeds.sql`). Each credits what that commander's own report describes, regardless of who won; commanders are resolved from the matchup by side; re-running skips existing awards. Judgment calls: #13, #18, #23, #44, #48. All can be withdrawn in Report Adjudication.
+- Each war zone's Territory Influence panel now lists "Deeds that shaped this war zone" (`TerritoryDeedLog`), folding multi-effect deeds into one entry and noting when a deed came from a battle elsewhere (Necron tomb awakenings also stir the Sump).
+- Validated the full migration chain on a throwaway Postgres with the real matchup ids. Resulting control: Ash Wastes Chaos 57%, Magma Forges Chaos 57%, Sump Ruins Chaos 42% (Necrons 25%), Orbital Relay Chaos 37% (Necrons 18%), Hive Spires Imperium 40%, Toxic Oceans contested (Imperium and Chaos tied, T'au 13%).
+- 147 tests passing (4 new), type check passing, no new lint issues.
+
+Follow-ups:
+- Apply `20261009000000_lower_influence_baseline.sql`, then `20261009000100_credit_round_1_3_deeds.sql`, in the Supabase SQL editor, in that order.

@@ -11,6 +11,7 @@ import TacticalSectorMap, { getFactionColor, getGrandAlliance } from '../../comp
 import { THEATRE_NAMES, type TheatreName } from '../../data/theatres';
 import { territoryInfluence } from '../../data/territoryInfluence';
 import LegendaryMomentsList from '../moments/LegendaryMomentsList';
+import TerritoryDeedLog from './TerritoryDeedLog';
 
 // Keyed by the canonical war zone names. Typed as Record<TheatreName, ...>, so
 // renaming or dropping a theatre in src/data/theatres.ts is a compile error here
@@ -747,6 +748,7 @@ export default function Dashboard() {
                         );
                       })}
                     </div>
+                    <TerritoryDeedLog territory={selectedTheatre.name} />
                   </div>
                 );
               })()}
