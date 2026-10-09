@@ -1430,4 +1430,4 @@ Tasks:
 - 147 tests passing (4 new), type check passing, no new lint issues.
 
 Follow-ups:
-- Apply `20261009000000_lower_influence_baseline.sql`, then `20261009000100_credit_round_1_3_deeds.sql`, in the Supabase SQL editor, in that order.
+- Applied both migrations (verified live: 31 award rows, territory scores match the test run).
