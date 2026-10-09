@@ -10,6 +10,7 @@ import { formatCommanderWithDiscord } from '../../utils/commanderUtils';
 import TacticalSectorMap, { getFactionColor, getGrandAlliance } from '../../components/TacticalSectorMap';
 import { THEATRE_NAMES, type TheatreName } from '../../data/theatres';
 import { territoryInfluence } from '../../data/territoryInfluence';
+import LegendaryMomentsList from '../moments/LegendaryMomentsList';
 
 // Keyed by the canonical war zone names. Typed as Record<TheatreName, ...>, so
 // renaming or dropping a theatre in src/data/theatres.ts is a compile error here
@@ -801,6 +802,11 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      <div className="card">
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', borderBottom: '2px solid var(--theme-border)', paddingBottom: '0.5rem', color: '#eab308' }}>★ Legendary Moments</h2>
+        <LegendaryMomentsList limit={6} emptyText="No Legendary Moments recorded yet. Commanders can nominate one from any completed battle." />
+      </div>
 
       <div className="card">
         <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', borderBottom: '2px solid var(--theme-border)', paddingBottom: '0.5rem', color: 'var(--theme-accent)' }}>Forces Deployed</h2>

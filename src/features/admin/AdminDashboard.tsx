@@ -5,6 +5,7 @@ import { getFactionsGrouped } from '../../data/warhammer40k';
 import { useUnitRegistry } from '../../hooks/useUnitRegistry';
 import { getGrandAlliance } from '../../components/TacticalSectorMap';
 import ReportAdjudication from './ReportAdjudication';
+import MomentReview from '../moments/MomentReview';
 import { THEATRE_NAMES, buildTheatreName } from '../../data/theatres';
 import { formatCommanderWithDiscord } from '../../utils/commanderUtils';
 
@@ -1348,6 +1349,7 @@ export default function AdminDashboard() {
         </div>
 
         <ReportAdjudication />
+        <MomentReview />
 
         
 {/* Edit form */}

@@ -3,6 +3,7 @@ import { supabase } from '../../supabaseClient';
 import { FACTIONS } from '../../data/warhammer40k';
 import { formatCommanderWithDiscord } from '../../utils/commanderUtils';
 import { baseTheatre } from '../../data/theatres';
+import NominateMoment from '../moments/NominateMoment';
 
 export interface MatchupData {
   id: string;
@@ -872,6 +873,15 @@ export default function CampaignBattles() {
                   Finalize Battle Report →
                 </button>
               </div>
+            )}
+
+            {activeMatchData.status === 'completed' && userId && (
+              <NominateMoment
+                matchupId={activeMatchData.id}
+                userId={userId}
+                opponentId={isP1Active ? activeMatchData.p2_id : activeMatchData.p1_id}
+                opponentName={isP1Active ? activeMatchData.p2_profile?.commander_name : activeMatchData.p1_profile?.commander_name}
+              />
             )}
 
             {!isFinalizing ? (

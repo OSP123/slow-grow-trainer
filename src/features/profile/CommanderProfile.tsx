@@ -8,6 +8,7 @@ import { useCommanderCampaignData } from '../../hooks/useCommanderCampaignData';
 import DatasheetBuilder from './DatasheetBuilder';
 import DatasheetViewer from './DatasheetViewer';
 import CampaignQuests from '../../components/CampaignQuests';
+import LegendaryMomentsList from '../moments/LegendaryMomentsList';
 
 export interface CrucibleRangedWeapon {
   id: string;
@@ -482,6 +483,16 @@ export default function CommanderProfile() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {profile.id && (
+          <div className="card" style={{ marginTop: '1.5rem' }}>
+            <h3 style={{ margin: '0 0 1rem 0', color: '#eab308' }}>★ Legendary Moments</h3>
+            <LegendaryMomentsList
+              honouredId={profile.id}
+              emptyText="No Legendary Moments yet. Nominate one from a completed battle on the Battles page."
+            />
           </div>
         )}
 

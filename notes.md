@@ -1408,3 +1408,15 @@ Tasks:
 
 Follow-ups:
 - None for this change.
+
+Date: 2026-10-08 (Legendary Moments)
+Tasks:
+- Added Legendary Moments: narrative honours for standout moments at the table, with no rules, points or map effect so game balance is untouched. Either player in a completed battle nominates one moment per battle (their own or their opponent's) from the Battles page; an admin approves or rejects it in Admin under Report Adjudication; approved moments show on the honoured commander's profile and in a campaign-wide card on the War Effort page.
+- New `src/features/moments/` (NominateMoment, MomentReview, LegendaryMomentsList, legendaryMoments.ts). Loads fail quietly rather than throwing, so a missing table or failed query never breaks the page.
+- New migration `20261008000000_legendary_moments.sql`. RLS validated on a throwaway Postgres with a simulated auth.uid(): players can only nominate from completed battles they fought in and only honour someone who fought in it; no impersonation or self-approval; one nomination per player per battle; pending/rejected visible only to the nominator and admins; only admins approve; a nominator can withdraw only while pending.
+- 143 tests passing (9 new), type check passing, no new lint issues.
+
+Follow-ups:
+- Applied `20261008000000_legendary_moments.sql` (verified live: table reachable, anonymous inserts blocked by RLS). Deploy to make it visible.
+- Battlefield Conditions drafted for round 4/5: "The Wound in the Sky" (Orbital Relay rift), "The Tomb Stirs" (Sump tremors) and "The Veil Thins" (campaign-wide warp whispers, chosen). A Huron-based draft was dropped: campaign events should not have named characters intervene. Add them in Admin -> Global Events; none exist yet.
+- Possible later: a "Moment of the Round" vote. Assessments votes on commanders, not moments, so it needs its own table.
