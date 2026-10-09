@@ -1418,7 +1418,7 @@ Tasks:
 
 Follow-ups:
 - Applied `20261008000000_legendary_moments.sql` (verified live: table reachable, anonymous inserts blocked by RLS). Deploy to make it visible.
-- Battlefield Conditions drafted for round 4/5: "The Wound in the Sky" (Orbital Relay rift), "The Tomb Stirs" (Sump tremors) and "The Veil Thins" (campaign-wide warp whispers, chosen). A Huron-based draft was dropped: campaign events should not have named characters intervene. Add them in Admin -> Global Events; none exist yet.
+- Round 4 Battlefield Conditions written as `20261009000200_round_4_battlefield_conditions.sql`: "The Veil Thins" (campaign-wide), "The Wound in the Sky" (Orbital Relay Station) and "The Tomb Stirs" (The Sump Ruins, reworded to name no single player's tomb world). A Huron-based draft was dropped: campaign events should not have named characters intervene. Apply in the Supabase SQL editor; they go live immediately and retire automatically at round 5.
 - Possible later: a "Moment of the Round" vote. Assessments votes on commanders, not moments, so it needs its own table.
 
 Date: 2026-10-09 (Credited Deeds and Deed Log)
